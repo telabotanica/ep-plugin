@@ -10,14 +10,16 @@ Author: Tela Botanica
 /* Chargement du code nécessitant BuddyPress */
 function initialisation_bp() {
 
-	require( dirname( __FILE__ ) . '/description-complete.php' );
+	require( dirname( __FILE__ ) . '/formulaires/categorie/categorie.php' );
+	require( dirname( __FILE__ ) . '/formulaires/description/description-complete.php' );
 	require( dirname( __FILE__ ) . '/outils/porte-documents.php' );
 	require( dirname( __FILE__ ) . '/outils/forum.php' );
-	
+	require( dirname( __FILE__ ) . '/formulaires/etiquettes/etiquettes.php' );	
 
 }
 add_action( 'bp_include', 'initialisation_bp' );
 add_action( 'bp_include', 'description_complete' );
+add_action( 'bp_include', 'categorie' );
 
 
 
@@ -32,53 +34,114 @@ class TelaBotanica
 		add_action('admin_menu',array($this,'ajout_menu_admin'));
 		
 		/* On lance la création de la table Outils Réglages lorsque le plugin est activé */
-		register_activation_hook(__FILE__,array('TelaBotanica','installation'));
+		register_activation_hook(__FILE__,array('TelaBotanica','installation_outils'));
+		
+		/* On lance la création de la table Catégories Projets lorsque le plugin est activé */
+		register_activation_hook(__FILE__,array('TelaBotanica','installation_categories'));
 		
 		/* On lance la supression de la table Outils Réglages lorsque le plugin est désinstallé */
-		register_deactivation_hook(__FILE__,array('TelaBotanica','desinstallation'));
+		register_deactivation_hook(__FILE__,array('TelaBotanica','desinstallation_outils'));
+		
+		/* On lance la supression de la table Outils Réglages lorsque le plugin est désinstallé */
+		register_deactivation_hook(__FILE__,array('TelaBotanica','desinstallation_categories'));
 	
 	}
 	
 	
 	/* Méthode qui crée la table "{$wpdb->prefix}tb_outils_reglages" dans la base de données lors de l'installation du plugin */
-	public function installation()
+	public function installation_outils()
 	{
 		global $wpdb;
-		$requete1 = "
+		$create_outils = "
 			CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}tb_outils_reglages` (
-			  `id_projet` bigint(11) NOT NULL,
-			  `id_outil` varchar(50) NOT NULL,
-			  `name` varchar(50) NOT NULL,
-			  `prive` tinyint(1) NOT NULL,
-			  `create_step_position` tinyint(3) NOT NULL,
-			  `nav_item_position` tinyint(3) NOT NULL,
-			  `enable_nav_item` tinyint(1) NOT NULL
+				`id_projet` bigint(11) NOT NULL,
+				`id_outil` varchar(50) NOT NULL,
+				`name` varchar(50) NOT NULL,
+				`prive` tinyint(1) NOT NULL,
+				`create_step_position` tinyint(3) NOT NULL,
+				`nav_item_position` tinyint(3) NOT NULL,
+				`enable_nav_item` tinyint(1) NOT NULL
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 		";
-		$requete2 = "
+		$pk_outils = "
 			ALTER TABLE `{$wpdb->prefix}tb_outils_reglages`
 			ADD PRIMARY KEY (`id_projet`,`id_outil`),
 			ADD KEY `id_projet` (`id_projet`);
 		";
-		$requete3 = "
+		$fk_outils = "
 			ALTER TABLE `{$wpdb->prefix}tb_outils_reglages`
 			ADD CONSTRAINT `fk_id-projet_id-group` FOREIGN KEY (`id_projet`) REFERENCES `{$wpdb->prefix}bp_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 		";
-		$wpdb->query($requete1);
-		$wpdb->query($requete2);
-		$wpdb->query($requete3);	
+		$wpdb->query($create_outils);
+		$wpdb->query($pk_outils);
+		$wpdb->query($fk_outils);	
 	}
 	
 	
+	
 	/* Méthode qui supprime la table "{$wpdb->prefix}tb_outils_reglages" dans la base de données lors de la désinstallation du plugin */
-	public function desinstallation()
+	public function desinstallation_outils()
 	{
 		/* Classe d'accès à la base de données dans WordPress */
 		global $wpdb;
 	
-		/* On vérifie que la table existe puis on la supprime */
-		$requete = "DROP TABLE IF EXISTS {$wpdb->prefix}tb_outils_reglages;";		
+		/* On vérifie que la table existe puis on la supprime */	
 		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}tb_outils_reglages;");
+	}
+	
+	
+	
+	/* Méthode qui crée la table "{$wpdb->prefix}tb_categories_projets" dans la base de données lors de l'installation du plugin */
+	public function installation_categories()
+	{
+		global $wpdb;
+		$create_categories = "
+			CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}tb_categories_projets` (
+				`id_categorie` int(11) NOT NULL,
+				`nom_categorie` varchar(30) NOT NULL
+			) ENGINE=InnoDB DEFAULT CHARSET=UTF8;
+		";
+		$insert_categories = "
+			INSERT INTO `{$wpdb->prefix}tb_categories_projets` (`id_categorie`, `nom_categorie`) VALUES
+				(0, 'Aucune catégorie'),
+				(1, 'Botanique locale'),
+				(2, 'Echanges'),
+				(3, 'Outils informatiques'),
+				(4, 'Organisation'),
+				(5, 'Contribution'),
+				(6, 'Construction')
+			;
+		";
+		$create_col_categories = "
+			ALTER TABLE {$wpdb->prefix}bp_groups
+			ADD `id_categorie` int(11) NOT NULL;
+		";
+		$pk_categories = "
+			ALTER TABLE `wp_tb_categories_projets`
+ 			ADD PRIMARY KEY (`id_categorie`);
+		";
+		$fk_categories = "
+			ALTER TABLE `{$wpdb->prefix}tb_outils_reglages`
+			ADD CONSTRAINT `fk_id-categorie_id-group` FOREIGN KEY (`id_categorie`) REFERENCES `{$wpdb->prefix}bp_groups` (`id_categorie`) ON DELETE CASCADE ON UPDATE CASCADE;
+		";
+		$wpdb->query($create_categories);
+		$wpdb->query($insert_categories);
+		//$wpdb->query($create_col_categories);
+		$wpdb->query($pk_categories);
+		//$wpdb->query($fk_categories);	
+	}
+
+	
+	
+	/* Méthode qui supprime la table "{$wpdb->prefix}tb_categories_projets" dans la base de données lors de la désinstallation du plugin */
+	public function desinstallation_categories()
+	{
+		/* Classe d'accès à la base de données dans WordPress */
+		global $wpdb;
+	
+		/* On vérifie que la table existe puis on la supprime */		
+		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}tb_categories_projets;");
+		//$wpdb->query("ALTER TABLE {$wpdb->prefix}bp_groups DROP id_categorie;");
 	}
 	
 	
@@ -105,7 +168,7 @@ class TelaBotanica
 	{
 		$titre = get_admin_page_title();
 		/* On définit l'URL de la vue HTML */
-		$url_html = plugin_dir_path(__FILE__).'backend/vue_presentation.html';
+		$url_html = plugin_dir_path(__FILE__).'admin/vue_presentation.html';
 		/* On récupère la vue HTML et on l'affiche */
 		$html = TelaBotanica::lecture_vue($url_html,array($titre,'Tela Botanica'));
 		echo $html;
@@ -118,7 +181,7 @@ class TelaBotanica
 	{
 		$titre = get_admin_page_title();
 		/* On définit l'URL de la vue HTML */
-		$url_html = plugin_dir_path(__FILE__).'backend/vue_outils.html';
+		$url_html = plugin_dir_path(__FILE__).'admin/vue_outils.html';
 		/* On récupère la vue HTML et on l'affiche */
 		$html = TelaBotanica::lecture_vue($url_html,array('Tela Botanica'));
 		echo $html;
