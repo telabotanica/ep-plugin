@@ -1,7 +1,7 @@
 <h1>Configuration des outils</h1>
 <p>Cette page affichera le panneau de configuration des outils, soyez patients.</p>
 
-<form action="<?php echo network_admin_url('admin.php?page=gtags_admin') ?>" name="gtags-settings-form" id="gtags-settings-form" method="post">
+<form action="<?php echo network_admin_url('admin.php?page=outils_admin') ?>" name="gtags-settings-form" id="gtags-settings-form" method="post">
 
 	<h3>Porte-documents</h3>
 	<ul>

@@ -278,7 +278,7 @@ add_action( 'groups_custom_group_fields_editable', 'gtags_add_tags_form' );
 function gtags_show_tags_chooser(){
 	?>
 	<span class="fr">
-		Suggestions : <span class="highlight etiquette"><?php echo .gtags_show_tags_in_add_form(); ?></span>
+		Suggestions : <span class="highlight etiquette"><?php echo gtags_show_tags_in_add_form(); ?></span>
 	</span>
 	<?php 
 }
@@ -437,12 +437,13 @@ function gtags_make_tags_for_group() {
 	$group_tags = gtags_get_group_tags();
 	$items = explode( ",", $group_tags );
 	$output = '';
-
+	if (!is_hidden()) {
 	foreach( $items as $item ) {
 		$item = trim( strtolower( $item ) );
 		if ($item=='') continue;
 		$link = $bp->root_domain . '/' . BP_GROUPS_SLUG . '/tag/' . urlencode( $item );
 		$output .= ' <a class="etiquette highlight" href="'.$link.'" title="Voir tous les projets ayant pour mots-clés '.$item.'">#'.$item.'</a> ';
+	}
 	}
 
 	return apply_filters( 'gtags_make_tags_for_group', $output, $items );

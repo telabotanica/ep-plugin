@@ -8,7 +8,7 @@ class Forum extends BP_Group_Extension {
 	
 		/* Initialisation des éléments nécessaires à la création d'un outil */
 		$id_projet = bp_get_current_group_id();
-		$this->slug = 'forul';
+		$this->slug = 'forum';
 		$this->name = 'Forum';
 		$this->prive = 0;
 		$this->create_step_position = 100;
@@ -122,7 +122,7 @@ class Forum extends BP_Group_Extension {
 	/* Vue onglet principal */
 	function display() {
 		$id_projet = bp_get_current_group_id();
-		if ( (!$this->prive) || ($this->prive && bp_get_total_group_count_for_user( bp_loggedin_user_id() ) ) ) {
+		if (!$this->prive) {
 		?>
 		<ul>
 			<li>ID du projet : <?php echo $id_projet ?></li>

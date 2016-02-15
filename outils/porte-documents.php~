@@ -80,7 +80,6 @@ class Porte_Documents extends BP_Group_Extension {
 		<p class="editfield">
 			<label for="confidentialite-outil">Outil privé <br/>(<?php echo $this->prive ?>)</label>
 			<input type="range" min="0" max="1" id="confidentialite-outil" class="pointer on-off" name="confidentialite-outil" value="<?php echo $this->prive ?>"/>
-			<span class="valeur-range"></span>
 		</p>
 		
 		<?php
