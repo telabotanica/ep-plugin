@@ -1,11 +1,11 @@
 <?php
 
-class Forum extends BP_Group_Extension {
+class Forum extends TB_Outil {
 
 	function forum() {
-	
+
 		global $wpdb, $bp;
-	
+
 		/* Initialisation des éléments nécessaires à la création d'un outil */
 		$id_projet = bp_get_current_group_id();
 		$this->slug = 'forum';
@@ -23,7 +23,7 @@ class Forum extends BP_Group_Extension {
 			AND id_outil='".$this->slug."'
 		";
 		$res = $wpdb->get_results($requete) ;
-		
+
 		/* Construction de l'objet */
 		foreach ($res as $meta) {	
 			$this->slug = $meta->id_outil;
@@ -33,9 +33,9 @@ class Forum extends BP_Group_Extension {
 			$this->nav_item_position = $meta->nav_item_position;
 			$this->enable_nav_item = $meta->enable_nav_item;
 		}
-		
+
 		/* Ajout d'une ligne dans la base de données (stockage de l'objet) */
-		$table = "{$wpdb->prefix}tb_outils_reglages";
+		/*$table = "{$wpdb->prefix}tb_outils_reglages";
 		$data = array( 	
 			'id_projet' => bp_get_current_group_id(),											
 			'id_outil' => $this->slug,
@@ -46,10 +46,23 @@ class Forum extends BP_Group_Extension {
 			'enable_nav_item' => $this->enable_nav_item
 		);
 		$format = null;
-		$wpdb->insert( $table, $data, $format );
+		$wpdb->insert( $table, $data, $format );*/
 	}
-	
-	
+
+	/**
+	 * Exécuté lors de l'installation du plugin TelaBotanica
+	 */
+	public function installation() {
+		
+	}
+
+	/**
+	 * Exécuté lors de la désinstallation du plugin TelaBotanica
+	 */
+	public function desinstallation() {
+		
+	}
+
 	/* Vue onglet admin */
 	function edit_screen() {
 		if ( !bp_is_group_admin_screen( $this->slug ) )
@@ -122,26 +135,20 @@ class Forum extends BP_Group_Extension {
 	/* Vue onglet principal */
 	function display() {
 		$id_projet = bp_get_current_group_id();
-		if ( (!$this->prive) || ($this->prive && bp_get_total_group_count_for_user( bp_loggedin_user_id() ) ) ) {
-		?>
-		<ul>
-			<li>ID du projet : <?php echo $id_projet ?></li>
-			<li>ID de l'outil : <?php echo $this->slug ?></li>
-			<li>Nom de l'outil : <?php echo $this->name ?></li>
-			<li>Outil privé : <?php echo $this->prive ?></li>
-			<li>Position de l'onglet lors de la création d'un projet : <?php echo $this->create_step_position ?></li>
-			<li>Position de l'onglet lors de la consultation d'un projet : <?php echo $this->nav_item_position ?></li>
-			<li>Activation de l'onglet : <?php echo $this->enable_nav_item ?></li>
-		</ul>
-		
-		<?php
-		}
-		else {
-		?>
-		<h4>L'outil <?php echo $this->name ?> est réservé aux membres du groupe</h4>
-		<?php
+		if ($this->prive) {
+			// on ne devrait passer là que si les contrôles de sécurités précédents
+			// ont réussi, càd si on est dans un groupe auquel on a droit (soit
+			// le groupe est public, soit l'utilisateur en est membre)
+			echo "<h4>L'outil <?php echo $this->name ?> est réservé aux membres du groupe</h4>";
+			return;
 		}
 
+		// 1) lire la config de l'outil pour tout WP
+
+		// 2) lire la config de l'outil pour le projet en cours
+
+		// 3) amorcer l'outil
+		include "forum/index.php";
 	}
 	
 }

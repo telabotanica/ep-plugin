@@ -1,6 +1,6 @@
 <?php
 
-class Porte_Documents extends BP_Group_Extension {
+class Porte_Documents extends TB_Outil {
 
 	function porte_documents() {
 	
@@ -35,7 +35,7 @@ class Porte_Documents extends BP_Group_Extension {
 		}
 		
 		/* Ajout d'une ligne dans la base de données (stockage de l'objet) */
-		$table = "{$wpdb->prefix}tb_outils_reglages";
+		/*$table = "{$wpdb->prefix}tb_outils_reglages";
 		$data = array( 	
 			'id_projet' => bp_get_current_group_id(),											
 			'id_outil' => $this->slug,
@@ -46,7 +46,21 @@ class Porte_Documents extends BP_Group_Extension {
 			'enable_nav_item' => $this->enable_nav_item
 		);
 		$format = null;
-		$wpdb->insert( $table, $data, $format );
+		$wpdb->insert( $table, $data, $format );*/
+	}
+
+	/**
+	 * Exécuté lors de l'installation du plugin TelaBotanica
+	 */
+	public function installation() {
+		
+	}
+
+	/**
+	 * Exécuté lors de la désinstallation du plugin TelaBotanica
+	 */
+	public function desinstallation() {
+		
 	}
 	
 	
