@@ -2,65 +2,47 @@
 
 class Forum extends TB_Outil {
 
-	function forum() {
-
-		global $wpdb, $bp;
-
-		/* Initialisation des éléments nécessaires à la création d'un outil */
-		$id_projet = bp_get_current_group_id();
+	function forum()
+	{
+		// config par défaut, si aucune config n'est trouvée dans la base
 		$this->slug = 'forum';
 		$this->name = 'Forum';
-		$this->prive = 0;
-		$this->create_step_position = 100;
-		$this->nav_item_position = 100;
-		$this->enable_nav_item = 1;
+		// recherche d'une config générale dans la base
+		$this->chargerConfig();
 
-		/* Lecture de la table "wp_tb_outils_reglages" */
-		$requete = "
-			SELECT * 
-			FROM {$wpdb->prefix}tb_outils_reglages
-			WHERE id_projet='".$id_projet."'
-			AND id_outil='".$this->slug."'
-		";
-		$res = $wpdb->get_results($requete) ;
+		//echo "CONFIIIIIG !!!"; var_dump($this->config);
+	}
 
-		/* Construction de l'objet */
-		foreach ($res as $meta) {	
-			$this->slug = $meta->id_outil;
-			$this->name = $meta->name;
-			$this->prive = $meta->prive;
-			$this->create_step_position = $meta->create_step_position;
-			$this->nav_item_position = $meta->nav_item_position;
-			$this->enable_nav_item = $meta->enable_nav_item;
-		}
+	/**
+	 * Exécuté lors de l'installation du plugin TelaBotanica; ATTENTION, à ce
+	 * moment elle est appelée en contexte non-objet
+	 */
+	public function installation()
+	{
+		global $wpdb;
 
-		/* Ajout d'une ligne dans la base de données (stockage de l'objet) */
-		/*$table = "{$wpdb->prefix}tb_outils_reglages";
-		$data = array( 	
-			'id_projet' => bp_get_current_group_id(),											
-			'id_outil' => $this->slug,
-			'name' => $this->name,
-			'prive' => $this->prive,
-			'create_step_position' => $this->create_step_position,
-			'nav_item_position' => $this->nav_item_position,
-			'enable_nav_item' => $this->enable_nav_item
+		// @TODO maintenir en cohésion avec le fichier config.defaut.json d'ezmlm-php
+		$configDefaut = array(
+			"domainRoot" => "http://localhost",
+			"baseUri" => "/ezmlm-forum",
+			"title" => "TB_forum",
+			"hrefBuildMode" => "REST",
+			"defaultPage" => "view-list",
+			"ezmlm-php" => array(
+				"rootUri" => "http://localhost/ezmlm-php",
+				"_rootUri" => "http://vpopmail.tela-botanica.org/ezmlm-service-test",
+				"list" => "example-list"
+			)
 		);
-		$format = null;
-		$wpdb->insert( $table, $data, $format );*/
-	}
 
-	/**
-	 * Exécuté lors de l'installation du plugin TelaBotanica
-	 */
-	public function installation() {
-		
-	}
-
-	/**
-	 * Exécuté lors de la désinstallation du plugin TelaBotanica
-	 */
-	public function desinstallation() {
-		
+		// l'id outil "forum" n'est pas tiré de $this->slug car la méthode d'install
+		// est appelée en contexte non-objet => mettre le slug dans un attribut statique ?
+		$insert_config_defaut = "
+			INSERT INTO `{$wpdb->prefix}tb_outils` VALUES (
+				'forum', 1, '" . json_encode($configDefaut) . "'
+			);
+		";
+		$wpdb->query($insert_config_defaut);
 	}
 
 	/* Vue onglet admin */
@@ -148,7 +130,7 @@ class Forum extends TB_Outil {
 		// 2) lire la config de l'outil pour le projet en cours
 
 		// 3) amorcer l'outil
-		include "forum/index.php";
+		//include "forum/index.php";
 	}
 	
 }
