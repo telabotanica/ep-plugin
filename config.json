@@ -1,0 +1,8 @@
+{
+	"__doc__": "FICHIER DE CONFIGURATION DU PLUGIN WP/BP TELA BOTANICA",
+
+	"outils": [
+		"porte-documents",
+		"forum"
+	]
+}
