@@ -8,7 +8,7 @@ class Forum extends BP_Group_Extension {
 	
 		/* Initialisation des éléments nécessaires à la création d'un outil */
 		$id_projet = bp_get_current_group_id();
-		$this->slug = 'forul';
+		$this->slug = 'forum';
 		$this->name = 'Forum';
 		$this->prive = 0;
 		$this->create_step_position = 100;
