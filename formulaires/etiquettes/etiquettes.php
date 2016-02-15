@@ -437,7 +437,6 @@ function gtags_make_tags_for_group() {
 	$group_tags = gtags_get_group_tags();
 	$items = explode( ",", $group_tags );
 	$output = '';
-
 	foreach( $items as $item ) {
 		$item = trim( strtolower( $item ) );
 		if ($item=='') continue;
