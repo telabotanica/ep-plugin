@@ -4,13 +4,16 @@ class Forum extends TB_Outil {
 
 	function forum()
 	{
-		// config par défaut, si aucune config n'est trouvée dans la base
+		// identifiant de l'outil et nom par défaut
 		$this->slug = 'forum';
 		$this->name = 'Forum';
+
 		// recherche d'une config générale dans la base
 		$this->chargerConfig();
 
-		//echo "CONFIIIIIG !!!"; var_dump($this->config);
+		$this->definirChemins();
+		// préparation des scripts / styles
+		add_action('bp_enqueue_scripts', array($this, 'scriptsEtStyles'));
 	}
 
 	/**
@@ -43,6 +46,28 @@ class Forum extends TB_Outil {
 			);
 		";
 		$wpdb->query($insert_config_defaut);
+	}
+
+	public function scriptsEtStyles() {
+		// Your css file is reachable at site.url/wp-content/plugins/buddyplug/includes/css/buddyplug.css
+		//wp_enqueue_style( 'buddyplug-css', $this->plugin_css . 'buddyplug.css', false, $this->version );
+		// Your script file is reachable at site.url/wp-content/plugins/buddyplug/includes/js/script.js
+		wp_enqueue_script('moment', $this->urlOutil . 'bower_components/moment/min/moment.min.js');
+		wp_enqueue_script('moment-fr', $this->urlOutil . 'bower_components/moment/locale/fr.js');
+		wp_enqueue_script('mustache', $this->urlOutil . 'bower_components/mustache.js/mustache.min.js');
+		wp_enqueue_script('binette', $this->urlOutil . 'bower_components/binette.js/binette.js');
+
+		wp_enqueue_script('EzmlmForum', $this->urlOutil . 'js/EzmlmForum.js');
+		wp_enqueue_script('ViewThread', $this->urlOutil . 'js/ViewThread.js');
+		wp_enqueue_script('ViewList', $this->urlOutil . 'js/ViewList.js');
+
+		wp_enqueue_script('EzmlmForum-CSS', $this->urlOutil . 'css/ezmlm-forum.css');
+
+		/*<script src="<?= $fc->getRootUri() ?>/bower_components/jquery/dist/jquery.min.js"></script>
+		<script src="<?= $fc->getRootUri() ?>/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>*/
+/*
+		<link rel="stylesheet" type="text/css" href="<?= $fc->getRootUri() ?>/bower_components/bootstrap/dist/css/bootstrap.min.css" />
+*/
 	}
 
 	/* Vue onglet admin */
@@ -125,12 +150,24 @@ class Forum extends TB_Outil {
 			return;
 		}
 
-		// 1) lire la config de l'outil pour tout WP
+		//var_dump($this->config);
 
-		// 2) lire la config de l'outil pour le projet en cours
+		// paramètres automatiques :
+		// - nom de la liste
+		// - domaine racine
+		// - URI de base
+		// - nom de la liste
+		// - titre de la page
 
-		// 3) amorcer l'outil
-		//include "forum/index.php";
+		// amorcer l'outil
+		chdir(dirname(__FILE__) . "/forum/");
+		require "ezmlm-forum.php";
+		$fc = new EzmlmForum($this->config); // front controller
+
+		// - ajouter les JS et CSS
+		// - définir le titre
+		// - inclure le corps de page
+		$fc->renderPage();
 	}
 	
 }

@@ -8,6 +8,16 @@ class TB_Outil extends BP_Group_Extension {
 	/** configuration de l'outil pour l'instance (projet) en cours */
 	protected $config;
 
+	protected $urlPlugin;
+	protected $urlOutil;
+
+	protected function definirChemins()
+	{
+        // url to your plugin dir : site.url/wp-content/plugins/buddyplug/
+        $this->urlPlugin = plugin_dir_url(__FILE__);
+		$this->urlOutil = trailingslashit($this->urlPlugin . $this->slug);
+    }
+
 	/**
 	 * Charge la configuration générale de l'outil plus la configuration pour le
 	 * projet en cours; concernant la colonne "config" (JSON libre), mélange les
