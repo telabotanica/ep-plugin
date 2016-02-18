@@ -21,25 +21,31 @@ class TB_Outil extends BP_Group_Extension {
 		$this->chargerConfig();
 
 		$this->definirChemins();
-		// préparation des scripts / styles
-		add_action('bp_enqueue_scripts', array($this, 'scriptsEtStylesConditionnels'));
-	}
 
-	/**
-	 * Ne chargera les scripts et styles définis dans scriptsEtStyles() que si
-	 * l'onglet de l'outil courant est actif
-	 */
-	public function scriptsEtStylesConditionnels()
-	{
+		// préparation des scripts / styles, pour l'outil courant seulement
+		// @WARNING le système de priorités n'a pas l'air de marcher...
 		if ($this->outilCourant()) {
-			$this->scriptsEtStyles();
+			add_action('wp_enqueue_scripts', array($this, 'scriptsEtStylesAvant'), 1);
+			add_action('wp_enqueue_scripts', array($this, 'scriptsEtStylesApres'), 100);
 		}
 	}
 
 	/**
-	 * Placer ici les wp_enqueue_(script|style)() pour l'outil courant
+	 * Placer ici les wp_enqueue_(script|style)() pour l'outil courant; ils
+	 * seront déclarés AVANT les ressources globales de WP/BP, donc ils
+	 * seront écrasés par les ressources ayant le même identifiant
 	 */
-	protected function scriptsEtStyles()
+	protected function scriptsEtStylesAvant()
+	{
+		// rien par défaut
+	}
+
+	/**
+	 * Placer ici les wp_enqueue_(script|style)() pour l'outil courant; ils
+	 * seront déclarés APRES les ressources globales de WP/BP, donc ils
+	 * écraseront les ressources ayant le même identifiant
+	 */
+	protected function scriptsEtStylesApres()
 	{
 		// rien par défaut
 	}
