@@ -88,8 +88,8 @@ class Forum extends TB_Outil {
 		// - domaine racine
 		// ...
 		// - URI de base
-		$this->config['baseUri'] = "/wordpress/projets/kill-bill/forum";
-		var_dump($this->config);
+		//$this->config['baseUri'] = "/wordpress/projets/kill-bill/forum";
+		//var_dump($this->config);
 
 		// - nom de la liste
 		// - nom de la liste
