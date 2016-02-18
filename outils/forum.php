@@ -8,12 +8,8 @@ class Forum extends TB_Outil {
 		$this->slug = 'forum';
 		$this->name = 'Forum';
 
-		// recherche d'une config générale dans la base
-		$this->chargerConfig();
-
-		$this->definirChemins();
-		// préparation des scripts / styles
-		add_action('bp_enqueue_scripts', array($this, 'scriptsEtStyles'));
+		// init du parent
+		$this->initialisation();
 	}
 
 	/**
@@ -48,26 +44,28 @@ class Forum extends TB_Outil {
 		$wpdb->query($insert_config_defaut);
 	}
 
-	public function scriptsEtStyles() {
-		// Your css file is reachable at site.url/wp-content/plugins/buddyplug/includes/css/buddyplug.css
-		//wp_enqueue_style( 'buddyplug-css', $this->plugin_css . 'buddyplug.css', false, $this->version );
-		// Your script file is reachable at site.url/wp-content/plugins/buddyplug/includes/js/script.js
+	public function scriptsEtStylesAvant() {
+		wp_enqueue_script('jquery', $this->urlOutil . 'bower_components/jquery/dist/jquery.min.js');
+		wp_enqueue_script('bootstrap-js', $this->urlOutil . 'bower_components/bootstrap/dist/js/bootstrap.min.js');
+		// @WTF le style n'est pas écrasé par le BS du thème, malgré son ID
+		// identique et sa priorité faible, c'est lui qui écrase l'autre :-/
+		// @TODO trouver une solution, car si on utilise le plugin sans le thème,
+		// y aura pas de BS et ça marchera pas :'(
+		//wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bower_components/bootstrap/dist/css/bootstrap.min.css');
+	}
+
+	public function scriptsEtStylesApres() {
 		wp_enqueue_script('moment', $this->urlOutil . 'bower_components/moment/min/moment.min.js');
 		wp_enqueue_script('moment-fr', $this->urlOutil . 'bower_components/moment/locale/fr.js');
 		wp_enqueue_script('mustache', $this->urlOutil . 'bower_components/mustache.js/mustache.min.js');
 		wp_enqueue_script('binette', $this->urlOutil . 'bower_components/binette.js/binette.js');
 
+		wp_enqueue_style('EzmlmForum-CSS', $this->urlOutil . 'css/ezmlm-forum-internal.css');
+
+		// code de l'appli Forum
 		wp_enqueue_script('EzmlmForum', $this->urlOutil . 'js/EzmlmForum.js');
 		wp_enqueue_script('ViewThread', $this->urlOutil . 'js/ViewThread.js');
 		wp_enqueue_script('ViewList', $this->urlOutil . 'js/ViewList.js');
-
-		wp_enqueue_script('EzmlmForum-CSS', $this->urlOutil . 'css/ezmlm-forum.css');
-
-		/*<script src="<?= $fc->getRootUri() ?>/bower_components/jquery/dist/jquery.min.js"></script>
-		<script src="<?= $fc->getRootUri() ?>/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>*/
-/*
-		<link rel="stylesheet" type="text/css" href="<?= $fc->getRootUri() ?>/bower_components/bootstrap/dist/css/bootstrap.min.css" />
-*/
 	}
 
 	/* Vue onglet admin */
@@ -160,6 +158,8 @@ class Forum extends TB_Outil {
 		// - titre de la page
 
 		// amorcer l'outil
+		echo '<div class="clear">';
+		echo '<div class="wp-bootstrap">';
 		chdir(dirname(__FILE__) . "/forum/");
 		require "ezmlm-forum.php";
 		$fc = new EzmlmForum($this->config); // front controller
@@ -168,6 +168,8 @@ class Forum extends TB_Outil {
 		// - définir le titre
 		// - inclure le corps de page
 		$fc->renderPage();
+		echo "</div>";
+		echo "</div>";
 	}
 	
 }
