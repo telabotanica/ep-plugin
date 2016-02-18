@@ -11,6 +11,39 @@ class TB_Outil extends BP_Group_Extension {
 	protected $urlPlugin;
 	protected $urlOutil;
 
+	/**
+	 * Initialisation post-constructeur : définit les chemins, charge les scripts,
+	 * styles etc.
+	 */
+	public function initialisation()
+	{
+		// recherche d'une config générale dans la base
+		$this->chargerConfig();
+
+		$this->definirChemins();
+		// préparation des scripts / styles
+		add_action('bp_enqueue_scripts', array($this, 'scriptsEtStylesConditionnels'));
+	}
+
+	/**
+	 * Ne chargera les scripts et styles définis dans scriptsEtStyles() que si
+	 * l'onglet de l'outil courant est actif
+	 */
+	public function scriptsEtStylesConditionnels()
+	{
+		if ($this->outilCourant()) {
+			$this->scriptsEtStyles();
+		}
+	}
+
+	/**
+	 * Placer ici les wp_enqueue_(script|style)() pour l'outil courant
+	 */
+	protected function scriptsEtStyles()
+	{
+		// rien par défaut
+	}
+
 	protected function definirChemins()
 	{
         // url to your plugin dir : site.url/wp-content/plugins/buddyplug/
@@ -70,6 +103,18 @@ class TB_Outil extends BP_Group_Extension {
 		
 		// @TODO si aucune config locale n'a été trouvée, écrire les paramètres
 		// par défaut dedans ? Serait plus simple pour la suite
+	}
+
+	/**
+	 * Retourne true si le flux d'exécution est dans l'outil en cours - permet
+	 * de n'effectuer certaines actions que pour un outil donné
+	 */
+	protected function outilCourant() {
+		$slug = $this->slug;
+		//echo "SLUG EN COURS: [$slug]<br/>";
+		$ok = bp_is_current_action($slug);
+		//echo "COURANT: "; var_dump($ok);
+		return $ok;
 	}
 
 	/**

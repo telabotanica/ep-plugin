@@ -8,12 +8,8 @@ class Forum extends TB_Outil {
 		$this->slug = 'forum';
 		$this->name = 'Forum';
 
-		// recherche d'une config générale dans la base
-		$this->chargerConfig();
-
-		$this->definirChemins();
-		// préparation des scripts / styles
-		add_action('bp_enqueue_scripts', array($this, 'scriptsEtStyles'));
+		// init du parent
+		$this->initialisation();
 	}
 
 	/**
@@ -56,12 +52,17 @@ class Forum extends TB_Outil {
 		wp_enqueue_script('moment-fr', $this->urlOutil . 'bower_components/moment/locale/fr.js');
 		wp_enqueue_script('mustache', $this->urlOutil . 'bower_components/mustache.js/mustache.min.js');
 		wp_enqueue_script('binette', $this->urlOutil . 'bower_components/binette.js/binette.js');
+		
+		//wp_enqueue_script('jquery-forum', $this->urlOutil . 'bower_components/jquery/dist/jquery.min.js');
+		wp_enqueue_script('bootstrap-forum', $this->urlOutil . 'bower_components/bootstrap/dist/js/bootstrap.min.js');
 
 		wp_enqueue_script('EzmlmForum', $this->urlOutil . 'js/EzmlmForum.js');
 		wp_enqueue_script('ViewThread', $this->urlOutil . 'js/ViewThread.js');
 		wp_enqueue_script('ViewList', $this->urlOutil . 'js/ViewList.js');
 
-		wp_enqueue_script('EzmlmForum-CSS', $this->urlOutil . 'css/ezmlm-forum.css');
+		wp_enqueue_style('EzmlmForum-CSS', $this->urlOutil . 'css/ezmlm-forum.css');
+
+		wp_enqueue_style('EzmlmForum-bootstrap-CSS', $this->urlOutil . 'bower_components/bootstrap/dist/css/bootstrap.min.css');
 
 		/*<script src="<?= $fc->getRootUri() ?>/bower_components/jquery/dist/jquery.min.js"></script>
 		<script src="<?= $fc->getRootUri() ?>/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>*/
@@ -160,6 +161,7 @@ class Forum extends TB_Outil {
 		// - titre de la page
 
 		// amorcer l'outil
+		echo '<div class="clear">';
 		chdir(dirname(__FILE__) . "/forum/");
 		require "ezmlm-forum.php";
 		$fc = new EzmlmForum($this->config); // front controller
@@ -168,6 +170,7 @@ class Forum extends TB_Outil {
 		// - définir le titre
 		// - inclure le corps de page
 		$fc->renderPage();
+		echo "</div>";
 	}
 	
 }
