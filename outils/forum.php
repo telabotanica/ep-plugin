@@ -86,14 +86,16 @@ class Forum extends TB_Outil {
 
 		// paramètres automatiques :
 		// - domaine racine
-		// ...
+		$this->config['domainRoot'] = $this->getServerRoot();
 		// - URI de base
-		//$this->config['baseUri'] = "/wordpress/projets/kill-bill/forum";
-		//var_dump($this->config);
+		$this->config['baseUri'] = $this->getBaseUri();
+		// - nom de la liste
+		if (empty($this->config['ezmlm-php']['list'])) {
+			$this->config['ezmlm-php']['list'] = "botadrome";
+			//$this->config['ezmlm-php']['list'] = bp_get_current_group_slug();
+		}
 
-		// - nom de la liste
-		// - nom de la liste
-		// - titre de la page
+		//var_dump($this->config);
 
 		// portée des styles
 		echo '<div class="wp-bootstrap">';

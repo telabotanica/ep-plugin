@@ -159,6 +159,30 @@ class TB_Outil extends BP_Group_Extension {
 	}
 
 	/**
+	 * Retourne le protocole et le domaine, donnés par PHP
+	 */
+	protected function getServerRoot()
+	{
+		//return (!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+		return "http://localhost";
+	}
+
+	/**
+	 * Retourne l'URI de base de l'outil (sans le domaine)
+	 */
+	protected function getBaseUri()
+	{
+		//$pageGroupes = BP_GROUPS_SLUG; // marche pas @TODO réparer ça !!!
+		$pageGroupes = 'projets'; // dépannage temporaire
+		// @TODO faire mieux
+		$siteUrl = get_option("siteurl");
+		$racineServeur = $this->getServerRoot();
+		$dossierRacine = substr($siteUrl, strlen($racineServeur) + 1);
+
+		return '/' . $dossierRacine . '/' . $pageGroupes . '/' . bp_get_current_group_slug() . '/' . $this->slug;
+	}
+
+	/**
 	 * Exécuté lors de l'installation du plugin TelaBotanica
 	 */
 	public function installation() {
