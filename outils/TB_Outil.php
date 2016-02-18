@@ -58,21 +58,37 @@ class TB_Outil extends BP_Group_Extension {
     }
 
 	/**
+	 * Retourne la "configuration" par défaut d'un outil : pas les réglages de
+	 * l'onglet BP (position, nom, etc.) mais les réglages de l'outil, par exemple
+	 * pour le forum : URL racine de la lib ezmlm-php, etc.
+	 */
+	protected function getConfigDefautOutil()
+	{
+		return array();
+	}
+
+	/**
 	 * Charge la configuration générale de l'outil plus la configuration pour le
 	 * projet en cours; concernant la colonne "config" (JSON libre), mélange les
 	 * deux en donnant la priorité à la config du projet en cours et place le
-	 * tout dans $this->config
+	 * tout dans $this->config;
+	 * 
+	 * Si aucune configuration locale pour le projet en cours n'existe au moment
+	 * du chargement, un tuple sera écrit dans la table _tb_outils_reglages
 	 */
 	protected function chargerConfig()
 	{
 		global $wpdb;
 
-		// 0) Config par défaut si rien n'est trouvé dans la base
+		// 0) Config par défaut si rien n'est trouvé dans la base (ne devrait pas
+		// se produire car la table_tb_outils devrait toujours avoir un tuple de
+		// config par outil
 		$id_projet = bp_get_current_group_id();
 		$this->prive = 0;
 		$this->create_step_position = 100;
 		$this->nav_item_position = 100;
 		$this->enable_nav_item = 1;
+		$this->config = $this->getConfigDefautOutil();
 
 		/* 1) Lecture de la table "wp_tb_outils" (config pour tous les projets) */
 		$requete = "
@@ -82,10 +98,10 @@ class TB_Outil extends BP_Group_Extension {
 		";
 		$res1 = $wpdb->get_results($requete) ;
 
-		// @TODO supprimer cette astuce de boucle alors qu'il n'est censé y avoir qu'un tuple ?
-		foreach ($res1 as $meta) {	
+		if (count($res1 > 0)) {
+			$meta = array_pop($res1);
 			// @TODO gérer l'activation / désactivation générale
-			$this->config = json_decode($meta->config, true);
+			$this->config = array_merge($this->config, json_decode($meta->config, true)); // priorité à la config générale
 		}
 
 		/* 2) Lecture de la table "wp_tb_outils_reglages" (config pour le projet en cours) */
@@ -97,18 +113,37 @@ class TB_Outil extends BP_Group_Extension {
 		";
 		$res2 = $wpdb->get_results($requete) ;
 
-		// @TODO supprimer cette astuce de boucle alors qu'il n'est censé y avoir qu'un tuple ?
-		foreach ($res2 as $meta) {	
+		if (count($res2) > 0) {
+			$meta = array_pop($res2);
 			$this->name = $meta->name;
 			$this->prive = $meta->prive;
 			$this->create_step_position = $meta->create_step_position;
 			$this->nav_item_position = $meta->nav_item_position;
 			$this->enable_nav_item = $meta->enable_nav_item;
 			$this->config = array_merge($this->config, json_decode($meta->config, true)); // priorité à la config locale
+		} else {
+			// écriture de la config locale (projet en cours) s'il n'y en avait pas
+			$this->ecrireConfigLocale();
 		}
-		
-		// @TODO si aucune config locale n'a été trouvée, écrire les paramètres
-		// par défaut dedans ? Serait plus simple pour la suite
+	}
+
+	// @TODO génériciser pour en faire un insert/update automatique
+	protected function ecrireConfigLocale()
+	{
+		global $wpdb;
+
+		$table = "{$wpdb->prefix}tb_outils_reglages";
+		$data = array(
+			"id_projet" => bp_get_current_group_id(),
+			"id_outil" => $this->slug,
+			"name" => $this->name,
+			"prive" => $this->prive,
+			"create_step_position" => $this->create_step_position,
+			"nav_item_position" => $this->nav_item_position,
+			"enable_nav_item" => $this->enable_nav_item,
+			"config" => json_encode($this->config)
+		);
+		$wpdb->insert($table, $data);
 	}
 
 	/**

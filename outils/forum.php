@@ -12,6 +12,23 @@ class Forum extends TB_Outil {
 		$this->initialisation();
 	}
 
+	// @TODO maintenir en cohésion avec le fichier config.defaut.json d'ezmlm-php
+	protected function getConfigDefautOutil()
+	{
+		$configDefaut = array(
+			//"domainRoot" => "http://localhost", // ne pas mentionner, autodétecté
+			//"baseUri" => "/ezmlm-forum", // ne pas mentionner, autodétecté
+			"title" => "", // laisser vide pour que WP/BP gèrent le titre
+			"hrefBuildMode" => "REST",
+			"defaultPage" => "view-list",
+			"ezmlm-php" => array(
+				"rootUri" => "http://localhost/ezmlm-php",
+				"list" => "" // si vide, cherchera une liste ayant le nom du projet
+			)
+		);
+		return $configDefaut;
+	}
+
 	/**
 	 * Exécuté lors de l'installation du plugin TelaBotanica; ATTENTION, à ce
 	 * moment elle est appelée en contexte non-objet
@@ -20,19 +37,7 @@ class Forum extends TB_Outil {
 	{
 		global $wpdb;
 
-		// @TODO maintenir en cohésion avec le fichier config.defaut.json d'ezmlm-php
-		$configDefaut = array(
-			"domainRoot" => "http://localhost",
-			"baseUri" => "/ezmlm-forum",
-			"title" => "TB_forum",
-			"hrefBuildMode" => "REST",
-			"defaultPage" => "view-list",
-			"ezmlm-php" => array(
-				"rootUri" => "http://localhost/ezmlm-php",
-				"_rootUri" => "http://vpopmail.tela-botanica.org/ezmlm-service-test",
-				"list" => "example-list"
-			)
-		);
+		$configDefaut = $this->getConfigDefautOutil();
 
 		// l'id outil "forum" n'est pas tiré de $this->slug car la méthode d'install
 		// est appelée en contexte non-objet => mettre le slug dans un attribut statique ?
@@ -66,6 +71,45 @@ class Forum extends TB_Outil {
 		wp_enqueue_script('EzmlmForum', $this->urlOutil . 'js/EzmlmForum.js');
 		wp_enqueue_script('ViewThread', $this->urlOutil . 'js/ViewThread.js');
 		wp_enqueue_script('ViewList', $this->urlOutil . 'js/ViewList.js');
+	}
+
+	/* Vue onglet principal */
+	function display() {
+		$id_projet = bp_get_current_group_id();
+		if ($this->prive) {
+			// on ne devrait passer là que si les contrôles de sécurités précédents
+			// ont réussi, càd si on est dans un groupe auquel on a droit (soit
+			// le groupe est public, soit l'utilisateur en est membre)
+			echo "<h4>L'outil <?php echo $this->name ?> est réservé aux membres du groupe</h4>";
+			return;
+		}
+
+		// paramètres automatiques :
+		// - domaine racine
+		// ...
+		// - URI de base
+		$this->config['baseUri'] = "/wordpress/projets/kill-bill/forum";
+		var_dump($this->config);
+
+		// - nom de la liste
+		// - nom de la liste
+		// - titre de la page
+
+		// portée des styles
+		echo '<div class="wp-bootstrap">';
+		echo '<div id="ezmlm-forum-main">';
+
+		// amorcer l'outil
+		chdir(dirname(__FILE__) . "/forum/");
+		require "ezmlm-forum.php";
+		$fc = new EzmlmForum($this->config); // front controller
+
+		// - définir le titre
+
+		// - inclure le corps de page
+		$fc->renderPage();
+		echo "</div>";
+		echo "</div>";
 	}
 
 	/* Vue onglet admin */
@@ -135,45 +179,6 @@ class Forum extends TB_Outil {
 		bp_core_add_message( __( 'Settings saved successfully', 'buddypress' ) );
 		bp_core_redirect( bp_get_group_permalink( $bp->groups->current_group ) . '/admin/' . $this->slug );
 	}
-	
-
-	/* Vue onglet principal */
-	function display() {
-		$id_projet = bp_get_current_group_id();
-		if ($this->prive) {
-			// on ne devrait passer là que si les contrôles de sécurités précédents
-			// ont réussi, càd si on est dans un groupe auquel on a droit (soit
-			// le groupe est public, soit l'utilisateur en est membre)
-			echo "<h4>L'outil <?php echo $this->name ?> est réservé aux membres du groupe</h4>";
-			return;
-		}
-
-		//var_dump($this->config);
-
-		// paramètres automatiques :
-		// - nom de la liste
-		// - domaine racine
-		// - URI de base
-		// - nom de la liste
-		// - titre de la page
-
-		// amorcer l'outil
-		echo '<div class="clear">';
-		echo '<div class="wp-bootstrap">';
-		chdir(dirname(__FILE__) . "/forum/");
-		require "ezmlm-forum.php";
-		$fc = new EzmlmForum($this->config); // front controller
-
-		// - ajouter les JS et CSS
-		// - définir le titre
-		// - inclure le corps de page
-		$fc->renderPage();
-		echo "</div>";
-		echo "</div>";
-	}
-	
 }
 
 bp_register_group_extension( 'Forum' );
-
-?>
