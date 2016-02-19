@@ -6,7 +6,7 @@ Version: 1.0 BETA
 Author: Tela Botanica
 */
 
-// chargement de la configuration depuis config.json
+/* Chargement de la configuration depuis config.json */
 function chargerConfig() {
 	$fichierConfig = dirname( __FILE__ ) . "/config.json";
 	if (! file_exists($fichierConfig)) {
@@ -65,7 +65,7 @@ class TelaBotanica
 		register_deactivation_hook(__FILE__,array('TelaBotanica','desinstallation_categories'));
 	}
 
-	/**
+	/*
 	 * Méthode qui crée les tables "{$wpdb->prefix}tb_outils" et
 	 * "{$wpdb->prefix}tb_outils_reglages" dans la base de données lors de
 	 * l'installation du plugin, et appelle la méthode installation() de chaque
@@ -88,7 +88,7 @@ class TelaBotanica
 		global $wpdb;
 		$config = chargerConfig();
 
-		// 1) réglages d'une outil pour l'ensemble de l'espace projets
+		// 1) Réglages d'un outil pour l'ensemble de l'espace projets
 		$create_outils = "
 			CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}tb_outils` (
 				`id_outil` varchar(50) NOT NULL,
@@ -103,7 +103,7 @@ class TelaBotanica
 		$wpdb->query($create_outils);
 		$wpdb->query($pk_outils);
 
-		// 2) réglages d'un outil pour un projet
+		// 2) Réglages d'un outil pour un projet
 		$create_outils_reglages = "
 			CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}tb_outils_reglages` (
 				`id_projet` bigint(11) NOT NULL,
@@ -129,11 +129,11 @@ class TelaBotanica
 		$wpdb->query($pk_outils_reglages);
 		$wpdb->query($fk_outils_reglages);
 
-		// déclenchement des routines d'installation des outils depuis la config
-		// @WARNING Astuce pourrite : les fichiers des classes outils ne sont
-		// normalement pas inclus si l'extension n'est pas activée, donc lors de
-		// l'activation de l'extention, eh ben ils n'y sont pas encore... donc on
-		// les inclut à la main ici, afin d'accéder à leur méthode "install"
+		/* déclenchement des routines d'installation des outils depuis la config
+		 * @WARNING Astuce pourrite : les fichiers des classes outils ne sont
+		 * normalement pas inclus si l'extension n'est pas activée, donc lors de
+		 * l'activation de l'extention, eh ben ils n'y sont pas encore... donc on
+		 * les inclut à la main ici, afin d'accéder à leur méthode "install"
 		// (un peu nul - revoir cette stratégie)
 		if (array_key_exists('outils', $config)) {
 			require( dirname( __FILE__ ) . '/outils/TB_Outil.php' );
