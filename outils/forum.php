@@ -37,7 +37,7 @@ class Forum extends TB_Outil {
 	{
 		global $wpdb;
 
-		$configDefaut = $this->getConfigDefautOutil();
+		$configDefaut = Forum::getConfigDefautOutil();
 
 		// l'id outil "forum" n'est pas tiré de $this->slug car la méthode d'install
 		// est appelée en contexte non-objet => mettre le slug dans un attribut statique ?
@@ -47,6 +47,22 @@ class Forum extends TB_Outil {
 			);
 		";
 		$wpdb->query($insert_config_defaut);
+	}
+
+	/**
+	 * Exécuté lors de la désinstallation du plugin TelaBotanica; ATTENTION, à
+	 * ce moment elle est appelée en contexte non-objet
+	 */
+	public function desinstallation()
+	{
+		global $wpdb;
+
+		// l'id outil "forum" n'est pas tiré de $this->slug car la méthode d'install
+		// est appelée en contexte non-objet => mettre le slug dans un attribut statique ?
+		$delete_config_defaut = "
+			DELETE FROM `{$wpdb->prefix}tb_outils` WHERE `id_outil` = 'forum';
+		";
+		// $wpdb->query($delete_config_defaut); // @DEBUG désactivé
 	}
 
 	public function scriptsEtStylesAvant() {
@@ -74,8 +90,7 @@ class Forum extends TB_Outil {
 	}
 
 	/* Vue onglet principal */
-	function display() {
-		$id_projet = bp_get_current_group_id();
+	function display($group_id = null) {
 		if ($this->prive) {
 			// on ne devrait passer là que si les contrôles de sécurités précédents
 			// ont réussi, càd si on est dans un groupe auquel on a droit (soit
@@ -89,6 +104,9 @@ class Forum extends TB_Outil {
 		$this->config['domainRoot'] = $this->getServerRoot();
 		// - URI de base
 		$this->config['baseUri'] = $this->getBaseUri();
+		// - URI de base pour les données (/wp-content/*)
+		$this->config['dataBaseUri'] = $this->getDataBaseUri();
+		//echo "DBU: [" . $this->config['dataBaseUri'] . "]";
 		// - nom de la liste
 		if (empty($this->config['ezmlm-php']['list'])) {
 			$this->config['ezmlm-php']['list'] = "botadrome";
@@ -115,7 +133,7 @@ class Forum extends TB_Outil {
 	}
 
 	/* Vue onglet admin */
-	function edit_screen() {
+	function edit_screen($group_id = null) {
 		if ( !bp_is_group_admin_screen( $this->slug ) )
 		return false;
 		
@@ -152,7 +170,7 @@ class Forum extends TB_Outil {
 		do_action( 'bp_after_group_settings_admin' );
 	}
 
-	function edit_screen_save() {
+	function edit_screen_save($group_id = null) {
 		global $wpdb, $bp;
 		$id_projet = bp_get_current_group_id();
 		if ( !isset( $_POST ) )	return false;
