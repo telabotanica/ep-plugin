@@ -139,7 +139,7 @@ class TelaBotanica
 		 * @WARNING Astuce pourrite : les fichiers des classes outils ne sont
 		 * normalement pas inclus si l'extension n'est pas activée, donc lors de
 		 * l'activation de l'extention, eh ben ils n'y sont pas encore... donc on
-		 * les inclut à la main ici, afin d'accéder à leur méthode "install"
+		 * les inclut à la main ici, afin d'accéder à leur méthode "install" */
 		// (un peu nul - revoir cette stratégie)
 		if (array_key_exists('outils', $config)) {
 			require( dirname( __FILE__ ) . '/outils/TB_Outil.php' );
