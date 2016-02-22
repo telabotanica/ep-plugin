@@ -35,7 +35,7 @@ class TB_Outil extends BP_Group_Extension {
 	 * seront déclarés AVANT les ressources globales de WP/BP, donc ils
 	 * seront écrasés par les ressources ayant le même identifiant
 	 */
-	protected function scriptsEtStylesAvant()
+	public function scriptsEtStylesAvant()
 	{
 		// rien par défaut
 	}
@@ -45,12 +45,12 @@ class TB_Outil extends BP_Group_Extension {
 	 * seront déclarés APRES les ressources globales de WP/BP, donc ils
 	 * écraseront les ressources ayant le même identifiant
 	 */
-	protected function scriptsEtStylesApres()
+	public function scriptsEtStylesApres()
 	{
 		// rien par défaut
 	}
 
-	protected function definirChemins()
+	public function definirChemins()
 	{
         // url to your plugin dir : site.url/wp-content/plugins/buddyplug/
         $this->urlPlugin = plugin_dir_url(__FILE__);
@@ -101,7 +101,10 @@ class TB_Outil extends BP_Group_Extension {
 		if (count($res1 > 0)) {
 			$meta = array_pop($res1);
 			// @TODO gérer l'activation / désactivation générale
-			$this->config = array_merge($this->config, json_decode($meta->config, true)); // priorité à la config générale
+			$configGenerale = json_decode($meta->config, true);
+			if (is_array($configGenerale)) {
+				$this->config = array_merge($this->config, $configGenerale); // priorité à la config générale
+			}
 		}
 
 		/* 2) Lecture de la table "wp_tb_outils_reglages" (config pour le projet en cours) */
@@ -120,7 +123,10 @@ class TB_Outil extends BP_Group_Extension {
 			$this->create_step_position = $meta->create_step_position;
 			$this->nav_item_position = $meta->nav_item_position;
 			$this->enable_nav_item = $meta->enable_nav_item;
-			$this->config = array_merge($this->config, json_decode($meta->config, true)); // priorité à la config locale
+			$configLocale = json_decode($meta->config, true);
+			if (is_array($configLocale)) {
+				$this->config = array_merge($this->config, $configLocale); // priorité à la config locale
+			}
 		} else {
 			// écriture de la config locale (projet en cours) s'il n'y en avait pas
 			$this->ecrireConfigLocale();
@@ -132,18 +138,22 @@ class TB_Outil extends BP_Group_Extension {
 	{
 		global $wpdb;
 
-		$table = "{$wpdb->prefix}tb_outils_reglages";
-		$data = array(
-			"id_projet" => bp_get_current_group_id(),
-			"id_outil" => $this->slug,
-			"name" => $this->name,
-			"prive" => $this->prive,
-			"create_step_position" => $this->create_step_position,
-			"nav_item_position" => $this->nav_item_position,
-			"enable_nav_item" => $this->enable_nav_item,
-			"config" => json_encode($this->config)
-		);
-		$wpdb->insert($table, $data);
+		$bpGroupId = bp_get_current_group_id();
+		// 0 signifie qu'on n'est pas dans une page de groupe
+		if ($bpGroupId > 0) {
+			$table = "{$wpdb->prefix}tb_outils_reglages";
+			$data = array(
+				"id_projet" => $bpGroupId,
+				"id_outil" => $this->slug,
+				"name" => $this->name,
+				"prive" => $this->prive,
+				"create_step_position" => $this->create_step_position,
+				"nav_item_position" => $this->nav_item_position,
+				"enable_nav_item" => $this->enable_nav_item,
+				"config" => json_encode($this->config)
+			);
+			$wpdb->insert($table, $data);
+		}
 	}
 
 	/**
@@ -169,17 +179,36 @@ class TB_Outil extends BP_Group_Extension {
 
 	/**
 	 * Retourne l'URI de base de l'outil (sans le domaine)
+	 * ex: /wordpress/groups/mon-super-groupe/mon-outil
 	 */
 	protected function getBaseUri()
 	{
 		//$pageGroupes = BP_GROUPS_SLUG; // marche pas @TODO réparer ça !!!
 		$pageGroupes = 'projets'; // dépannage temporaire
 		// @TODO faire mieux
+		$dossierRacine = $this->getDossierRacine();
+
+		return '/' . $dossierRacine . '/' . $pageGroupes . '/' . bp_get_current_group_slug() . '/' . $this->slug;
+	}
+
+	/**
+	 * Retourne l'URI de base des données l'outil (sans le domaine)
+	 * ex: /wordpress/wp-content/plugins/tela-botanica/outils/mon-outil
+	 */
+	protected function getDataBaseUri()
+	{
+		$dossierRacine = $this->getDossierRacine();
+
+		return '/' . $dossierRacine . '/wp-content/plugins/tela-botanica/outils/' . $this->slug;
+	}
+
+	protected function getDossierRacine()
+	{
 		$siteUrl = get_option("siteurl");
 		$racineServeur = $this->getServerRoot();
 		$dossierRacine = substr($siteUrl, strlen($racineServeur) + 1);
 
-		return '/' . $dossierRacine . '/' . $pageGroupes . '/' . bp_get_current_group_slug() . '/' . $this->slug;
+		return $dossierRacine;
 	}
 
 	/**

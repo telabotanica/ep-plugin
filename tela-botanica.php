@@ -52,11 +52,17 @@ class TelaBotanica
 		/* On déclenche la fonction ajout_menu_admin lors du chargement des menus de WordPress */
 		add_action('admin_menu',array('TelaBotanica','ajout_menu_admin'));
 
+		// Routes personnalisées pour les outils @TODO trouver un moyen de les
+		// déclarer dans chaque outil
+		//add_action('init', array('TelaBotanica', 'reecritureRoutes'));
+
 		// @TODO remplacer "activation" par "installation" dans la version prod
 		/* On lance la création de la table Outils Réglages lorsque le plugin est activé */
 		register_activation_hook(__FILE__,array('TelaBotanica','installation_outils'));
 		/* On lance la création de la table Catégories Projets lorsque le plugin est activé */
 		register_activation_hook(__FILE__,array('TelaBotanica','installation_categories'));
+		// On doit flusher les routes une fois, à l'activation du plugin
+		register_activation_hook(__FILE__,array('TelaBotanica','flushRoutes'));
 
 		// @TODO remplacer "deactivation" par "deinstallation" dans la version prod
 		/* On lance la supression de la table Outils Réglages lorsque le plugin est désinstallé */
@@ -136,6 +142,7 @@ class TelaBotanica
 		 * les inclut à la main ici, afin d'accéder à leur méthode "install"
 		 * (un peu nul - revoir cette stratégie)
 		 */
+
 		if (array_key_exists('outils', $config)) {
 			require( dirname( __FILE__ ) . '/outils/TB_Outil.php' );
 			foreach ($config['outils'] as $outil) {
@@ -218,8 +225,38 @@ class TelaBotanica
 		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}tb_categories_projets;");
 		//$wpdb->query("ALTER TABLE {$wpdb->prefix}bp_groups DROP id_categorie;");
 	}
-	
-	
+
+	/*static function reecritureRoutes()
+	{
+		error_log("Coucou la réécriture des routes !");
+		$base_url = get_option('siteurl');
+		//echo "base URL: "; var_dump($base_url);
+		//$bp_group_slug = BP_GROUPS_SLUG;
+		//echo "groups Slug: "; var_dump($bp_group_slug);
+		//$regex = "^$base_url/$bp_group_slug/.+/porte-documents/(.+)";
+		//$regex = "projets/.+/porte-documents/(.+)";
+		$regex='.*';
+		$dest = 'wp-content/plugins/tela-botanica/outils/porte-documents/$matches[1]';
+		$dest = 'http://www.bing.com';
+
+		echo "REGEX: [$regex]";
+		echo "DEST: [$dest]";
+
+		//
+		flush_rewrite_rules();
+
+		add_rewrite_rule($regex, $dest, 'top');
+	}
+
+	static function flushRoutes()
+	{
+		// ajouter la route avant de flusher() - curieux car la route est ajoutée
+		// à chaque chargement de page (hook 'init') :-/ comprends pas...
+		// du coup quand on active le plugin, ça déclenche reecritureRoutes() 2x
+		self::reecritureRoutes();
+		error_log('FLUUUUCHE !!!!!');
+		flush_rewrite_rules();
+	}*/
 	
 	/* Méthode qui crée des menus ayant pour paramètres :
 	 * - Titre de la page
