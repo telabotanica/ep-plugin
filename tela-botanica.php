@@ -92,24 +92,9 @@ class TelaBotanica
 	static function installation_outils()
 	{
 		global $wpdb;
-		$config = chargerConfig();
+		$config = chargerConfig();		
 
-		// 1) Réglages d'un outil pour l'ensemble de l'espace projets
-		$create_outils = "
-			CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}tb_outils` (
-				`id_outil` varchar(50) NOT NULL,
-				`active` tinyint(1) NOT NULL,
-				`config` text NOT NULL
-			) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-		";
-		$pk_outils = "
-			ALTER TABLE `{$wpdb->prefix}tb_outils`
-			ADD PRIMARY KEY (`id_outil`);
-		";
-		$wpdb->query($create_outils);
-		$wpdb->query($pk_outils);
-
-		// 2) Réglages d'un outil pour un projet
+		// Réglages d'un outil pour un projet
 		$create_outils_reglages = "
 			CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}tb_outils_reglages` (
 				`id_projet` bigint(11) NOT NULL,
@@ -272,20 +257,11 @@ class TelaBotanica
 										
 		/* Sous-menus */
 		add_submenu_page('tela-botanica','Configuration','Configuration','manage_options','configuration',array('TelaBotanica','configuration'));
-		
-		/* Options */
-		add_settings_field ('porte_documents_actif','Actif','option_1_callback','configuration','page_1_section',array('This is the description of the option 1'));
-		add_settings_field ('forum_actif','Actif','option_2_callback','configuration','page_2_section',array('This is the description of the option 2'));  
-		
-		
-		register_setting('porte-documents','porte_documents_actif');
-		register_setting('forum','forum_actif');
-		add_settings_section('page_1_section','Section 1','page_1_section_callback','porte-documents');
 	}
 	
 	
 	
-	
+	/*
 	function page_1_section_callback() {
    		echo '<p>Section Description here</p>';  
 	}
@@ -296,7 +272,7 @@ class TelaBotanica
 		<p class="description option_1"> <?php echo $args[0] ?> </p>
 	<?php      
 	}
-	
+	*/
 	
 	/* Méthode qui affiche la vue Home */
 	static function home()
@@ -311,7 +287,7 @@ class TelaBotanica
 	
 	
 	
-	/* Méthode qui affiche la vue Outils */
+	/* Méthode qui affiche la vue Configuration */
 	static function configuration()
 	{
 		//$titre = get_admin_page_title();

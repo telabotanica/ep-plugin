@@ -125,7 +125,7 @@ class TB_Outil extends BP_Group_Extension {
 			$this->enable_nav_item = $meta->enable_nav_item;
 			$configLocale = json_decode($meta->config, true);
 			if (is_array($configLocale)) {
-				$this->config = array_merge($this->config, $configLocale); // priorité à la config locale
+				$this->config = array_replace_recursive($this->config, $configLocale); // priorité à la config locale
 			}
 		} else {
 			// écriture de la config locale (projet en cours) s'il n'y en avait pas
@@ -183,8 +183,8 @@ class TB_Outil extends BP_Group_Extension {
 	 */
 	protected function getBaseUri()
 	{
-		//$pageGroupes = BP_GROUPS_SLUG; // marche pas @TODO réparer ça !!!
-		$pageGroupes = 'projets'; // dépannage temporaire
+		$pageGroupes = BP_GROUPS_SLUG; // marche pas @TODO réparer ça !!!
+		//$pageGroupes = 'projets'; // dépannage temporaire
 		// @TODO faire mieux
 		$dossierRacine = $this->getDossierRacine();
 

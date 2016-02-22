@@ -22,7 +22,7 @@ class Forum extends TB_Outil {
 			"hrefBuildMode" => "REST",
 			"defaultPage" => "view-list",
 			"ezmlm-php" => array(
-				"rootUri" => "http://localhost/ezmlm-php",
+				"rootUri" => "http://vpopmail.tela-botanica.org/ezmlm-php-ng",
 				"list" => "" // si vide, cherchera une liste ayant le nom du projet
 			)
 		);
@@ -40,12 +40,8 @@ class Forum extends TB_Outil {
 
 		// l'id outil "forum" n'est pas tiré de $this->slug car la méthode d'install
 		// est appelée en contexte non-objet => mettre le slug dans un attribut statique ?
-		$insert_config_defaut = "
-			INSERT INTO `{$wpdb->prefix}tb_outils` VALUES (
-				'forum', 1, '" . json_encode($configDefaut) . "'
-			);
-		";
-		$wpdb->query($insert_config_defaut);
+		
+		add_option('tb_forum_config',json_encode($configDefaut));
 	}
 
 	/**
@@ -71,7 +67,7 @@ class Forum extends TB_Outil {
 		// identique et sa priorité faible, c'est lui qui écrase l'autre :-/
 		// @TODO trouver une solution, car si on utilise le plugin sans le thème,
 		// y aura pas de BS et ça marchera pas :'(
-		//wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bower_components/bootstrap/dist/css/bootstrap.min.css');
+		// wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bower_components/bootstrap/dist/css/bootstrap.min.css');
 	}
 
 	public function scriptsEtStylesApres() {
@@ -154,14 +150,21 @@ class Forum extends TB_Outil {
 		</p>
 		
 		<p class="editfield">
+			<label for="liste-outil">Nom de la liste</label>
+			<input type="text" id="liste-outil" name="liste-outil" value="<?php echo $this->config['ezmlm-php']['list'] ?>" />
+		</p>
+		
+		<p class="editfield">
 			<label for="position-outil">Position de l'outil <br/>(<?php echo $this->nav_item_position ?>)</label>
 			<input type="range" min="0" max="100" step="5" id="position-outil" class="pointer" name="position-outil" value="<?php echo $this->nav_item_position ?>"/>
 		</p>
 		
+		<!-- Marche pas
 		<p class="editfield">
 			<label for="confidentialite-outil">Outil privé <br/>(<?php echo $this->prive ?>)</label>
 			<input type="range" min="0" max="1" id="confidentialite-outil" class="pointer on-off" name="confidentialite-outil" value="<?php echo $this->prive ?>"/>
 		</p>
+		-->
 		
 		<?php
 		
@@ -174,14 +177,16 @@ class Forum extends TB_Outil {
 		$id_projet = bp_get_current_group_id();
 		if ( !isset( $_POST ) )	return false;
 		check_admin_referer( 'groups_edit_save_' . $this->slug );
-		
+
 		/* Mise à jour de la ligne dans la base de données */
+		$this->config['ezmlm-php']['list'] = $_POST['liste-outil'];
 		$table = "{$wpdb->prefix}tb_outils_reglages";
 		$data = array( 												
 			'enable_nav_item' => $_POST['activation-outil'],
 			'name' => $_POST['nom-outil'],
-			'nav_item_position' => $_POST['position-outil'],
-			'prive' => $_POST['confidentialite-outil'],
+			'config' => '{"ezmlm-php":{"list":"'.$_POST['liste-outil'].'"}}',
+			'nav_item_position' => $_POST['position-outil']
+			//'prive' => $_POST['confidentialite-outil']
 		);
 		$where = array( 												
 			'id_projet' => $id_projet,

@@ -91,10 +91,12 @@ class Porte_Documents extends TB_Outil {
 			<input type="range" min="0" max="100" step="5" id="position-outil" class="pointer" name="position-outil" value="<?php echo $this->nav_item_position ?>"/>
 		</p>
 		
+		<!-- Marche pas
 		<p class="editfield">
 			<label for="confidentialite-outil">Outil privé <br/>(<?php echo $this->prive ?>)</label>
 			<input type="range" min="0" max="1" id="confidentialite-outil" class="pointer on-off" name="confidentialite-outil" value="<?php echo $this->prive ?>"/>
 		</p>
+		-->
 		
 		<?php
 		
@@ -113,8 +115,8 @@ class Porte_Documents extends TB_Outil {
 		$data = array( 												
 			'enable_nav_item' => $_POST['activation-outil'],
 			'name' => $_POST['nom-outil'],
-			'nav_item_position' => $_POST['position-outil'],
-			'prive' => $_POST['confidentialite-outil'],
+			'nav_item_position' => $_POST['position-outil']
+			//'prive' => $_POST['confidentialite-outil']
 		);
 		$where = array( 												
 			'id_projet' => $id_projet,
