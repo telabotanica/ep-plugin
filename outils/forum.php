@@ -37,7 +37,7 @@ class Forum extends TB_Outil {
 	{
 		global $wpdb;
 
-		$configDefaut = $this->getConfigDefautOutil();
+		Forum::getConfigDefautOutil();
 
 		// l'id outil "forum" n'est pas tiré de $this->slug car la méthode d'install
 		// est appelée en contexte non-objet => mettre le slug dans un attribut statique ?

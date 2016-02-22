@@ -134,7 +134,8 @@ class TelaBotanica
 		 * normalement pas inclus si l'extension n'est pas activée, donc lors de
 		 * l'activation de l'extention, eh ben ils n'y sont pas encore... donc on
 		 * les inclut à la main ici, afin d'accéder à leur méthode "install"
-		// (un peu nul - revoir cette stratégie)
+		 * (un peu nul - revoir cette stratégie)
+		 */
 		if (array_key_exists('outils', $config)) {
 			require( dirname( __FILE__ ) . '/outils/TB_Outil.php' );
 			foreach ($config['outils'] as $outil) {
@@ -148,7 +149,7 @@ class TelaBotanica
 		}
 	}
 
-	/**
+	/*
 	 * Méthode qui supprime les tables "{$wpdb->prefix}tb_outils" et
 	 * "{$wpdb->prefix}tb_outils_reglages" dans la base de données lors de la
 	 * désinstallation du plugin; appelle la méthode desinstallation() de chaque
@@ -194,23 +195,15 @@ class TelaBotanica
 				(6, 'Construction')
 			;
 		";
-		/*$create_col_categories = "
-			ALTER TABLE {$wpdb->prefix}bp_groups
-			ADD `id_categorie` int(11) NOT NULL;
-		";*/
+
 		$pk_categories = "
 			ALTER TABLE `{$wpdb->prefix}tb_categories_projets`
  			ADD PRIMARY KEY (`id_categorie`);
 		";
-		/*$fk_categories = "
-			ALTER TABLE `{$wpdb->prefix}tb_outils_reglages`
-			ADD CONSTRAINT `fk_id-categorie_id-group` FOREIGN KEY (`id_categorie`) REFERENCES `{$wpdb->prefix}bp_groups` (`id_categorie`) ON DELETE CASCADE ON UPDATE CASCADE;
-		";*/
+
 		$wpdb->query($create_categories);
 		$wpdb->query($insert_categories);
-		//$wpdb->query($create_col_categories);
 		$wpdb->query($pk_categories);
-		//$wpdb->query($fk_categories);	
 	}
 
 	
@@ -238,19 +231,42 @@ class TelaBotanica
 	static function ajout_menu_admin()
 	{
 		/* Menu */
-		add_menu_page('Tela Botanica','Tela Botanica','manage_options','tela-botanica',array('TelaBotanica','vue_presentation'));									
+		add_menu_page('Tela Botanica','Tela Botanica','manage_options','tela-botanica',array('TelaBotanica','home'));	
+										
 		/* Sous-menus */
-		add_submenu_page('tela-botanica','Outils','Outils','manage_options','outils',array('TelaBotanica','vue_outils'));								
+		add_submenu_page('tela-botanica','Configuration','Configuration','manage_options','configuration',array('TelaBotanica','configuration'));
+		
+		/* Options */
+		add_settings_field ('porte_documents_actif','Actif','option_1_callback','configuration','page_1_section',array('This is the description of the option 1'));
+		add_settings_field ('forum_actif','Actif','option_2_callback','configuration','page_2_section',array('This is the description of the option 2'));  
+		
+		
+		register_setting('porte-documents','porte_documents_actif');
+		register_setting('forum','forum_actif');
+		add_settings_section('page_1_section','Section 1','page_1_section_callback','porte-documents');
 	}
 	
-		
 	
-	/* Méthode qui affiche la vue Apercu */
-	static function vue_presentation()
+	
+	
+	function page_1_section_callback() {
+   		echo '<p>Section Description here</p>';  
+	}
+	
+	function option_1_callback($args) {  
+	?>
+		<input type="text" id="option_1" class="option_1" name="option_1" value="<?php echo get_option('option_1') ?>">
+		<p class="description option_1"> <?php echo $args[0] ?> </p>
+	<?php      
+	}
+	
+	
+	/* Méthode qui affiche la vue Home */
+	static function home()
 	{
 		$titre = get_admin_page_title();
 		/* On définit l'URL de la vue HTML */
-		$url_html = plugin_dir_path(__FILE__).'admin/vue_presentation.html';
+		$url_html = plugin_dir_path(__FILE__).'admin/home.php';
 		/* On récupère la vue HTML et on l'affiche */
 		$html = TelaBotanica::lecture_vue($url_html,array($titre,'Tela Botanica'));
 		echo $html;
@@ -258,19 +274,20 @@ class TelaBotanica
 	
 	
 	
-	/* Méthode qui affiche la vue A propos */
-	static function vue_outils()
+	/* Méthode qui affiche la vue Outils */
+	static function configuration()
 	{
 		//$titre = get_admin_page_title();
 		/* On définit l'URL de la vue HTML */
-		$url_html = plugin_dir_path(__FILE__).'admin/vue_outils.html';
+		$url_html = plugin_dir_path(__FILE__).'admin/config.php';
 		/* On récupère la vue HTML et on l'affiche */
 		$html = TelaBotanica::lecture_vue($url_html,array('Tela Botanica'));
 		echo $html;
 	}
 	
 	
-	/**
+	
+	/*
 	 * Extrait du code HTML depuis une vue, avec en paramètres l'URL du fichier
 	 * HTML et les variables PHP à faire passer à la méthode
 	 */
@@ -291,7 +308,7 @@ class TelaBotanica
 		return $sortie;
 	}
 
-	/**
+	/*
 	 * Convertit un nom d'outil correspondant au nom de fichier dans extension
 	 * (ex: porte-documents) en nom de classe (ex: Porte_Documents); les - sont
 	 * convertis en _, et chaque mot a la première lettre en majuscule
