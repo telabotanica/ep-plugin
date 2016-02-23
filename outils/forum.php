@@ -13,7 +13,7 @@ class Forum extends TB_Outil {
 	}
 
 	// @TODO maintenir en cohésion avec le fichier config.defaut.json d'ezmlm-php
-	protected function getConfigDefautOutil()
+	public function getConfigDefautOutil()
 	{
 		$configDefaut = array(
 			//"domainRoot" => "http://localhost", // ne pas mentionner, autodétecté

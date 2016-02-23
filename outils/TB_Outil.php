@@ -198,7 +198,6 @@ class TB_Outil extends BP_Group_Extension {
 	protected function getDataBaseUri()
 	{
 		$dossierRacine = $this->getDossierRacine();
-
 		return '/' . $dossierRacine . '/wp-content/plugins/tela-botanica/outils/' . $this->slug;
 	}
 

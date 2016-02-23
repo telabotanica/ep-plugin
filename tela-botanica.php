@@ -21,6 +21,7 @@ function chargerConfig() {
 /* Chargement du code nécessitant BuddyPress */
 function initialisation_bp() {
 
+	require( dirname( __FILE__ ) . '/admin/admin.php' );
 	require( dirname( __FILE__ ) . '/outils/TB_Outil.php' );
 	require( dirname( __FILE__ ) . '/formulaires/categorie/categorie.php' );
 	require( dirname( __FILE__ ) . '/formulaires/description/description-complete.php' );
@@ -49,9 +50,6 @@ class TelaBotanica
 	/* Constructeur de la classe TelaBotanica */
 	public function __construct()
 	{	
-		/* On déclenche la fonction ajout_menu_admin lors du chargement des menus de WordPress */
-		add_action('admin_menu',array('TelaBotanica','ajout_menu_admin'));
-
 		// Routes personnalisées pour les outils @TODO trouver un moyen de les
 		// déclarer dans chaque outil
 		//add_action('init', array('TelaBotanica', 'reecritureRoutes'));
@@ -242,84 +240,6 @@ class TelaBotanica
 		error_log('FLUUUUCHE !!!!!');
 		flush_rewrite_rules();
 	}*/
-	
-	/* Méthode qui crée des menus ayant pour paramètres :
-	 * - Titre de la page
-	 * - Libellé du menu
-	 * - Intitulé des droits
-	 * - Clé d'identification du menu
-	 * - La fonction de rendu à appeler
-	 */
-	static function ajout_menu_admin()
-	{
-		/* Menu */
-		add_menu_page('Tela Botanica','Tela Botanica','manage_options','tela-botanica',array('TelaBotanica','home'));	
-										
-		/* Sous-menus */
-		add_submenu_page('tela-botanica','Configuration','Configuration','manage_options','configuration',array('TelaBotanica','configuration'));
-	}
-	
-	
-	
-	/*
-	function page_1_section_callback() {
-   		echo '<p>Section Description here</p>';  
-	}
-	
-	function option_1_callback($args) {  
-	?>
-		<input type="text" id="option_1" class="option_1" name="option_1" value="<?php echo get_option('option_1') ?>">
-		<p class="description option_1"> <?php echo $args[0] ?> </p>
-	<?php      
-	}
-	*/
-	
-	/* Méthode qui affiche la vue Home */
-	static function home()
-	{
-		$titre = get_admin_page_title();
-		/* On définit l'URL de la vue HTML */
-		$url_html = plugin_dir_path(__FILE__).'admin/home.php';
-		/* On récupère la vue HTML et on l'affiche */
-		$html = TelaBotanica::lecture_vue($url_html,array($titre,'Tela Botanica'));
-		echo $html;
-	}
-	
-	
-	
-	/* Méthode qui affiche la vue Configuration */
-	static function configuration()
-	{
-		//$titre = get_admin_page_title();
-		/* On définit l'URL de la vue HTML */
-		$url_html = plugin_dir_path(__FILE__).'admin/config.php';
-		/* On récupère la vue HTML et on l'affiche */
-		$html = TelaBotanica::lecture_vue($url_html,array('Tela Botanica'));
-		echo $html;
-	}
-	
-	
-	
-	/*
-	 * Extrait du code HTML depuis une vue, avec en paramètres l'URL du fichier
-	 * HTML et les variables PHP à faire passer à la méthode
-	 */
-	static function lecture_vue($html,$donnees = array())
-	{
-		$sortie = false;
-		/* On vérifie que le fichier existe */
-		if (file_exists($html))
-		{
-			/* On ouvre le buffer et on lit le fichier */
-			ob_start();
-			include $html;
-			/* On stocke le contenu du buffer dans une variable de sortie */
-			$sortie = ob_get_contents();
-			/* On vide le buffer */	
-			ob_end_clean();		
-		}
-		return $sortie;
-	}
 
 	/*
 	 * Convertit un nom d'outil correspondant au nom de fichier dans extension
