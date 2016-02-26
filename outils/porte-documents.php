@@ -10,50 +10,22 @@ class Porte_Documents extends TB_Outil {
 		$id_projet = bp_get_current_group_id();
 		$this->slug = 'porte-documents';
 		$this->name = 'Porte-documents';
-		$this->prive = 0;
-		$this->create_step_position = 100;
-		$this->nav_item_position = 100;
-		$this->enable_nav_item = 1;
 
-		/* Lecture de la table "wp_tb_outils_reglages" */
-		$requete = "
-			SELECT * 
-			FROM {$wpdb->prefix}tb_outils_reglages
-			WHERE id_projet='".$id_projet."'
-			AND id_outil='".$this->slug."'
-		";
-		$res = $wpdb->get_results($requete) ;
-		
-		/* Construction de l'objet */
-		foreach ($res as $meta) {	
-			$this->slug = $meta->id_outil;
-			$this->name = $meta->name;
-			$this->prive = $meta->prive;
-			$this->create_step_position = $meta->create_step_position;
-			$this->nav_item_position = $meta->nav_item_position;
-			$this->enable_nav_item = $meta->enable_nav_item;
-		}
-		
-		/* Ajout d'une ligne dans la base de données (stockage de l'objet) */
-		/*$table = "{$wpdb->prefix}tb_outils_reglages";
-		$data = array( 	
-			'id_projet' => bp_get_current_group_id(),											
-			'id_outil' => $this->slug,
-			'name' => $this->name,
-			'prive' => $this->prive,
-			'create_step_position' => $this->create_step_position,
-			'nav_item_position' => $this->nav_item_position,
-			'enable_nav_item' => $this->enable_nav_item
-		);
-		$format = null;
-		$wpdb->insert( $table, $data, $format );*/
+		// init du parent
+		$this->initialisation();
 	}
 
 	/**
 	 * Exécuté lors de l'installation du plugin TelaBotanica
 	 */
 	public function installation() {
+		global $wpdb;
+		$configDefaut = Porte_Documents::getConfigDefautOutil();
+
+		// l'id outil "forum" n'est pas tiré de $this->slug car la méthode d'install
+		// est appelée en contexte non-objet => mettre le slug dans un attribut statique ?
 		
+		add_option('tb_forum_config',json_encode($configDefaut));
 	}
 
 	/**
