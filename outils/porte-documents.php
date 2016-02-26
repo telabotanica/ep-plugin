@@ -17,7 +17,7 @@ class Porte_Documents extends TB_Outil {
 
 	/**
 	 * Exécuté lors de l'installation du plugin TelaBotanica
-	 */
+	 
 	public function installation() {
 		global $wpdb;
 		$configDefaut = Porte_Documents::getConfigDefautOutil();
@@ -27,6 +27,7 @@ class Porte_Documents extends TB_Outil {
 		
 		add_option('tb_forum_config',json_encode($configDefaut));
 	}
+	 */
 
 	/**
 	 * Exécuté lors de la désinstallation du plugin TelaBotanica
