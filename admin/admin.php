@@ -176,7 +176,7 @@ function tb_ssmenu_configuration() {
 		
 					<!-- URL ezmlm-php -->
 					<div class="wrap">
-						<p>URL du gros PD
+						<p>URL du porte-documents
 							<input type="text" name="<?php echo $data_field_name_pd; ?>" value="<?php echo $tab_json_pd['ezmlm-php']['rootUri']; ?>" />
 						</p>	
 					</div>
