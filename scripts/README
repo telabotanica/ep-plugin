@@ -1,0 +1,5 @@
+# Scripts WP-Tela-Botanica
+
+Ce dossier contient des scripts de migration, etc. qui ne sont
+pas chargés par Wordpress. Ils sont destinés à être lancés séparément,
+à la demande.
