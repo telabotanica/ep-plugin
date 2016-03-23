@@ -25,8 +25,8 @@ $argc -= 2;
 // connexion aux BDs
 $bdProjet = connexionProjet();
 $bdProjet->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-/*$bdCumulus = connexionCumulus();
-$bdCumulus->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);*/
+$bdCumulus = connexionCumulus();
+$bdCumulus->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 // action en fonction du 1er argument de la ligne de commande
 switch($action) {
@@ -152,7 +152,11 @@ function migration_documents_bdd($argc, $argv) {
 		$req .= ");";
 		//echo "R/ [$req]\n";
 		//exit;
-		$bdCumulus->exec($req);
+		try {
+			$bdCumulus->exec($req);
+		} catch(Exception $e) {
+			echo "-- FOIRAX: [$req]\n";
+		}
 	}
 }
 
