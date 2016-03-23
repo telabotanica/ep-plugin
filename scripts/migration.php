@@ -116,7 +116,7 @@ function migration_documents_bdd($argc, $argv) {
 		if (! preg_match('//u', $description)) {
 			$description = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $description);
 		}*/
-		$nouveauNomFichierUtf = $titre . substr($nomFichier, strrpos($nomFichier, '.'));
+		$nouveauNomFichierUtf = $titre . substr($nomFichierUtf, strrpos($nomFichierUtf, '.'));
 
 		// calcul de la clef
 		$clef = sha1($cheminCumulus . $f['pd_lien']);
