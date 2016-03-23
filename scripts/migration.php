@@ -93,9 +93,13 @@ function migration_documents_bdd($argc, $argv) {
 			$fichiersOrphelins[] = $f;
 			continue;
 		}
+
+		// merdier de partout avec les encodages pas cohérents etc.
 		$titre = $f['pd_nom'];
-		$nomFichier = $f['pd_lien'];
 		$description = $f['pd_description'];
+		$nomFichier = $f['pd_lien'];
+		$nomFichierUtf = $nomFichier;
+		$nouveauNomFichier = $titre . substr($nomFichier, strrpos($nomFichier, '.'));
 		// trucs à encoder en utf-8
 		if (! preg_match('//u', $cheminCumulus)) {
 			$cheminCumulus = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $cheminCumulus);
@@ -103,16 +107,17 @@ function migration_documents_bdd($argc, $argv) {
 		if (! preg_match('//u', $cheminProjet)) {
 			$cheminProjet = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $cheminProjet);
 		}
-		if (! preg_match('//u', $titre)) {
-			$titre = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $titre);
+		if (! preg_match('//u', $nomFichierUtf)) {
+			$nomFichierUtf = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $nomFichierUtf);
 		}
-		if (! preg_match('//u', $nomFichier)) {
-			$nomFichier = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $nomFichier);
+		/*if (! preg_match('//u', $titre)) {
+			$titre = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $titre);
 		}
 		if (! preg_match('//u', $description)) {
 			$description = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $description);
-		}
-		$nouveauNomFichier = $titre . substr($nomFichier, strrpos($nomFichier, '.'));
+		}*/
+		$nouveauNomFichierUtf = $titre . substr($nomFichier, strrpos($nomFichier, '.'));
+
 		// calcul de la clef
 		$clef = sha1($cheminCumulus . $f['pd_lien']);
 		//echo "=> clef: [$clef]\n";
@@ -148,8 +153,8 @@ function migration_documents_bdd($argc, $argv) {
 			'creation_date' => $f['pd_date_de_mise_a_jour'],
 			'last_modification_date' => $f['pd_date_de_mise_a_jour'],
 			// pour la copie de fichiers
-			'ancien_chemin' => $prefixe_stockage_anciens_projets . "/" . rtrim($cheminProjet, '/') . '/' . $nomFichier,
-			'nouveau_chemin' => $prefixe_disque . rtrim($cheminCumulus, '/') . '/' . $nouveauNomFichier
+			'ancien_chemin' => $prefixe_stockage_anciens_projets . "/" . rtrim($cheminProjet, '/') . '/' . $nomFichierUtf,
+			'nouveau_chemin' => $prefixe_disque . rtrim($cheminCumulus, '/') . '/' . $nouveauNomFichierUtf
 		);
 		$fichiersCumulus[] = $fc;
 	}
