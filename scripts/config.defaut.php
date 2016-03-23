@@ -15,7 +15,7 @@ function connexionProjet() {
 	$base = "tela_prod_v4";
 	// touche pas à ça
 	$dsn = "mysql:host=" . $hote . ";port=" . $port . ";dbname=" . $base;
-	$bd = new PDO($dsn, $utilisateur, $mdp);
+	$bd = new PDO($dsn, $utilisateur, $mdp, array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
 	return $bd;
 }
 function connexionCumulus() {
@@ -27,6 +27,6 @@ function connexionCumulus() {
 	$base = "cumulus";
 	// touche pas à ça
 	$dsn = "mysql:host=" . $hote . ";port=" . $port . ";dbname=" . $base;
-	$bd = new PDO($dsn, $utilisateur, $mdp);
+	$bd = new PDO($dsn, $utilisateur, $mdp, array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
 	return $bd;
 }

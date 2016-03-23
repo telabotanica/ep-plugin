@@ -93,6 +93,8 @@ function migration_documents_bdd($argc, $argv) {
 			$fichiersOrphelins[] = $f;
 			continue;
 		}
+		$prefixe_bd = $prefixe_stockage_cumulus_bd . $prefixe_stockage_projets_cumulus . '/' . $f['p_id'];
+		$prefixe_disque = $prefixe_stockage_cumulus . $prefixe_stockage_projets_cumulus . '/' . $f['p_id'];
 
 		// merdier de partout avec les encodages pas cohérents etc.
 		$titre = $f['pd_nom'];
@@ -100,6 +102,11 @@ function migration_documents_bdd($argc, $argv) {
 		$description = $f['pd_description'];
 		$nomFichier = $f['pd_lien'];
 		$nomFichierUtf = $nomFichier;
+
+		// déHTMLentitiesization comme un goret
+		$titre = html_entity_decode($titre, ENT_COMPAT | ENT_HTML401, 'UTF-8');
+		$description = html_entity_decode($description, ENT_COMPAT | ENT_HTML401, 'UTF-8');
+
 		$nouveauNomFichier = $titre . substr($nomFichier, strrpos($nomFichier, '.'));
 		// trucs à encoder en utf-8
 		if (! preg_match('//u', $cheminCumulus)) {
@@ -119,6 +126,24 @@ function migration_documents_bdd($argc, $argv) {
 		}*/
 		$nouveauNomFichierUtf = $titreUtf . substr($nomFichier, strrpos($nomFichier, '.'));
 
+		$_path = $prefixe_stockage_projets_cumulus . '/' . $f['p_id'] . $cheminCumulus;
+		$_storage_path = $prefixe_bd . rtrim($cheminCumulus, '/') . '/' . $nouveauNomFichier;
+		/*if (strpos($f['pd_nom'], 'en nomenclature normal') !== false || strpos($f['pd_nom'], 'groupe Trac') !== false) {
+			echo "\n";
+			echo "Titre: $titre\n";
+			echo "Titre UTF: $titreUtf\n";
+			echo "Description: $description\n";
+			echo "Nom fichier: $nomFichier\n";
+			echo "Nom fichier UTF: $nomFichierUtf\n";
+			echo "Nouveau nom fichier: $nouveauNomFichier\n";
+			echo "Nouveau nom fichier UTF: $nouveauNomFichierUtf\n";
+			echo "Chemin projet: $cheminProjet\n";
+			echo "Chemin cumulus: $cheminCumulus\n";
+			echo "path: $_path\n";
+			echo "storage_path: $_storage_path\n";
+			echo "\n";
+		}*/
+
 		// calcul de la clef
 		$clef = sha1($cheminCumulus . $f['pd_lien']);
 		//echo "=> clef: [$clef]\n";
@@ -126,8 +151,6 @@ function migration_documents_bdd($argc, $argv) {
 		if ($clef == "") {
 			throw new Exception("clef vide pour fichier n°" . $f['pd_id'] . " : " . print_r($f, true));
 		}
-		$prefixe_bd = $prefixe_stockage_cumulus_bd . $prefixe_stockage_projets_cumulus . '/' . $f['p_id'];
-		$prefixe_disque = $prefixe_stockage_cumulus . $prefixe_stockage_projets_cumulus . '/' . $f['p_id'];
 		$perms = 'wr';
 		if ($f['pd_visibilite'] == 'prive') {
 			$perms = 'r-';
@@ -137,7 +160,7 @@ function migration_documents_bdd($argc, $argv) {
 			'id' => $f['pd_id'],
 			'fkey' => $clef,
 			'name' => $nouveauNomFichier,
-			'path' => $prefixe_stockage_projets_cumulus . '/' . $f['p_id'] . $cheminCumulus,
+			'path' => $_path,
 			'storage_path' => $prefixe_bd . rtrim($cheminCumulus, '/') . '/' . $nouveauNomFichier,
 			'mimetype' => null,
 			'size' => null,
