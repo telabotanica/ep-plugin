@@ -1,5 +1,7 @@
 <?php
 
+$ICONV_UTF8 = true;
+
 // définir ici les paramètres de connexion MySQL (pas de fichier de config, la flemme)
 function connexionProjet() {
 	// touche à ça

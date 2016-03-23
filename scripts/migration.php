@@ -44,9 +44,10 @@ switch($action) {
 function migration_documents_bdd($argc, $argv) {
 	global $bdProjet;
 	global $bdCumulus;
-	// ++++++++++++++++ CONFIG À L'ARRACHE ++++++++++++++++++++++++++
-	$prefixe_stockage = '/grosdur/cumulus/docs/_projets';
-	
+	global $ICONV_UTF8;
+
+	$prefixe_stockage = '/grosdur/cumulus/docs';
+	$prefixe_stockage_projets = '/_projets';
 	// tous les dossiers (pour reconstruire les chemins);
 	$reqDos = "SELECT pd_id, pd_nom, pd_pere FROM projet_documents WHERE pd_ce_type = 0";
 	$resDos = $bdProjet->query($reqDos);
@@ -88,17 +89,24 @@ function migration_documents_bdd($argc, $argv) {
 			$fichiersOrphelins[] = $f;
 			continue;
 		}
-		//$chemin = utf8_encode($chemin);
-		$chemin = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $chemin);
-		//echo "Chemin: [$chemin], Nom: [" . $f['pd_lien'] . "]\n";
-		$nomFichier = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $f['pd_lien']);
+		$titre = $f['pd_nom'];
+		$nomFichier = $f['pd_lien'];
+		$description = $f['pd_description'];
+		// trucs à encoder en utf-8
+		if ($ICONV_UTF8) {
+			$chemin = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $chemin);
+			$titre = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $titre);
+			$nomFichier = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $nomFichier);
+			$description = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $description);
+		}
+		// calcul de la clef
 		$clef = sha1($chemin . $f['pd_lien']);
 		//echo "=> clef: [$clef]\n";
 		// au kazoo que /i
 		if ($clef == "") {
 			throw new Exception("clef vide pour fichier n°" . $f['pd_id'] . " : " . print_r($f, true));
 		}
-		$prefixe = $prefixe_stockage . '/' . $f['p_id'];
+		$prefixe = $prefixe_stockage . $prefixe_stockage_projets . '/' . $f['p_id'];
 		$perms = 'wr';
 		if ($f['pd_visibilite'] == 'prive') {
 			$perms = 'r-';
@@ -107,7 +115,7 @@ function migration_documents_bdd($argc, $argv) {
 		$fc = array(
 			'fkey' => $clef,
 			'name' => $nomFichier,
-			'path' => $chemin,
+			'path' => $prefixe_stockage_projets . '/' . $f['p_id'] . $chemin,
 			'storage_path' => $prefixe . rtrim($chemin, '/') . '/' . $nomFichier,
 			'mimetype' => null,
 			'size' => null,
@@ -118,10 +126,9 @@ function migration_documents_bdd($argc, $argv) {
 			'permissions' => $perms,
 			'keywords' => null,
 			'license' => 'CC BY SA',
-			'meta' => array(
-				'description' => iconv("ISO-8859-1", "UTF-8//TRANSLIT", $f['pd_description']),
-				'titre' => iconv("ISO-8859-1", "UTF-8//TRANSLIT", $f['pd_nom'])
-			),
+			// JSON à la main car pb d'unicode avec PHP < 5.3
+			'meta' => '{"description":"' . $description
+				. '","titre":"' . $titre . '"}',
 			'creation_date' => $f['pd_date_de_mise_a_jour'],
 			'last_modification_date' => $f['pd_date_de_mise_a_jour']
 		);
@@ -146,7 +153,7 @@ function migration_documents_bdd($argc, $argv) {
 		$req .= "'" . $fc['permissions'] . "',";
 		$req .= "NULL,";
 		$req .= "'" . $fc['license'] . "',";
-		$req .= "'" .  dqq(json_encode($fc['meta'], JSON_UNESCAPED_UNICODE)) . "',";
+		$req .= "'" .  dqq($fc['meta']) . "',";
 		$req .= "'" . $fc['creation_date'] . "',";
 		$req .= "'" . $fc['last_modification_date'] . "'";
 		$req .= ");";
