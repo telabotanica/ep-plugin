@@ -47,6 +47,7 @@ function migration_documents_bdd($argc, $argv) {
 	global $bdCumulus;
 	global $ICONV_UTF8;
 	global $prefixe_stockage_cumulus;
+	global $prefixe_stockage_cumulus_bd;
 	global $prefixe_stockage_projets_cumulus;
 	global $prefixe_stockage_anciens_projets;
 
@@ -94,26 +95,24 @@ function migration_documents_bdd($argc, $argv) {
 		}
 		$titre = $f['pd_nom'];
 		$nomFichier = $f['pd_lien'];
-		$nouveauNomFichier = $titre . substr($nomFichier, strrpos($nomFichier, '.'));
 		$description = $f['pd_description'];
 		// trucs à encoder en utf-8
-		if ($ICONV_UTF8) {
-			if (! preg_match('//u', $cheminCumulus)) {
-				$cheminCumulus = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $cheminCumulus);
-			}
-			if (! preg_match('//u', $cheminProjet)) {
-				$cheminProjet = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $cheminProjet);
-			}
-			if (! preg_match('//u', $titre)) {
-				$titre = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $titre);
-			}
-			if (! preg_match('//u', $nomFichier)) {
-				$nomFichier = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $nomFichier);
-			}
-			if (! preg_match('//u', $description)) {
-				$description = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $description);
-			}
+		if (! preg_match('//u', $cheminCumulus)) {
+			$cheminCumulus = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $cheminCumulus);
 		}
+		if (! preg_match('//u', $cheminProjet)) {
+			$cheminProjet = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $cheminProjet);
+		}
+		if (! preg_match('//u', $titre)) {
+			$titre = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $titre);
+		}
+		if (! preg_match('//u', $nomFichier)) {
+			$nomFichier = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $nomFichier);
+		}
+		if (! preg_match('//u', $description)) {
+			$description = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $description);
+		}
+		$nouveauNomFichier = $titre . substr($nomFichier, strrpos($nomFichier, '.'));
 		// calcul de la clef
 		$clef = sha1($cheminCumulus . $f['pd_lien']);
 		//echo "=> clef: [$clef]\n";
@@ -121,7 +120,8 @@ function migration_documents_bdd($argc, $argv) {
 		if ($clef == "") {
 			throw new Exception("clef vide pour fichier n°" . $f['pd_id'] . " : " . print_r($f, true));
 		}
-		$prefixe = $prefixe_stockage_cumulus . $prefixe_stockage_projets_cumulus . '/' . $f['p_id'];
+		$prefixe_bd = $prefixe_stockage_cumulus_bd . $prefixe_stockage_projets_cumulus . '/' . $f['p_id'];
+		$prefixe_disque = $prefixe_stockage_cumulus . $prefixe_stockage_projets_cumulus . '/' . $f['p_id'];
 		$perms = 'wr';
 		if ($f['pd_visibilite'] == 'prive') {
 			$perms = 'r-';
@@ -132,8 +132,7 @@ function migration_documents_bdd($argc, $argv) {
 			'fkey' => $clef,
 			'name' => $nouveauNomFichier,
 			'path' => $prefixe_stockage_projets_cumulus . '/' . $f['p_id'] . $cheminCumulus,
-			'storage_path' => $prefixe . rtrim($cheminCumulus, '/') . '/' . $nouveauNomFichier,
-			'ancien_chemin' => $prefixe_stockage_anciens_projets . "/" . rtrim($cheminProjet, '/') . '/' . $nomFichier,
+			'storage_path' => $prefixe_bd . rtrim($cheminCumulus, '/') . '/' . $nouveauNomFichier,
 			'mimetype' => null,
 			'size' => null,
 			'owner' => $f['U_MAIL'], // @PB : si on change d'email ? Mettre l'id numérique !
@@ -147,7 +146,10 @@ function migration_documents_bdd($argc, $argv) {
 			'meta' => '{"description":"' . $description
 				. '","titre":"' . $titre . '"}',
 			'creation_date' => $f['pd_date_de_mise_a_jour'],
-			'last_modification_date' => $f['pd_date_de_mise_a_jour']
+			'last_modification_date' => $f['pd_date_de_mise_a_jour'],
+			// pour la copie de fichiers
+			'ancien_chemin' => $prefixe_stockage_anciens_projets . "/" . rtrim($cheminProjet, '/') . '/' . $nomFichier,
+			'nouveau_chemin' => $prefixe_disque . rtrim($cheminCumulus, '/') . '/' . $nouveauNomFichier
 		);
 		$fichiersCumulus[] = $fc;
 	}
@@ -179,14 +181,14 @@ function migration_documents_bdd($argc, $argv) {
 		//echo "Nouveau chemin: [" . $fc['storage_path'] . "]\n";
 		//exit;
 		if (file_exists($fc['ancien_chemin'])) {
-			$rep = dirname($fc['storage_path']);
+			$rep = dirname($fc['nouveau_chemin']);
 			// création du dossier si besoin
 			//echo "$rep\n";
 			if (! file_exists($rep)) {
 				mkdir($rep, 0777, true);
 			}
 			// copie du fichier
-			$ok = copy($fc['ancien_chemin'], $fc['storage_path']);
+			$ok = copy($fc['ancien_chemin'], $fc['nouveau_chemin']);
 			if ($ok) {
 				try {
 					$bdCumulus->exec($req);
@@ -194,7 +196,7 @@ function migration_documents_bdd($argc, $argv) {
 					echo "-- ECHEC REQUÊTE: [$req]\n";
 				}
 			} else {
-				echo "-- ECHEC COPIE FICHIER [" . $fc['ancien_chemin'] . "] vers [" . $fc['storage_path'] . "]\n";
+				echo "-- ECHEC COPIE FICHIER [" . $fc['ancien_chemin'] . "] vers [" . $fc['nouveau_chemin'] . "]\n";
 			}
 		} else {
 			echo "-- FICHIER SOURCE INEXISTANT: [" . $fc['id'] . "] [" . $fc['ancien_chemin'] . "]\n";
