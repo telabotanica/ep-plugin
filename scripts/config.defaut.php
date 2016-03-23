@@ -2,6 +2,10 @@
 
 $ICONV_UTF8 = true;
 
+$prefixe_stockage_cumulus = '/grosdur/cumulus/docs';
+$prefixe_stockage_projets_cumulus = '/_projets';
+$prefixe_stockage_anciens_projets = '/home/telabotap/www/reseau/projet/fichiers';
+
 // définir ici les paramètres de connexion MySQL (pas de fichier de config, la flemme)
 function connexionProjet() {
 	// touche à ça

@@ -42,12 +42,14 @@ switch($action) {
 
 // actions qui font vraiment des trucs
 function migration_documents_bdd($argc, $argv) {
+	// config à l'arrache
 	global $bdProjet;
 	global $bdCumulus;
 	global $ICONV_UTF8;
+	global $prefixe_stockage_cumulus;
+	global $prefixe_stockage_projets_cumulus;
+	global $prefixe_stockage_anciens_projets;
 
-	$prefixe_stockage = '/grosdur/cumulus/docs';
-	$prefixe_stockage_projets = '/_projets';
 	// tous les dossiers (pour reconstruire les chemins);
 	$reqDos = "SELECT pd_id, pd_nom, pd_pere FROM projet_documents WHERE pd_ce_type = 0";
 	$resDos = $bdProjet->query($reqDos);
@@ -62,7 +64,7 @@ function migration_documents_bdd($argc, $argv) {
 	echo count($dossiers) . " dossiers trouvés\n";
 
 	// tous les fichiers, dans les dossiers
-	$reqFic = "SELECT p_id, p_titre, U_MAIL, pd_id, pd_ce_type, pd_nom, pd_lien, "
+	$reqFic = "SELECT p_id, p_nom_repertoire, p_titre, U_MAIL, pd_id, pd_ce_type, pd_nom, pd_lien, "
 		. "pd_pere, pd_permissions, pd_date_de_mise_a_jour, pd_description, pd_visibilite "
 		. "FROM projet "
 		. "LEFT JOIN projet_documents ON p_id = pd_ce_projet "
@@ -83,40 +85,44 @@ function migration_documents_bdd($argc, $argv) {
 	$fichiersCumulus = array();
 	foreach ($fichiers as $f) {
 		// rassemblement de tout qu'es-ce qu'y faut
-		$chemin = reconstruire_chemin($dossiers, $f);
-		if ($chemin === false) {
+		$cheminProjet = reconstruire_chemin_projet($dossiers, $f);
+		$cheminCumulus = reconstruire_chemin_cumulus($dossiers, $f);
+		if ($cheminCumulus === false) {
 			// quarantainisation du fichier
 			$fichiersOrphelins[] = $f;
 			continue;
 		}
 		$titre = $f['pd_nom'];
 		$nomFichier = $f['pd_lien'];
+		$nouveauNomFichier = $titre . substr($nomFichier, strrpos($nomFichier, '.'));
 		$description = $f['pd_description'];
 		// trucs à encoder en utf-8
 		if ($ICONV_UTF8) {
-			$chemin = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $chemin);
+			$cheminCumulus = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $cheminCumulus);
 			$titre = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $titre);
 			$nomFichier = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $nomFichier);
 			$description = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $description);
 		}
 		// calcul de la clef
-		$clef = sha1($chemin . $f['pd_lien']);
+		$clef = sha1($cheminCumulus . $f['pd_lien']);
 		//echo "=> clef: [$clef]\n";
 		// au kazoo que /i
 		if ($clef == "") {
 			throw new Exception("clef vide pour fichier n°" . $f['pd_id'] . " : " . print_r($f, true));
 		}
-		$prefixe = $prefixe_stockage . $prefixe_stockage_projets . '/' . $f['p_id'];
+		$prefixe = $prefixe_stockage_cumulus . $prefixe_stockage_projets_cumulus . '/' . $f['p_id'];
 		$perms = 'wr';
 		if ($f['pd_visibilite'] == 'prive') {
 			$perms = 'r-';
 		}
 		// construction de l'entrée de fichier
 		$fc = array(
+			'id' => $f['pd_id'],
 			'fkey' => $clef,
-			'name' => $nomFichier,
-			'path' => $prefixe_stockage_projets . '/' . $f['p_id'] . $chemin,
-			'storage_path' => $prefixe . rtrim($chemin, '/') . '/' . $nomFichier,
+			'name' => $nouveauNomFichier,
+			'path' => $prefixe_stockage_projets_cumulus . '/' . $f['p_id'] . $cheminCumulus,
+			'storage_path' => $prefixe . rtrim($cheminCumulus, '/') . '/' . $nouveauNomFichier,
+			'ancien_chemin' => $prefixe_stockage_anciens_projets . "/" . rtrim($cheminProjet, '/') . '/' . $nomFichier,
 			'mimetype' => null,
 			'size' => null,
 			'owner' => $f['U_MAIL'], // @PB : si on change d'email ? Mettre l'id numérique !
@@ -158,11 +164,29 @@ function migration_documents_bdd($argc, $argv) {
 		$req .= "'" . $fc['last_modification_date'] . "'";
 		$req .= ");";
 		//echo "R/ [$req]\n";
+		//echo "Ancien chemin: [" . $fc['ancien_chemin'] . "]\n";
+		//echo "Nouveau chemin: [" . $fc['storage_path'] . "]\n";
 		//exit;
-		try {
-			$bdCumulus->exec($req);
-		} catch(Exception $e) {
-			echo "-- FOIRAX: [$req]\n";
+		if (file_exists($fc['ancien_chemin'])) {
+			$rep = dirname($fc['storage_path']);
+			// création du dossier si besoin
+			//echo "$rep\n";
+			if (! file_exists($rep)) {
+				mkdir($rep, 0777, true);
+			}
+			// copie du fichier
+			$ok = copy($fc['ancien_chemin'], $fc['storage_path']);
+			if ($ok) {
+				try {
+					$bdCumulus->exec($req);
+				} catch(Exception $e) {
+					echo "-- ECHEC REQUÊTE: [$req]\n";
+				}
+			} else {
+				echo "-- ECHEC COPIE FICHIER [" . $fc['ancien_chemin'] . "] vers [" . $fc['storage_path'] . "]\n";
+			}
+		} else {
+			echo "-- FICHIER SOURCE INEXISTANT: [" . $fc['id'] . "] [" . $fc['ancien_chemin'] . "]\n";
 		}
 	}
 }
@@ -172,22 +196,46 @@ function dqq($str) {
 	return str_replace("'", "''", $str);
 }
 
-function reconstruire_chemin(&$dossiers, $f) {
+// retrouve le chemin où aller chercher le fichier existant sur le disque
+function reconstruire_chemin_projet(&$dossiers, $f) {
 	$chemin = '';
 	$entite = $f;
 	$parentsParcourus = array(); // detecteur de boucles
 	while(($entite['pd_pere'] != 0) && !in_array($entite['pd_pere'], $parentsParcourus)) {
+		// si le dossier parent existe dans la BD
 		if (isset($dossiers[$entite['pd_pere']])) {
+			// on marque qu'on est déjà passé par là
 			$parentsParcourus[] = $entite['pd_pere'];
+			// on remonte le chemin depuis la fin
+			$chemin = $entite['pd_pere'] . '/' . $chemin;
+			// on continue notre route
 			$entite = $dossiers[$entite['pd_pere']];
-			$chemin .= '/' . $entite['pd_nom'];
 		} else {
 			// chemin cassé
 			return false;
 		}
 	}
-	if ($chemin == "") {
-		$chemin = "/";
+	$chemin = $f['p_nom_repertoire'] . '/' . $chemin;
+	return $chemin;
+}
+
+// construit le chemin où placer le nouveau fichier sur le disque
+function reconstruire_chemin_cumulus(&$dossiers, $f) {
+	$chemin = '/';
+	$entite = $f;
+	$parentsParcourus = array(); // detecteur de boucles
+	while(($entite['pd_pere'] != 0) && !in_array($entite['pd_pere'], $parentsParcourus)) {
+		// si le dossier parent existe dans la BD
+		if (isset($dossiers[$entite['pd_pere']])) {
+			// on marque qu'on est déjà passé par là
+			$parentsParcourus[] = $entite['pd_pere'];
+			$entite = $dossiers[$entite['pd_pere']];
+			// on remonte le chemin depuis la fin
+			$chemin .= $entite['pd_nom'] . '/';
+		} else {
+			// chemin cassé
+			return false;
+		}
 	}
 	return $chemin;
 }
