@@ -96,6 +96,7 @@ function migration_documents_bdd($argc, $argv) {
 
 		// merdier de partout avec les encodages pas cohérents etc.
 		$titre = $f['pd_nom'];
+		$titreUtf = $titre;
 		$description = $f['pd_description'];
 		$nomFichier = $f['pd_lien'];
 		$nomFichierUtf = $nomFichier;
@@ -110,13 +111,13 @@ function migration_documents_bdd($argc, $argv) {
 		if (! preg_match('//u', $nomFichierUtf)) {
 			$nomFichierUtf = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $nomFichierUtf);
 		}
-		/*if (! preg_match('//u', $titre)) {
-			$titre = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $titre);
+		if (! preg_match('//u', $titreUtf)) {
+			$titreUtf = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $titreUtf);
 		}
-		if (! preg_match('//u', $description)) {
+		/*if (! preg_match('//u', $description)) {
 			$description = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $description);
 		}*/
-		$nouveauNomFichierUtf = $titre . substr($nomFichierUtf, strrpos($nomFichierUtf, '.'));
+		$nouveauNomFichierUtf = $titreUtf . substr($nomFichier, strrpos($nomFichier, '.'));
 
 		// calcul de la clef
 		$clef = sha1($cheminCumulus . $f['pd_lien']);
