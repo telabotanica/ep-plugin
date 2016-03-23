@@ -136,9 +136,9 @@ function migration_documents_bdd($argc, $argv) {
 	foreach ($fichiersCumulus as $fc) {
 		$req = "INSERT INTO cumulus_files VALUES(";
 		$req .= "'" . $fc['fkey'] . "',";
-		$req .= "'" . $fc['name'] . "',";
-		$req .= "'" . $fc['path'] . "',";
-		$req .= "'" . $fc['storage_path'] . "',";
+		$req .= "'" . dqq($fc['name']) . "',";
+		$req .= "'" . dqq($fc['path']) . "',";
+		$req .= "'" . dqq($fc['storage_path']) . "',";
 		$req .= "NULL,";
 		$req .= "NULL,";
 		$req .= "'" . $fc['owner'] . "',";
@@ -146,7 +146,7 @@ function migration_documents_bdd($argc, $argv) {
 		$req .= "'" . $fc['permissions'] . "',";
 		$req .= "NULL,";
 		$req .= "'" . $fc['license'] . "',";
-		$req .= "'" . str_replace("'", "''", json_encode($fc['meta'], JSON_UNESCAPED_UNICODE)) . "',"; // double les ' pour MySQL
+		$req .= "'" .  dqq(json_encode($fc['meta'], JSON_UNESCAPED_UNICODE)) . "',";
 		$req .= "'" . $fc['creation_date'] . "',";
 		$req .= "'" . $fc['last_modification_date'] . "'";
 		$req .= ");";
@@ -158,6 +158,11 @@ function migration_documents_bdd($argc, $argv) {
 			echo "-- FOIRAX: [$req]\n";
 		}
 	}
+}
+
+// double quote les quotes : transforme ' en '' pour MySQL
+function dqq($str) {
+	return str_replace("'", "''", $str);
 }
 
 function reconstruire_chemin(&$dossiers, $f) {
