@@ -98,10 +98,21 @@ function migration_documents_bdd($argc, $argv) {
 		$description = $f['pd_description'];
 		// trucs à encoder en utf-8
 		if ($ICONV_UTF8) {
-			$cheminCumulus = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $cheminCumulus);
-			$titre = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $titre);
-			$nomFichier = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $nomFichier);
-			$description = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $description);
+			if (! preg_match('//u', $cheminCumulus)) {
+				$cheminCumulus = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $cheminCumulus);
+			}
+			if (! preg_match('//u', $cheminProjet)) {
+				$cheminProjet = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $cheminProjet);
+			}
+			if (! preg_match('//u', $titre)) {
+				$titre = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $titre);
+			}
+			if (! preg_match('//u', $nomFichier)) {
+				$nomFichier = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $nomFichier);
+			}
+			if (! preg_match('//u', $description)) {
+				$description = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $description);
+			}
 		}
 		// calcul de la clef
 		$clef = sha1($cheminCumulus . $f['pd_lien']);
