@@ -161,7 +161,7 @@ function migration_documents_bdd($argc, $argv) {
 			'fkey' => $clef,
 			'name' => $nouveauNomFichier,
 			'path' => $_path,
-			'storage_path' => $prefixe_bd . rtrim($cheminCumulus, '/') . '/' . $nouveauNomFichier,
+			'storage_path' => $_storage_path,
 			'mimetype' => null,
 			'size' => null,
 			'owner' => $f['U_MAIL'], // @PB : si on change d'email ? Mettre l'id numérique !
