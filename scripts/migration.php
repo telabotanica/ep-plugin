@@ -98,7 +98,6 @@ function migration_documents_bdd($argc, $argv) {
 
 		// merdier de partout avec les encodages pas cohérents etc.
 		$titre = $f['pd_nom'];
-		$titreUtf = $titre;
 		$description = $f['pd_description'];
 		$nomFichier = $f['pd_lien'];
 		$nomFichierUtf = $nomFichier;
@@ -106,6 +105,8 @@ function migration_documents_bdd($argc, $argv) {
 		// déHTMLentitiesization comme un goret
 		$titre = html_entity_decode($titre, ENT_COMPAT | ENT_HTML401, 'UTF-8');
 		$description = html_entity_decode($description, ENT_COMPAT | ENT_HTML401, 'UTF-8');
+
+		$titreUtf = $titre;
 
 		$nouveauNomFichier = $titre . substr($nomFichier, strrpos($nomFichier, '.'));
 		// trucs à encoder en utf-8
