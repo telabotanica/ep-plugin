@@ -2,7 +2,7 @@
 
 require_once "config.php";
 
-$actions = array("documents_bdd", "documents_fichiers", "listes");
+$actions = array("documents", "projets", "inscrits", "listes");
 
 function usage() {
 	global $argv;
@@ -27,25 +27,37 @@ $bdProjet = connexionProjet();
 $bdProjet->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $bdCumulus = connexionCumulus();
 $bdCumulus->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$bdWordpress = connexionWordpress();
+$bdWordpress->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
 
 // action en fonction du 1er argument de la ligne de commande
 switch($action) {
-	case "documents_bdd":
-		migration_documents_bdd($argc, $argv);
+	case "documents":
+		migration_documents($argc, $argv);
 		break;
-	case "documents_fichiers":
-		migration_documents_fichiers($argc, $argv);
+	case "projets":
+		migration_projets($argc, $argv);
+		break;
+	case "inscrits":
+		migration_inscrits($argc, $argv);
+		break;
+	case "listes":
+		migration_listes($argc, $argv);
 		break;
 	default:
 		throw new Exception('une action déclarée dans $actions devrait avoir un "case" correspondant dans le "switch"');
 }
 
-// actions qui font vraiment des trucs
-function migration_documents_bdd($argc, $argv) {
+/**
+ * Copie tous les documents (fichiers) des anciens projets vers Cumulus
+ * @ATTENTION penser ensuite à régénérer les mimetypes/tailles (script Cumulus)
+ * et changer le propriétaire des fichiers
+ */
+function migration_documents($argc, $argv) {
 	// config à l'arrache
 	global $bdProjet;
 	global $bdCumulus;
-	global $ICONV_UTF8;
 	global $prefixe_stockage_cumulus;
 	global $prefixe_stockage_cumulus_bd;
 	global $prefixe_stockage_projets_cumulus;
@@ -129,21 +141,6 @@ function migration_documents_bdd($argc, $argv) {
 
 		$_path = $prefixe_stockage_projets_cumulus . '/' . $f['p_id'] . $cheminCumulus;
 		$_storage_path = $prefixe_bd . rtrim($cheminCumulus, '/') . '/' . $nouveauNomFichier;
-		/*if (strpos($f['pd_nom'], 'en nomenclature normal') !== false || strpos($f['pd_nom'], 'groupe Trac') !== false) {
-			echo "\n";
-			echo "Titre: $titre\n";
-			echo "Titre UTF: $titreUtf\n";
-			echo "Description: $description\n";
-			echo "Nom fichier: $nomFichier\n";
-			echo "Nom fichier UTF: $nomFichierUtf\n";
-			echo "Nouveau nom fichier: $nouveauNomFichier\n";
-			echo "Nouveau nom fichier UTF: $nouveauNomFichierUtf\n";
-			echo "Chemin projet: $cheminProjet\n";
-			echo "Chemin cumulus: $cheminCumulus\n";
-			echo "path: $_path\n";
-			echo "storage_path: $_storage_path\n";
-			echo "\n";
-		}*/
 
 		// calcul de la clef
 		$clef = sha1($cheminCumulus . $f['pd_lien']);
@@ -283,3 +280,143 @@ function reconstruire_chemin_cumulus(&$dossiers, $f) {
 	return $chemin;
 }
 
+/**
+ * Copie les caractéristiques des projets existants dans les
+ * nouveaux projets (Wordpress / Buddypress)
+ */
+function migration_projets($argc, $argv) {
+	global $bdProjet;
+	global $bdWordpress;
+	global $prefixe_tables_wp;
+
+	$reqProjets = "SELECT p_id, p_titre, p_resume, p_description, p_espace_internet, p_wikini, p_date_creation, p_type, p_modere, GROUP_CONCAT(pt_label_theme) as themes FROM projet LEFT JOIN projet_avoir_theme ON pat_id_projet = p_id LEFT JOIN projet_theme ON pat_id_theme = pt_id_theme GROUP BY p_id";
+	$resProjets = $bdProjet->query($reqProjets);
+	$projets = array();
+	while ($ligne = $resProjets->fetch()) {
+		$projets[$ligne['p_id']] = array(
+			"p_titre" => $ligne['p_titre'],
+			"p_resume" => $ligne['p_resume'],
+			"p_description" => $ligne['p_description'],
+			"p_espace_internet" => $ligne['p_espace_internet'],
+			"p_wikini" => $ligne['p_wikini'],
+			"p_date_creation" => $ligne['p_date_creation'],
+			"p_type" => $ligne['p_type'],
+			"p_modere" => $ligne['p_modere'],
+			"themes" => $ligne['themes']
+		);
+	}
+	var_dump($projets);
+	echo count($projets) . " projets trouvés\n";
+
+	// insertion dans {$prefixe_tables_wp}_bp_groups
+	$tableGroupes = $prefixe_tables_wp . 'bp_groups';
+	$cpt = 0;
+	foreach ($projets as $id => $projet) {
+		$nom = $projet['p_titre'];
+		$slug = $nom;
+		$description = $projet['p_description'];
+		/*
+		 * ATTENTION, p_description va dans bp_groups mais c'est la description
+		 * courte; la description longue va dans les triplets de bp_groups_meta
+		 */
+		$status = "public"; // "public", "hidden" ou "private";
+		if ($projet['p_modere'] == 1) { // @TODO vérifier si ça correspond (plutôt un réglage de liste ?)
+			$status = "private";
+		}
+		$dateCreation = $projet['p_date_creation'];
+		// Le creator_id sera mis à jour dans migration_inscrits
+		$req = "INSERT INTO $tableGroupes (id, creator_id, name, slug, description, status, enable_forum, date_created) "
+			. "VALUES($id, NULL, '$nom', '$slug', '$description', '$status', 0, '$dateCreation');";
+		echo $req . "\n";
+		/*try {
+			$bdWordpress->exec($req);
+			$cpt++;
+		} catch(Exception $e) {
+			echo "-- ECHEC REQUÊTE: [$req]\n";
+		}*/
+	}
+	echo "$cpt projets migrés\n";
+}
+
+/**
+ * Copie les utilisateurs inscrits aux projets existants dans les
+ * nouveaux projets (Wordpress / Buddypress)
+ */
+function migration_inscrits($argc, $argv) {
+	global $bdProjet;
+	global $bdWordpress;
+	global $prefixe_tables_wp;
+
+	$reqInscrits = "SELECT psu_id_utilisateur, psu_id_projet, ps_statut_nom FROM projet_statut_utilisateurs LEFT JOIN projet_statut ON psu_id_statut = ps_id_statut";
+	$resInscrits = $bdProjet->query($reqInscrits);
+	$inscrits = $resInscrits->fetchAll();
+	var_dump($inscrits);
+	echo count($inscrits) . " inscrits trouvés\n";
+
+	// insertion dans {$prefixe_tables_wp}_tb_outils_reglages
+	/*$tableReglages = $prefixe_tables_wp . 'tb_outils_reglages';
+	$cpt = 0;
+	foreach ($listes as $idProjet => $liste) {
+		$prive = ($liste['pl_visibilite'] == 1 ? 0 : 1); // inverseur de flux quantique
+		$nomListe = $liste['pl_nom_liste'];
+		$posAt = strpos($nomListe, '@'); // au cas où le nom de liste soit l'adresse entière
+		if ($posAt !== false) {
+			$nomListe = substr($nomListe, 0, $posAt);
+		}
+		$jsonConfig = '{"ezmlm-php": {"list": "' . $nomListe . '"}}';
+		$req = "INSERT INTO $tableReglages (id_projet, id_outil, name, prive, config) VALUES($idProjet, 'forum', 'forum', $prive, '$jsonConfig');";
+		//echo $req . "\n";
+		try {
+			$bdWordpress->exec($req);
+			$cpt++;
+		} catch(Exception $e) {
+			echo "-- ECHEC REQUÊTE: [$req]\n";
+		}
+	}
+	echo "$cpt listes migrées\n";*/
+}
+
+/**
+ * Migre les listes de discussion (nom, visibilité)
+ * @ATTENTION penser à migrer les projets d'abord, sans quoi la contrainte de
+ * clef étrangère va empêcher d'insérer les données de réglages d'outils
+ */
+function migration_listes($argc, $argv) {
+	global $bdProjet;
+	global $bdWordpress;
+	global $prefixe_tables_wp;
+
+	$reqListes = "SELECT pl.pl_nom_liste, pl.pl_visibilite, pll.pl_id_projet FROM projet_liste pl LEFT JOIN projet_lien_liste pll ON pll.pl_id_liste = pl.pl_id_liste";
+	$resListes = $bdProjet->query($reqListes);
+	$listes = array();
+	while ($ligne = $resListes->fetch()) {
+		$listes[$ligne['pl_id_projet']] = array(
+			"pl_nom_liste" => $ligne['pl_nom_liste'],
+			"pl_visibilite" => $ligne['pl_visibilite']
+		);
+	}
+	//var_dump($listes);
+	echo count($listes) . " listes trouvées\n";
+
+	// insertion dans {$prefixe_tables_wp}_tb_outils_reglages
+	$tableReglages = $prefixe_tables_wp . 'tb_outils_reglages';
+	$cpt = 0;
+	foreach ($listes as $idProjet => $liste) {
+		$prive = ($liste['pl_visibilite'] == 1 ? 0 : 1); // inverseur de flux quantique
+		$nomListe = $liste['pl_nom_liste'];
+		$posAt = strpos($nomListe, '@'); // au cas où le nom de liste soit l'adresse entière
+		if ($posAt !== false) {
+			$nomListe = substr($nomListe, 0, $posAt);
+		}
+		$jsonConfig = '{"ezmlm-php": {"list": "' . $nomListe . '"}}';
+		$req = "INSERT INTO $tableReglages (id_projet, id_outil, name, prive, config) VALUES($idProjet, 'forum', 'forum', $prive, '$jsonConfig');";
+		//echo $req . "\n";
+		try {
+			$bdWordpress->exec($req);
+			$cpt++;
+		} catch(Exception $e) {
+			echo "-- ECHEC REQUÊTE: [$req]\n";
+		}
+	}
+	echo "$cpt listes migrées\n";
+}
