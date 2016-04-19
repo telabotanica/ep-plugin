@@ -305,18 +305,21 @@ function migration_projets($argc, $argv) {
 			"themes" => $ligne['themes']
 		);
 	}
-	var_dump($projets);
+	//var_dump($projets);
 	echo count($projets) . " projets trouvés\n";
 
 	// insertion dans {$prefixe_tables_wp}_bp_groups
 	$tableGroupes = $prefixe_tables_wp . 'bp_groups';
+	$tableGroupesMeta = $prefixe_tables_wp . 'bp_groups_groupmeta';
 	$cpt = 0;
 	foreach ($projets as $id => $projet) {
-		$nom = $projet['p_titre'];
-		$slug = $nom;
-		$description = $projet['p_description'];
+		$nom = dqq($projet['p_titre']);
+		$slug = limacifier(html_entity_decode($projet['p_titre']));
+		$description = dqq($projet['p_description']);
+		$resume = dqq($projet['p_resume']);
+		$espaceInternet = $projet['p_espace_internet']; // en général Wikini
 		/*
-		 * ATTENTION, p_description va dans bp_groups mais c'est la description
+		 * ATTENTION, p_resume va dans bp_groups mais c'est la description
 		 * courte; la description longue va dans les triplets de bp_groups_meta
 		 */
 		$status = "public"; // "public", "hidden" ou "private";
@@ -324,18 +327,54 @@ function migration_projets($argc, $argv) {
 			$status = "private";
 		}
 		$dateCreation = $projet['p_date_creation'];
-		// Le creator_id sera mis à jour dans migration_inscrits
+		// Le creator_id est NOT NULL; il est mis à 1 (utilisateur admin) et
+		// sera mis à jour dans migration_inscrits
+		//var_dump($projet);
 		$req = "INSERT INTO $tableGroupes (id, creator_id, name, slug, description, status, enable_forum, date_created) "
-			. "VALUES($id, NULL, '$nom', '$slug', '$description', '$status', 0, '$dateCreation');";
-		echo $req . "\n";
-		/*try {
+			. "VALUES($id, 1, '$nom', '$slug', '$resume', '$status', 1, '$dateCreation');";
+		//echo $req . "\n";
+		// Tout ce qui ne rentre pas dans "groups" part en métadonnées :
+		// - description complète
+		// - adresse wiki externe ("espace Internet")
+		// - mots-clés (dans "gtags_group_tags"), non utilisé ici
+		$reqMeta = "INSERT INTO $tableGroupesMeta (group_id, meta_key, meta_value) VALUES "
+			. "($id, 'description-complete', '$description'), "
+			. "($id, 'espace-internet', '$espaceInternet')";
+		
+		//echo $reqMeta . "\n";
+		try {
 			$bdWordpress->exec($req);
+			$bdWordpress->exec($reqMeta);
 			$cpt++;
 		} catch(Exception $e) {
-			echo "-- ECHEC REQUÊTE: [$req]\n";
-		}*/
+			echo "-- ECHEC REQUÊTE: [$req | $reqMeta]\n";
+		}
 	}
 	echo "$cpt projets migrés\n";
+}
+
+/**
+ * Transforme un titre de projet en "slug" (limace) : un nom sans espace, en
+ * minuscules, sans accents ni caractères spéciaux
+ * http://stackoverflow.com/questions/2955251/php-function-to-make-slug-url-string
+ */
+function limacifier($text) {
+	// replace non letter or digits by -
+	$text = preg_replace('~[^\pL\d]+~u', '-', $text);
+	// remove accents
+	$text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+	// remove unwanted characters
+	$text = preg_replace('~[^-\w]+~', '', $text);
+	// trim
+	$text = trim($text, '-');
+	// remove duplicate -
+	$text = preg_replace('~-+~', '-', $text);
+	// lowercase
+	$text = strtolower($text);
+	if (empty($text)) {
+		throw new Exception('La limacification a trop bien marché :-/');
+	}
+return $text;
 }
 
 /**
@@ -350,30 +389,90 @@ function migration_inscrits($argc, $argv) {
 	$reqInscrits = "SELECT psu_id_utilisateur, psu_id_projet, ps_statut_nom FROM projet_statut_utilisateurs LEFT JOIN projet_statut ON psu_id_statut = ps_id_statut";
 	$resInscrits = $bdProjet->query($reqInscrits);
 	$inscrits = $resInscrits->fetchAll();
-	var_dump($inscrits);
+	//var_dump($inscrits);
 	echo count($inscrits) . " inscrits trouvés\n";
 
-	// insertion dans {$prefixe_tables_wp}_tb_outils_reglages
-	/*$tableReglages = $prefixe_tables_wp . 'tb_outils_reglages';
-	$cpt = 0;
-	foreach ($listes as $idProjet => $liste) {
-		$prive = ($liste['pl_visibilite'] == 1 ? 0 : 1); // inverseur de flux quantique
-		$nomListe = $liste['pl_nom_liste'];
-		$posAt = strpos($nomListe, '@'); // au cas où le nom de liste soit l'adresse entière
-		if ($posAt !== false) {
-			$nomListe = substr($nomListe, 0, $posAt);
+	// groupement par projet, pour trouver le nombre total de membres et qui est
+	// le patron
+	$inscritsParProjet = array();
+	foreach ($inscrits as $id => $inscrit) {
+		$idProjet = $inscrit['psu_id_projet'];
+		$idUtilisateur = $inscrit['psu_id_utilisateur'];
+		$statutUtilisateur = $inscrit['ps_statut_nom'];
+		if (! array_key_exists($idProjet, $inscritsParProjet)) {
+			$inscritsParProjet[$idProjet] = array(
+				'inscrits' => array(),
+				'admin' => null
+			);
 		}
-		$jsonConfig = '{"ezmlm-php": {"list": "' . $nomListe . '"}}';
-		$req = "INSERT INTO $tableReglages (id_projet, id_outil, name, prive, config) VALUES($idProjet, 'forum', 'forum', $prive, '$jsonConfig');";
-		//echo $req . "\n";
-		try {
-			$bdWordpress->exec($req);
-			$cpt++;
-		} catch(Exception $e) {
-			echo "-- ECHEC REQUÊTE: [$req]\n";
+		// on compte les inscrits
+		$inscritsParProjet[$idProjet]['inscrits'][] = $inscrit;
+		// qui est le patron ?
+		// le premier des "coordonnateurs" est considéré comme le créateur du
+		// projet @TODO c'est certainement pas vrai !
+		if (($statutUtilisateur == 'Coordonnateur' || $statutUtilisateur == 'Administrateur') && ($inscritsParProjet[$idProjet]['admin'] === null)) {
+			$inscritsParProjet[$idProjet]['admin'] = (int)$idUtilisateur;
 		}
 	}
-	echo "$cpt listes migrées\n";*/
+	//var_dump($inscritsParProjet);
+
+	// insertion dans {$prefixe_tables_wp}_bp_groups
+	$tableGroupes = $prefixe_tables_wp . 'bp_groups';
+	$tableMembres = $prefixe_tables_wp . 'bp_groups_members';
+	$tableGroupesMeta = $prefixe_tables_wp . 'bp_groups_groupmeta';
+	$cptP = 0;
+	$cptI = 0;
+	foreach ($inscritsParProjet as $idProjet => $ipp) {
+		// le pire n'est jamais décevant !
+		if ($idProjet == 0) continue;
+
+		$nbInscrits = count($ipp['inscrits']);
+		$createur = $ipp['admin'];
+		if ($createur === null) {
+			$createur = $ipp['inscrits'][0]['psu_id_utilisateur'];
+		}
+		//var_dump($ipp);
+		$reqMajP = "UPDATE $tableGroupes SET creator_id = $createur WHERE id = $idProjet";
+		//echo $reqMajP . "\n";
+		// Stockage de "total_member_count" en métadonnées
+		$reqMeta = "INSERT INTO $tableGroupesMeta (group_id, meta_key, meta_value) VALUES "
+			. "($idProjet, 'total_member_count', $nbInscrits)";
+		//echo $reqMeta . "\n";
+		try {
+			$bdWordpress->exec($reqMajP);
+			$bdWordpress->exec($reqMeta);
+			$cptP++;
+			// inscriptions des messieurs-dames
+			foreach ($ipp['inscrits'] as $inscrit) {
+				$idUtilisateur = $inscrit['psu_id_utilisateur'];
+				$statut = $inscrit['ps_statut_nom'];
+				// s'il n'y a pas de créateur de groupe, ou si c'est lui qu'on
+				// est en train de traiter, on considère que le membre a été
+				// invité par l'admin du site (ça ou autre chose...)
+				$inviteur = 1;
+				if ($ipp['admin'] !== null && $ipp['admin'] != $idUtilisateur) {
+					$inviteur = $ipp['admin'];
+				}
+				// @TODO dans un premier temps on confond les rôles "admin" et "mod"
+				$estAdmin = ($statut == 'Coordonnateur' || $statut == 'Administrateur') ? 1 : 0;
+				$estConfirme = ($statut == 'En attente') ? 0 : 1;
+				// go Jeannine !
+				$req = "INSERT INTO $tableMembres (group_id, user_id, inviter_id, is_admin, is_mod, user_title, date_modified, comments, is_confirmed, is_banned, invite_sent) "
+					. "VALUES ($idProjet, $idUtilisateur, $inviteur, $estAdmin, $estAdmin, '$statut', NOW(), '', $estConfirme, 0, 0);";
+				//echo $req . "\n";
+				try {
+					$bdWordpress->exec($req);
+					$cptI++;
+				} catch(Exception $e) {
+					echo "-- ECHEC REQUÊTE: [$req]\n";
+				}
+			}
+		} catch(Exception $e) {
+			echo "-- ECHEC REQUÊTE: [$reqMajP | $reqMeta]\n";
+		}
+	}
+	echo "$cptI inscrits migrés\n";
+	echo "$cptP projets mis à jour\n";
 }
 
 /**
