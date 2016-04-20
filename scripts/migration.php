@@ -337,8 +337,11 @@ function migration_projets($argc, $argv) {
 		// - description complète
 		// - adresse wiki externe ("espace Internet")
 		// - mots-clés (dans "gtags_group_tags"), non utilisé ici
+		// - last_activity doit exister, sans quoi le groupe ne ressortira pas
+		//		dans la liste des groupes !
 		$reqMeta = "INSERT INTO $tableGroupesMeta (group_id, meta_key, meta_value) VALUES "
 			. "($id, 'description-complete', '$description'), "
+			. "($id, 'last_activity', NOW()), "
 			. "($id, 'espace-internet', '$espaceInternet')";
 		
 		//echo $reqMeta . "\n";
