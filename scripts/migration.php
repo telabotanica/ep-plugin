@@ -2,7 +2,7 @@
 
 require_once "config.php";
 
-$actions = array("documents", "projets", "inscrits", "listes");
+$actions = array("documents", "projets", "inscrits", "listes", "vue-annuaire");
 
 function usage() {
 	global $argv;
@@ -44,6 +44,9 @@ switch($action) {
 		break;
 	case "listes":
 		migration_listes($argc, $argv);
+		break;
+	case "vue-annuaire":
+		migration_vue_annuaire($argc, $argv);
 		break;
 	default:
 		throw new Exception('une action déclarée dans $actions devrait avoir un "case" correspondant dans le "switch"');
@@ -521,4 +524,48 @@ function migration_listes($argc, $argv) {
 		}
 	}
 	echo "$cpt listes migrées\n";
+}
+
+/**
+ * Renomme {prefixewp}_users en  {prefixewp}_users_original et crée une vue de
+ * tela_prod_v4.annuaire_tela sur {prefixewp}_users
+ */
+function migration_vue_annuaire($argc, $argv) {
+	global $bdWordpress;
+	global $prefixe_tables_wp;
+
+	$tableUtilisateurs = $prefixe_tables_wp . "users";
+	$tableUtilisateursNouveauNom = $prefixe_tables_wp . "users_original";
+	$tableAnnuaire = "tela_prod_v4.annuaire_tela";
+
+	// renomme la table des utilisateurs Wordpress pour la remplacer par la vue
+	$req1 = "RENAME TABLE $tableUtilisateurs TO $tableUtilisateursNouveauNom;";
+	try {
+		$bdWordpress->exec($req1);
+		echo "Table $tableUtilisateurs renommée en $tableUtilisateursNouveauNom" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req1]\n";
+	}
+
+	// création d'une vue qui unit les utilisateurs Wordpress et les
+	// utilisateurs de Tela Botanica
+	$req2 = "CREATE VIEW $tableUtilisateurs AS "
+		. "SELECT * FROM $tableUtilisateursNouveauNom "
+		. "UNION "
+		. "SELECT U_ID as ID, LOWER(U_MAIL) as user_login, U_PASSWD as user_pass, '' as user_nicename, U_MAIL as user_email, '' as user_url, U_DATE as user_registered, '' as user_activation_key, 0 as user_status, CONCAT(U_SURNAME, ' ', U_NAME) as display_name "
+		. "FROM $tableAnnuaire WHERE U_PASSWD != '';";
+	try {
+		$bdWordpress->exec($req2);
+		echo "Vue $tableUtilisateurs créée" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req2]\n";
+		// on remet tout comme avant
+		$req3 = "RENAME TABLE $tableUtilisateursNouveauNom TO $tableUtilisateurs;";
+		try {
+			$bdWordpress->exec($req3);
+			echo "Table $tableUtilisateursNouveauNom renommée en $tableUtilisateurs" . PHP_EOL;
+		} catch(Exception $e) {
+			echo "-- ECHEC REQUÊTE: [$req3]\n";
+		}
+	}
 }
