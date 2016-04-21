@@ -2,7 +2,7 @@
 
 require_once "config.php";
 
-$actions = array("documents", "projets", "inscrits", "listes", "listes-permissions", "vue-annuaire");
+$actions = array("documents", "projets", "inscrits", "listes", "listes-permissions", "utilisateurs");
 
 function usage() {
 	global $argv;
@@ -48,8 +48,8 @@ switch($action) {
 	case "listes-permissions":
 		migration_listes_permissions($argc, $argv);
 		break;
-	case "vue-annuaire":
-		migration_vue_annuaire($argc, $argv);
+	case "utilisateurs":
+		migration_utilisateurs($argc, $argv);
 		break;
 	default:
 		throw new Exception('une action déclarée dans $actions devrait avoir un "case" correspondant dans le "switch"');
@@ -577,44 +577,90 @@ function migration_listes_permissions($argc, $argv) {
 
 /**
  * Renomme {prefixewp}_users en  {prefixewp}_users_original et crée une vue de
- * tela_prod_v4.annuaire_tela sur {prefixewp}_users
+ * tela_prod_v4.annuaire_tela sur {prefixewp}_users; ajoute une métadonnée
+ * "last_activity" aux utilisateurs, afin qu'ils apparaîssent dans les listes
+ * de membres des groupes
  */
-function migration_vue_annuaire($argc, $argv) {
+function migration_utilisateurs($argc, $argv) {
 	global $bdWordpress;
 	global $prefixe_tables_wp;
 
 	$tableUtilisateurs = $prefixe_tables_wp . "users";
 	$tableUtilisateursNouveauNom = $prefixe_tables_wp . "users_original";
+	$tableMetadonneesUtilisateurs = $prefixe_tables_wp . "usermeta";
+	$tableBPActivite = $prefixe_tables_wp . "bp_activity";
 	$tableAnnuaire = "tela_prod_v4.annuaire_tela";
 
-	// renomme la table des utilisateurs Wordpress pour la remplacer par la vue
-	$req1 = "RENAME TABLE $tableUtilisateurs TO $tableUtilisateursNouveauNom;";
+	$vueExisteDeja = false;
+	$req0 = "SHOW TABLES LIKE '$tableUtilisateursNouveauNom'";
 	try {
-		$bdWordpress->exec($req1);
-		echo "Table $tableUtilisateurs renommée en $tableUtilisateursNouveauNom" . PHP_EOL;
+		$res = $bdWordpress->query($req0);
+		$res = $res->fetchAll();
+		$vueExisteDeja = (count($res) > 0);
 	} catch(Exception $e) {
-		echo "-- ECHEC REQUÊTE: [$req1]\n";
+		echo "-- ECHEC REQUÊTE: [$req0]\n";
+		exit;
 	}
 
-	// création d'une vue qui unit les utilisateurs Wordpress et les
-	// utilisateurs de Tela Botanica
-	$req2 = "CREATE VIEW $tableUtilisateurs AS "
-		. "SELECT * FROM $tableUtilisateursNouveauNom "
-		. "UNION "
-		. "SELECT U_ID as ID, LOWER(U_MAIL) as user_login, U_PASSWD as user_pass, '' as user_nicename, U_MAIL as user_email, '' as user_url, U_DATE as user_registered, '' as user_activation_key, 0 as user_status, CONCAT(U_SURNAME, ' ', U_NAME) as display_name "
-		. "FROM $tableAnnuaire WHERE U_PASSWD != '';";
-	try {
-		$bdWordpress->exec($req2);
-		echo "Vue $tableUtilisateurs créée" . PHP_EOL;
-	} catch(Exception $e) {
-		echo "-- ECHEC REQUÊTE: [$req2]\n";
-		// on remet tout comme avant
-		$req3 = "RENAME TABLE $tableUtilisateursNouveauNom TO $tableUtilisateurs;";
+	if ($vueExisteDeja) {
+		echo "La vue $tableUtilisateurs semble déjà exister (présence d'une table $tableUtilisateursNouveauNom)" . PHP_EOL;
+	} else {
+		// renomme la table des utilisateurs Wordpress pour la remplacer par la vue
+		$req1 = "RENAME TABLE $tableUtilisateurs TO $tableUtilisateursNouveauNom;";
 		try {
-			$bdWordpress->exec($req3);
-			echo "Table $tableUtilisateursNouveauNom renommée en $tableUtilisateurs" . PHP_EOL;
+			$bdWordpress->exec($req1);
+			echo "Table $tableUtilisateurs renommée en $tableUtilisateursNouveauNom" . PHP_EOL;
 		} catch(Exception $e) {
-			echo "-- ECHEC REQUÊTE: [$req3]\n";
+			echo "-- ECHEC REQUÊTE: [$req1]\n";
 		}
+
+		// création d'une vue qui unit les utilisateurs Wordpress et les
+		// utilisateurs de Tela Botanica
+		$req2 = "CREATE VIEW $tableUtilisateurs AS "
+			. "SELECT * FROM $tableUtilisateursNouveauNom "
+			. "UNION "
+			. "SELECT U_ID as ID, LOWER(U_MAIL) as user_login, U_PASSWD as user_pass, '' as user_nicename, U_MAIL as user_email, '' as user_url, U_DATE as user_registered, '' as user_activation_key, 0 as user_status, CONCAT(U_SURNAME, ' ', U_NAME) as display_name "
+			. "FROM $tableAnnuaire WHERE U_PASSWD != '';";
+		try {
+			$bdWordpress->exec($req2);
+			echo "Vue $tableUtilisateurs créée" . PHP_EOL;
+		} catch(Exception $e) {
+			echo "-- ECHEC REQUÊTE: [$req2]\n";
+			// on remet tout comme avant
+			$req3 = "RENAME TABLE $tableUtilisateursNouveauNom TO $tableUtilisateurs;";
+			try {
+				$bdWordpress->exec($req3);
+				echo "Table $tableUtilisateursNouveauNom renommée en $tableUtilisateurs" . PHP_EOL;
+			} catch(Exception $e) {
+				echo "-- ECHEC REQUÊTE: [$req3]\n";
+			}
+		}
+	}
+
+	// insertion d'une métadonnée "last_activity" à tous les utilisateurs hors
+	// table d'origine de Wordpress dans la table {prefixewp}_usermeta
+	$req4 = "INSERT INTO $tableMetadonneesUtilisateurs (user_id, meta_key, meta_value) "
+		. "SELECT ID, 'last_activity', NOW() "
+		. "FROM wp442_users "
+		. "WHERE ID NOT IN(SELECT DISTINCT user_id FROM $tableMetadonneesUtilisateurs WHERE meta_key = 'last_activity') "
+		. "AND ID NOT IN (SELECT ID FROM $tableUtilisateursNouveauNom);";
+	try {
+		$bdWordpress->exec($req4);
+		echo "Activité WP insérée" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req4]\n";
+	}
+
+	// pareil dans la table {prefixewp}_bp_activity
+	$req5 = "INSERT INTO $tableBPActivite (user_id, component, type, action, content, primary_link, item_id, secondary_item_id, date_recorded, hide_sitewide, mptt_left, mptt_right, is_spam)"
+		. "SELECT ID, 'members', 'last_activity', '', '','', 0, NULL, NOW(), 0, 0, 0, 0 "
+		. "FROM wp442_users "
+		. "WHERE ID NOT IN(SELECT DISTINCT user_id FROM $tableBPActivite WHERE component = 'members' AND type = 'last_activity') "
+		. "AND ID NOT IN (SELECT ID FROM $tableUtilisateursNouveauNom);";
+	try {
+		$bdWordpress->exec($req5);
+		echo "Activité BP insérée" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req5]\n";
 	}
 }
