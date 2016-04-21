@@ -401,6 +401,18 @@ function migration_inscrits($argc, $argv) {
 	//var_dump($inscrits);
 	echo count($inscrits) . " inscrits trouvés\n";
 
+	// groupement par personne, pour avoir le nombre de projets par utilisateur
+	$projetsParPersonne = array();
+	foreach ($inscrits as $i) {
+		$idUtilisateur = $i['psu_id_utilisateur'];
+		if (array_key_exists($idUtilisateur, $projetsParPersonne)) {
+			$projetsParPersonne[$idUtilisateur]++;
+		} else {
+			$projetsParPersonne[$idUtilisateur] = 1;
+		}
+	}
+	//var_dump($projetsParPersonne);
+
 	// groupement par projet, pour trouver le nombre total de membres et qui est
 	// le patron
 	$inscritsParProjet = array();
@@ -424,6 +436,21 @@ function migration_inscrits($argc, $argv) {
 		}
 	}
 	//var_dump($inscritsParProjet);
+
+	// mise à jour du nombre total de groupes dans {$prefixewp}_usermeta
+	$tableMetadonneesUtilisateurs = $prefixe_tables_wp . 'usermeta';
+	$cptM = 0;
+	foreach ($projetsParPersonne as $idUtilisateur => $nombre) {
+		$req = "INSERT INTO $tableMetadonneesUtilisateurs (user_id, meta_key, meta_value) VALUES ($idUtilisateur, 'total_group_count', $nombre)";
+		//echo $req . "\n";
+		try {
+			$bdWordpress->exec($req);
+			$cptM++;
+		} catch(Exception $e) {
+			echo "-- ECHEC REQUÊTE: [$req]\n";
+		}
+	}
+	echo "$cptM métadonnées utilisateurs mises à jour (total_group_count)\n";
 
 	// insertion dans {$prefixe_tables_wp}_bp_groups
 	$tableGroupes = $prefixe_tables_wp . 'bp_groups';
