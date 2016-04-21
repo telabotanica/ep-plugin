@@ -2,7 +2,7 @@
 
 require_once "config.php";
 
-$actions = array("documents", "projets", "inscrits", "listes", "vue-annuaire");
+$actions = array("documents", "projets", "inscrits", "listes", "listes-permissions", "vue-annuaire");
 
 function usage() {
 	global $argv;
@@ -44,6 +44,9 @@ switch($action) {
 		break;
 	case "listes":
 		migration_listes($argc, $argv);
+		break;
+	case "listes-permissions":
+		migration_listes_permissions($argc, $argv);
 		break;
 	case "vue-annuaire":
 		migration_vue_annuaire($argc, $argv);
@@ -524,6 +527,52 @@ function migration_listes($argc, $argv) {
 		}
 	}
 	echo "$cpt listes migrées\n";
+}
+
+
+/**
+ * Consulte les permissions des listes dans la nouvelle base de données, et
+ * génère une liste de commandes à exécuter sur sequoia/vpopmail pour mettre à
+ * jour les permissions dans ezmlm. @ATTENTION, lire la page de manuel
+ * d'ezmlm-make pour ne pas faire de bêtises (sticky bit, etc.)
+ * Conseil : rediriger la sortie vers un fichier
+ */
+function migration_listes_permissions($argc, $argv) {
+	global $bdWordpress;
+	global $prefixe_tables_wp;
+
+	$tableReglages = $prefixe_tables_wp . 'tb_outils_reglages';
+	$req = "SELECT prive, config FROM $tableReglages WHERE id_outil = 'forum'";
+	$res = $bdWordpress->query($req);
+	$listes = array(
+		'a_rendre_publiques' => array(),
+		'a_rendre_privees' => array()
+	);
+	while ($ligne = $res->fetch()) {
+		$config = json_decode($ligne['config'], true);
+		$nomListe = $config['ezmlm-php']['list'];
+		if ($ligne['prive'] == 1) {
+			$listes['a_rendre_privees'][] = $nomListe;
+		} else {
+			$listes['a_rendre_publiques'][] = $nomListe;
+		}
+	}
+	//var_dump($listes);
+	sort($listes['a_rendre_privees']);
+	sort($listes['a_rendre_publiques']);
+
+	$pat = "/usr/local/bin/ezmlm/ezmlm-make -e+%s /home/vpopmail/domains/tela-botanica.org/%s/\n";
+	echo "# Généré par le script de migration du plugin Wordpress [telabotanica] le " . date("Y-m-d H:i:s") . " :\n\n";
+	// commandes à exécuter
+	echo "# listes à rendre PRIVÉES (" . count($listes['a_rendre_privees']) . ") :\n";
+	foreach ($listes['a_rendre_privees'] as $l) {
+		printf($pat, "P", $l);
+	}
+	echo "\n";
+	echo "# listes à rendre PUBLIQUES (" . count($listes['a_rendre_publiques']) . ") :\n";
+	foreach ($listes['a_rendre_publiques'] as $l) {
+		printf($pat, "p", $l);
+	}
 }
 
 /**
