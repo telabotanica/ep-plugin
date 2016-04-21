@@ -668,7 +668,7 @@ function migration_utilisateurs($argc, $argv) {
 	// table d'origine de Wordpress dans la table {prefixewp}_usermeta
 	$req4 = "INSERT INTO $tableMetadonneesUtilisateurs (user_id, meta_key, meta_value) "
 		. "SELECT ID, 'last_activity', NOW() "
-		. "FROM wp442_users "
+		. "FROM $tableUtilisateurs "
 		. "WHERE ID NOT IN(SELECT DISTINCT user_id FROM $tableMetadonneesUtilisateurs WHERE meta_key = 'last_activity') "
 		. "AND ID NOT IN (SELECT ID FROM $tableUtilisateursNouveauNom);";
 	try {
@@ -681,7 +681,7 @@ function migration_utilisateurs($argc, $argv) {
 	// pareil dans la table {prefixewp}_bp_activity
 	$req5 = "INSERT INTO $tableBPActivite (user_id, component, type, action, content, primary_link, item_id, secondary_item_id, date_recorded, hide_sitewide, mptt_left, mptt_right, is_spam)"
 		. "SELECT ID, 'members', 'last_activity', '', '','', 0, NULL, NOW(), 0, 0, 0, 0 "
-		. "FROM wp442_users "
+		. "FROM $tableUtilisateurs "
 		. "WHERE ID NOT IN(SELECT DISTINCT user_id FROM $tableBPActivite WHERE component = 'members' AND type = 'last_activity') "
 		. "AND ID NOT IN (SELECT ID FROM $tableUtilisateursNouveauNom);";
 	try {
