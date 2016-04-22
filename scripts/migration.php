@@ -2,7 +2,7 @@
 
 require_once "config.php";
 
-$actions = array("tout", "documents", "projets", "inscrits", "listes", "listes-permissions", "utilisateurs");
+$actions = array("tout", "documents", "projets", "inscrits", "listes", "listes-permissions", "config-porte-docs", "utilisateurs");
 
 function usage() {
 	global $argv;
@@ -47,6 +47,9 @@ switch($action) {
 		break;
 	case "listes-permissions":
 		migration_listes_permissions($argc, $argv);
+		break;
+	case "config-porte-docs":
+		configuration_porte_documents($argc, $argv);
 		break;
 	case "utilisateurs":
 		migration_utilisateurs($argc, $argv);
@@ -578,7 +581,7 @@ function migration_listes($argc, $argv) {
 			$nomListe = substr($nomListe, 0, $posAt);
 		}
 		$jsonConfig = '{"ezmlm-php": {"list": "' . $nomListe . '"}}';
-		$req = "INSERT INTO $tableReglages (id_projet, id_outil, name, prive, config) VALUES($idProjet, 'forum', 'forum', $prive, '$jsonConfig');";
+		$req = "INSERT INTO $tableReglages (id_projet, id_outil, name, prive, create_step_position, nav_item_position, enable_nav_item, config) VALUES($idProjet, 'forum', 'Forum', $prive, 0, 70, 1, '$jsonConfig');";
 		//echo $req . "\n";
 		try {
 			$bdWordpress->exec($req);
@@ -634,6 +637,14 @@ function migration_listes_permissions($argc, $argv) {
 	foreach ($listes['a_rendre_publiques'] as $l) {
 		printf($pat, "p", $l);
 	}
+}
+
+/**
+ * Insère les réglages du porte-documents par défaut, pour chaque projet
+ * @ATTENTION, ne touche pas aux documents, voir l'action "documents" pour ça
+ */
+function configuration_porte_documents($argc, $argv) {
+	throw new Exception('pas encore implémenté');
 }
 
 /**
