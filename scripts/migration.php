@@ -2,7 +2,7 @@
 
 require_once "config.php";
 
-$actions = array("documents", "projets", "inscrits", "listes", "listes-permissions", "utilisateurs");
+$actions = array("tout", "documents", "projets", "inscrits", "listes", "listes-permissions", "utilisateurs");
 
 function usage() {
 	global $argv;
@@ -51,9 +51,26 @@ switch($action) {
 	case "utilisateurs":
 		migration_utilisateurs($argc, $argv);
 		break;
+	case "remettoutcommeavant":
+		remet_tout_comme_avant($argc, $argv);
+		break;
 	default:
 		throw new Exception('une action déclarée dans $actions devrait avoir un "case" correspondant dans le "switch"');
 }
+
+/**
+ * Remet tout comme c'était avant (oui enfin en gros, quoi) : vide la table des
+ * projets, la table des inscrits, les métadonnées afférentes, et la config des
+ * outils Tela Botanica
+ */
+/*function remet_tout_comme_avant($argc, $argv) {
+	global $bdProjet;
+	global $bdWordpress;
+	global $prefixe_tables_wp;
+
+	$tableGroupes = $prefixe_tables_wp . 'bp_groups';
+	$tableGroupesMeta = $prefixe_tables_wp . 'bp_groups_groupmeta';
+}*/
 
 /**
  * Copie tous les documents (fichiers) des anciens projets vers Cumulus
@@ -320,9 +337,24 @@ function migration_projets($argc, $argv) {
 	$cpt = 0;
 	foreach ($projets as $id => $projet) {
 		$nom = dqq($projet['p_titre']);
+		if (! preg_match('//u', $nom)) {
+			$nom = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $nom);
+		}
+		$nom = dqq($nom);
 		$slug = limacifier(html_entity_decode($projet['p_titre']));
-		$description = dqq($projet['p_description']);
-		$resume = dqq($projet['p_resume']);
+		if (! preg_match('//u', $slug)) {
+			$slug = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $slug);
+		}
+		$description = $projet['p_description'];
+		if (! preg_match('//u', $description)) {
+			$description = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $description);
+		}
+		$description = dqq($description);
+		$resume = $projet['p_resume'];
+		if (! preg_match('//u', $resume)) {
+			$resume = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $resume);
+		}
+		$resume = dqq($resume);
 		$espaceInternet = $projet['p_espace_internet']; // en général Wikini
 		/*
 		 * ATTENTION, p_resume va dans bp_groups mais c'est la description
