@@ -644,7 +644,20 @@ function migration_listes_permissions($argc, $argv) {
  * @ATTENTION, ne touche pas aux documents, voir l'action "documents" pour ça
  */
 function configuration_porte_documents($argc, $argv) {
-	throw new Exception('pas encore implémenté');
+	global $bdWordpress;
+	global $prefixe_tables_wp;
+
+	$tableReglages = $prefixe_tables_wp . 'tb_outils_reglages';
+	$tableProjets = $prefixe_tables_wp . 'bp_groups';
+	$req = "INSERT INTO $tableReglages "
+		. "(id_projet, id_outil, name, prive, create_step_position, nav_item_position, enable_nav_item, config) "
+		. "SELECT ID, 'porte-documents', 'Porte-documents', IF(status = 'private', 1, 0), 0, 70, 1, '{}' FROM $tableProjets";
+	try {
+		$bdWordpress->exec($req);
+		echo "Configuration par défaut du porte-documents insérée";
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req]\n";
+	}
 }
 
 /**
