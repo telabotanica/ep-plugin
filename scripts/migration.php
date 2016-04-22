@@ -654,7 +654,7 @@ function configuration_porte_documents($argc, $argv) {
 		. "SELECT ID, 'porte-documents', 'Porte-documents', IF(status = 'private', 1, 0), 0, 70, 1, '{}' FROM $tableProjets";
 	try {
 		$bdWordpress->exec($req);
-		echo "Configuration par défaut du porte-documents insérée";
+		echo "Configuration par défaut du porte-documents insérée\n";
 	} catch(Exception $e) {
 		echo "-- ECHEC REQUÊTE: [$req]\n";
 	}
