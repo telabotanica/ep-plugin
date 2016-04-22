@@ -336,7 +336,7 @@ function migration_projets($argc, $argv) {
 	$tableGroupesMeta = $prefixe_tables_wp . 'bp_groups_groupmeta';
 	$cpt = 0;
 	foreach ($projets as $id => $projet) {
-		$nom = dqq($projet['p_titre']);
+		$nom = $projet['p_titre'];
 		if (! preg_match('//u', $nom)) {
 			$nom = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $nom);
 		}
