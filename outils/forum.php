@@ -12,7 +12,7 @@ class Forum extends TB_Outil {
 		$this->initialisation();
 	}
 
-	// @TODO maintenir en cohésion avec le fichier config.defaut.json d'ezmlm-php
+	// @TODO maintenir en cohésion avec le fichier config.defaut.json d'ezmlm-forum
 	public function getConfigDefautOutil()
 	{
 		$configDefaut = array(
@@ -21,9 +21,17 @@ class Forum extends TB_Outil {
 			"title" => "", // laisser vide pour que WP/BP gèrent le titre
 			"hrefBuildMode" => "REST",
 			"defaultPage" => "view-list",
+			"displayListTitle" => true,
 			"ezmlm-php" => array(
 				"rootUri" => "http://vpopmail.tela-botanica.org/ezmlm-php-ng",
 				"list" => "" // si vide, cherchera une liste ayant le nom du projet
+			),
+			"authAdapter" => "AuthAdapterTB",
+			"adapters" => array(
+				"AuthAdapterTB" => array (
+					"annuaireURL" => "https://www.tela-botanica.org/service:annuaire:auth",
+					"headerName" => "Authorization"
+				)
 			)
 		);
 		return $configDefaut;
@@ -35,7 +43,7 @@ class Forum extends TB_Outil {
 	 */
 	public function installation()
 	{
-		global $wpdb;
+		//global $wpdb;
 		$configDefaut = Forum::getConfigDefautOutil();
 
 		// l'id outil "forum" n'est pas tiré de $this->slug car la méthode d'install
@@ -57,11 +65,10 @@ class Forum extends TB_Outil {
 		$delete_config_defaut = "
 			DELETE FROM `{$wpdb->prefix}tb_outils` WHERE `id_outil` = 'forum';
 		";
-		// $wpdb->query($delete_config_defaut); // @DEBUG désactivé
+		$wpdb->query($delete_config_defaut); // @DEBUG désactivé
 	}
 
 	public function scriptsEtStylesAvant() {
-		wp_enqueue_script('jquery', $this->urlOutil . 'bower_components/jquery/dist/jquery.min.js');
 		wp_enqueue_script('bootstrap-js', $this->urlOutil . 'bower_components/bootstrap/dist/js/bootstrap.min.js');
 		// @WTF le style n'est pas écrasé par le BS du thème, malgré son ID
 		// identique et sa priorité faible, c'est lui qui écrase l'autre :-/
@@ -71,6 +78,7 @@ class Forum extends TB_Outil {
 	}
 
 	public function scriptsEtStylesApres() {
+		wp_enqueue_script('jquery-noconflict-compat', $this->urlOutil . 'js/jquery-noconflict-compat.js');
 		wp_enqueue_script('moment', $this->urlOutil . 'bower_components/moment/min/moment.min.js');
 		wp_enqueue_script('moment-fr', $this->urlOutil . 'bower_components/moment/locale/fr.js');
 		wp_enqueue_script('mustache', $this->urlOutil . 'bower_components/mustache.js/mustache.min.js');
@@ -79,6 +87,7 @@ class Forum extends TB_Outil {
 		wp_enqueue_style('EzmlmForum-CSS', $this->urlOutil . 'css/ezmlm-forum-internal.css');
 
 		// code de l'appli Forum
+		wp_enqueue_script('AuthAdapter', $this->urlOutil . 'js/AuthAdapter.js');
 		wp_enqueue_script('EzmlmForum', $this->urlOutil . 'js/EzmlmForum.js');
 		wp_enqueue_script('ViewThread', $this->urlOutil . 'js/ViewThread.js');
 		wp_enqueue_script('ViewList', $this->urlOutil . 'js/ViewList.js');
@@ -104,8 +113,8 @@ class Forum extends TB_Outil {
 		//echo "DBU: [" . $this->config['dataBaseUri'] . "]";
 		// - nom de la liste
 		if (empty($this->config['ezmlm-php']['list'])) {
-			$this->config['ezmlm-php']['list'] = "botadrome";
-			//$this->config['ezmlm-php']['list'] = bp_get_current_group_slug();
+			//$this->config['ezmlm-php']['list'] = "botadrome";
+			$this->config['ezmlm-php']['list'] = bp_get_current_group_slug();
 		}
 
 		//var_dump($this->config);
