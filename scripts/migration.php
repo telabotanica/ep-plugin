@@ -581,7 +581,8 @@ function migration_listes($argc, $argv) {
 			$nomListe = substr($nomListe, 0, $posAt);
 		}
 		$jsonConfig = '{"ezmlm-php": {"list": "' . $nomListe . '"}}';
-		$req = "INSERT INTO $tableReglages (id_projet, id_outil, name, prive, create_step_position, nav_item_position, enable_nav_item, config) VALUES($idProjet, 'forum', 'Forum', $prive, 0, 70, 1, '$jsonConfig');";
+		$req = "INSERT INTO $tableReglages (id_projet, id_outil, name, prive, create_step_position, nav_item_position, enable_nav_item, config) "
+			. "VALUES($idProjet, 'forum', 'Forum', $prive, 70, 70, 1, '$jsonConfig');";
 		//echo $req . "\n";
 		try {
 			$bdWordpress->exec($req);
@@ -651,7 +652,7 @@ function configuration_porte_documents($argc, $argv) {
 	$tableProjets = $prefixe_tables_wp . 'bp_groups';
 	$req = "INSERT INTO $tableReglages "
 		. "(id_projet, id_outil, name, prive, create_step_position, nav_item_position, enable_nav_item, config) "
-		. "SELECT ID, 'porte-documents', 'Porte-documents', IF(status = 'private', 1, 0), 0, 70, 1, '{}' FROM $tableProjets";
+		. "SELECT ID, 'porte-documents', 'Porte-documents', IF(status = 'private', 1, 0), 71, 71, 1, '{}' FROM $tableProjets";
 	try {
 		$bdWordpress->exec($req);
 		echo "Configuration par défaut du porte-documents insérée\n";
