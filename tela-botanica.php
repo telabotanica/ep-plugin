@@ -1,13 +1,16 @@
 <?php
 /*
-Plugin Name: Tela Botanica
-Description: Plugin permettant d'ajouter les outils de Tela Botanica à l'espace projets
-Version: 1.0 BETA
-Author: Tela Botanica
+ * Plugin Name: Tela Botanica
+ * Description: Plugin permettant d'ajouter les outils de Tela Botanica à l'espace projets
+ * Version: 1.0 BETA
+ * Author: Tela Botanica
 */
 
-/* Chargement de la configuration depuis config.json */
-function chargerConfig() {
+/*
+ * Chargement de la configuration depuis config.json
+ */
+function chargerConfig()
+{
 	$fichierConfig = dirname( __FILE__ ) . "/config.json";
 	if (! file_exists($fichierConfig)) {
 		throw new Exception("Veuillez placer un fichier de configuration valide dans 'config.json'");
@@ -19,8 +22,8 @@ function chargerConfig() {
 }
 
 /* Chargement du code nécessitant BuddyPress */
-function initialisation_bp() {
-
+function initialisation_bp()
+{
 	require( dirname( __FILE__ ) . '/admin/admin.php' );
 	require( dirname( __FILE__ ) . '/outils/TB_Outil.php' );
 	require( dirname( __FILE__ ) . '/formulaires/categorie/categorie.php' );
@@ -37,55 +40,70 @@ function initialisation_bp() {
 	}
 
 	require( dirname( __FILE__ ) . '/formulaires/etiquettes/etiquettes.php' );	
-
 }
+
+// amorçage du plugin lors de l'amorçage de BuddyPress
 add_action( 'bp_include', 'initialisation_bp' );
 add_action( 'bp_include', 'description_complete' );
 add_action( 'bp_include', 'categorie' );
 
-
 class TelaBotanica
 {
 
-	/* Constructeur de la classe TelaBotanica */
+	/**
+	 * Constructeur de la classe TelaBotanica
+	 * Déclare les "hooks" d'installation / désintallation et d'activation /
+	 * désactivation des fonctionnalités apportées par le plugin
+	 */
 	public function __construct()
-	{	
-		// Routes personnalisées pour les outils @TODO trouver un moyen de les
-		// déclarer dans chaque outil
-		//add_action('init', array('TelaBotanica', 'reecritureRoutes'));
+	{
+		// requiert Buddypress @TODO faire ça mieux avec admin_notice, mais
+		// comment annuler l'activation sans jeter d'exception ?
+		$plugins = get_option('active_plugins');
+		$buddypressActif = in_array("buddypress/bp-loader.php", $plugins);
+		if (! $buddypressActif) {
+			throw new Exception("Vous devez installer et activer Buddypress pour utiliser ce plugin");
+		}
 
-		// @TODO remplacer "activation" par "installation" dans la version prod
-		/* On lance la création de la table Outils Réglages lorsque le plugin est activé */
-		register_activation_hook(__FILE__,array('TelaBotanica','installation_outils'));
-		/* On lance la création de la table Catégories Projets lorsque le plugin est activé */
-		register_activation_hook(__FILE__,array('TelaBotanica','installation_categories'));
-		// On doit flusher les routes une fois, à l'activation du plugin
-		register_activation_hook(__FILE__,array('TelaBotanica','flushRoutes'));
+		// MODE TEST (évite de désintaller / réinstaller pour tester les hooks)
+		//register_activation_hook(__FILE__,array('TelaBotanica','installation'));
+		//register_deactivation_hook(__FILE__,array('TelaBotanica','desinstallation'));
+		//register_deactivation_hook(__FILE__,array('TelaBotanica','desactivation'));
 
-		// @TODO remplacer "deactivation" par "deinstallation" dans la version prod
-		/* On lance la supression de la table Outils Réglages lorsque le plugin est désinstallé */
-		register_deactivation_hook(__FILE__,array('TelaBotanica','desinstallation_outils'));
-		/* On lance la supression de la table Outils Réglages lorsque le plugin est désinstallé */
-		register_deactivation_hook(__FILE__,array('TelaBotanica','desinstallation_categories'));
+		// MODE PROD
+		register_activation_hook(__FILE__,array('TelaBotanica','installation'));
+		register_uninstall_hook(__FILE__,array('TelaBotanica','desinstallation'));
+		register_deactivation_hook(__FILE__,array('TelaBotanica','desactivation'));
+	}
+
+	/**
+	 * Méthode d'installation du plugin
+	 */
+	static function installation()
+	{
+		self::installation_outils();
+		self::installation_categories();
+	}
+
+	/**
+	 * Méthode de désinstallation du plugin
+	 */
+	static function desinstallation()
+	{
+		self::desinstallation_outils();
+		self::desinstallation_categories();
 	}
 
 	/*
-	 * Méthode qui crée les tables "{$wpdb->prefix}tb_outils" et
-	 * "{$wpdb->prefix}tb_outils_reglages" dans la base de données lors de
-	 * l'installation du plugin, et appelle la méthode installation() de chaque
-	 * outil recensé dans la config
+	 * Crée la table "{$wpdb->prefix}tb_outils_reglages" et appelle la méthode
+	 * installation() de chaque outil recensé dans la config
 	 * 
-	 * - "{$wpdb->prefix}tb_outils" concerne la configuration d'un outil quel
-	 * que soit le projet (liée au panneau de configuration du tableau de bord
-	 * WP)
-	 * 
-	 * - "{$wpdb->prefix}tb_outils_reglages" concerne la configuration d'un outil
+	 * "{$wpdb->prefix}tb_outils_reglages" concerne la configuration d'un outil
 	 * pour un projet donné (liée au sous-onglet de réglages de l'outil, dans
 	 * l'onglet d'administration d'un projet)
 	 * 
 	 * Dans chaque table, la colonne "config" contient la configuration propre à
 	 * chaque outil, en JSON (ou autre, à la discrétion de l'outil)
-	 * 
 	 */
 	static function installation_outils()
 	{
@@ -125,7 +143,6 @@ class TelaBotanica
 		 * les inclut à la main ici, afin d'accéder à leur méthode "install"
 		 * (un peu nul - revoir cette stratégie)
 		 */
-
 		if (array_key_exists('outils', $config)) {
 			require( dirname( __FILE__ ) . '/outils/TB_Outil.php' );
 			foreach ($config['outils'] as $outil) {
@@ -140,17 +157,15 @@ class TelaBotanica
 	}
 
 	/*
-	 * Méthode qui supprime les tables "{$wpdb->prefix}tb_outils" et
-	 * "{$wpdb->prefix}tb_outils_reglages" dans la base de données lors de la
-	 * désinstallation du plugin; appelle la méthode desinstallation() de chaque
-	 * outil recensé dans la config
+	 * Appelle la méthode desinstallation() de chaque outil recensé dans la
+	 * config puis supprime la table "{$wpdb->prefix}tb_outils_reglages"
 	 */
 	static function desinstallation_outils()
 	{
 		global $wpdb;
 		$config = chargerConfig();
 
-		// déclenchement des routines d'installation des outils depuis la config
+		// déclenchement des routines de désinstallation des outils depuis la config
 		if (array_key_exists('outils', $config)) {
 			foreach ($config['outils'] as $outil) {
 				$classeOutil = TelaBotanica::nomFichierVersClasseOutil($outil);
@@ -159,12 +174,13 @@ class TelaBotanica
 			}
 		}
 
-		/* On vérifie que les tables existent puis on les supprime */	
+		// On vérifie que les tables existent puis on les supprime
 		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}tb_outils_reglages;");
-		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}tb_outils;");
 	}
 
-	/* Méthode qui crée la table "{$wpdb->prefix}tb_categories_projets" dans la base de données lors de l'installation du plugin */
+	/*
+	 * Crée la table "{$wpdb->prefix}tb_categories_projets"
+	 */
 	static function installation_categories()
 	{
 		global $wpdb;
@@ -196,57 +212,24 @@ class TelaBotanica
 		$wpdb->query($pk_categories);
 	}
 
-	
-	
-	/* Méthode qui supprime la table "{$wpdb->prefix}tb_categories_projets" dans la base de données lors de la désinstallation du plugin */
+	/*
+	 * Supprime la table "{$wpdb->prefix}tb_categories_projets"
+	 */
 	static function desinstallation_categories()
 	{
-		/* Classe d'accès à la base de données dans WordPress */
 		global $wpdb;
 	
-		/* On vérifie que la table existe puis on la supprime */		
+		// On vérifie que la table existe puis on la supprime
 		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}tb_categories_projets;");
-		//$wpdb->query("ALTER TABLE {$wpdb->prefix}bp_groups DROP id_categorie;");
 	}
-
-	/*static function reecritureRoutes()
-	{
-		error_log("Coucou la réécriture des routes !");
-		$base_url = get_option('siteurl');
-		//echo "base URL: "; var_dump($base_url);
-		//$bp_group_slug = BP_GROUPS_SLUG;
-		//echo "groups Slug: "; var_dump($bp_group_slug);
-		//$regex = "^$base_url/$bp_group_slug/.+/porte-documents/(.+)";
-		//$regex = "projets/.+/porte-documents/(.+)";
-		$regex='.*';
-		$dest = 'wp-content/plugins/tela-botanica/outils/porte-documents/$matches[1]';
-		$dest = 'http://www.bing.com';
-
-		echo "REGEX: [$regex]";
-		echo "DEST: [$dest]";
-
-		//
-		flush_rewrite_rules();
-
-		add_rewrite_rule($regex, $dest, 'top');
-	}
-
-	static function flushRoutes()
-	{
-		// ajouter la route avant de flusher() - curieux car la route est ajoutée
-		// à chaque chargement de page (hook 'init') :-/ comprends pas...
-		// du coup quand on active le plugin, ça déclenche reecritureRoutes() 2x
-		self::reecritureRoutes();
-		error_log('FLUUUUCHE !!!!!');
-		flush_rewrite_rules();
-	}*/
 
 	/*
-	 * Convertit un nom d'outil correspondant au nom de fichier dans extension
+	 * Convertit un nom d'outil correspondant au nom de fichier dans l'extension
 	 * (ex: porte-documents) en nom de classe (ex: Porte_Documents); les - sont
-	 * convertis en _, et chaque mot a la première lettre en majuscule
+	 * convertis en _, et la première lettre de  chaque mot passe en majuscule
 	 */
-	static function nomFichierVersClasseOutil($nomFichier) {
+	static function nomFichierVersClasseOutil($nomFichier)
+	{
 		$classeOutil = $nomFichier;
 		$morceaux = explode('-', $nomFichier);
 		foreach ($morceaux as $m) {
@@ -254,9 +237,7 @@ class TelaBotanica
 		}
 		$classeOutil = implode('_', $morceaux);
 		return $classeOutil;
-	}
-	
-		
+	}	
 }
 
 new TelaBotanica();

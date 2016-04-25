@@ -173,8 +173,8 @@ class TB_Outil extends BP_Group_Extension {
 	 */
 	protected function getServerRoot()
 	{
-		//return (!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
-		return "http://localhost";
+		return (!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+		//return "http://localhost";
 	}
 
 	/**
