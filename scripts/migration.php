@@ -362,7 +362,8 @@ function migration_projets($argc, $argv) {
 			$resume = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $resume);
 		}
 		$resume = dqq($resume);
-		$espaceInternet = $projet['p_espace_internet']; // en général Wikini
+		$espaceInternet = $projet['p_espace_internet'];
+		$wikiExterne = $projet['p_wikini']; // en général Wikini
 		/*
 		 * ATTENTION, p_resume va dans bp_groups mais c'est la description
 		 * courte; la description longue va dans les triplets de bp_groups_meta
@@ -387,6 +388,7 @@ function migration_projets($argc, $argv) {
 		$reqMeta = "INSERT INTO $tableGroupesMeta (group_id, meta_key, meta_value) VALUES "
 			. "($id, 'description-complete', '$description'), "
 			. "($id, 'last_activity', NOW()), "
+			. "($id, 'wiki-externe', '$wikiExterne'), "
 			. "($id, 'espace-internet', '$espaceInternet')";
 		
 		//echo $reqMeta . "\n";
@@ -756,7 +758,7 @@ function migration_utilisateurs($argc, $argv) {
 
 /**
  * Active ou non le pseudo-outil "wiki" dans les groupes, selon la présence d'un
- * "espace-internet" dans leurs métadonnées
+ * "wiki-externe" dans leurs métadonnées
  */
 function migration_wikis($argc, $argv) {
 	global $bdWordpress;
@@ -778,7 +780,7 @@ function migration_wikis($argc, $argv) {
 	// @TODO le faire en une fois avec un JOIN, la honte
 	$req2 = "INSERT INTO $tableOutilsReglages "
 		. "SELECT DISTINCT group_id, 'wiki', 'Wiki', 0, 75, 75, 0, '' "
-		. "FROM $tableGroupesMeta WHERE meta_key = 'espace-internet' AND meta_value = '';";
+		. "FROM $tableGroupesMeta WHERE meta_key = 'wiki-externe' AND meta_value = '';";
 	try {
 		$bdWordpress->exec($req2);
 		echo "Réglages insérés pour les projets sans wikis" . PHP_EOL;
@@ -787,7 +789,7 @@ function migration_wikis($argc, $argv) {
 	}
 	$req3 = "INSERT INTO $tableOutilsReglages "
 		. "SELECT DISTINCT group_id, 'wiki', 'Wiki', 0, 75, 75, 1, '' "
-		. "FROM $tableGroupesMeta WHERE meta_key = 'espace-internet' AND meta_value != '';";
+		. "FROM $tableGroupesMeta WHERE meta_key = 'wiki-externe' AND meta_value != '';";
 	try {
 		$bdWordpress->exec($req3);
 		echo "Réglages insérés pour les projets avec wikis" . PHP_EOL;

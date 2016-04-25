@@ -2,7 +2,7 @@
 
 /**
  * Pseudo-outil en attendant de faire mieux : un onglet qui affiche un lien vers
- * le wiki existant (Wikini)
+ * le wiki existant (Wikini) dans lea métadonnée "wiki-externe" du groupe
  */
 class Wiki extends TB_Outil {
 
@@ -27,7 +27,7 @@ class Wiki extends TB_Outil {
 	function display($group_id = null)
 	{
 		echo "<h3>Retrouvez votre espace wiki ici :</h3>";
-		$adresseWiki = groups_get_groupmeta(bp_get_group_id(), "espace-internet");
+		$adresseWiki = groups_get_groupmeta(bp_get_group_id(), "wiki-externe");
 		echo '<a target="_blank" href="' . $adresseWiki . '">' . $adresseWiki . '</a>';
 	}
 }
