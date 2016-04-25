@@ -55,17 +55,13 @@ class Forum extends TB_Outil {
 	 */
 	public function desinstallation()
 	{
-		global $wpdb;
-
 		// l'id outil "forum" n'est pas tiré de $this->slug car la méthode d'install
 		// est appelée en contexte non-objet => mettre le slug dans un attribut statique ?
-		$delete_config_defaut = "
-			DELETE FROM `{$wpdb->prefix}tb_outils` WHERE `id_outil` = 'forum';
-		";
-		$wpdb->query($delete_config_defaut); // @DEBUG désactivé
+		add_option('tb_forum_config');
 	}
 
-	public function scriptsEtStylesAvant() {
+	public function scriptsEtStylesAvant()
+	{
 		wp_enqueue_script('bootstrap-js', $this->urlOutil . 'bower_components/bootstrap/dist/js/bootstrap.min.js');
 		// @WTF le style n'est pas écrasé par le BS du thème, malgré son ID
 		// identique et sa priorité faible, c'est lui qui écrase l'autre :-/
@@ -74,7 +70,8 @@ class Forum extends TB_Outil {
 		// wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bower_components/bootstrap/dist/css/bootstrap.min.css');
 	}
 
-	public function scriptsEtStylesApres() {
+	public function scriptsEtStylesApres()
+	{
 		wp_enqueue_script('jquery-noconflict-compat', $this->urlOutil . 'js/jquery-noconflict-compat.js');
 		wp_enqueue_script('moment', $this->urlOutil . 'bower_components/moment/min/moment.min.js');
 		wp_enqueue_script('moment-fr', $this->urlOutil . 'bower_components/moment/locale/fr.js');
@@ -90,8 +87,11 @@ class Forum extends TB_Outil {
 		wp_enqueue_script('ViewList', $this->urlOutil . 'js/ViewList.js');
 	}
 
-	/* Vue onglet principal */
-	function display($group_id = null) {
+	/*
+	 * Vue onglet principal - affichage du forum dans la page
+	 */
+	function display($group_id = null)
+	{
 		if ($this->prive) {
 			// on ne devrait passer là que si les contrôles de sécurités précédents
 			// ont réussi, càd si on est dans un groupe auquel on a droit (soit

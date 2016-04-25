@@ -86,6 +86,13 @@ class TelaBotanica
 	}
 
 	/**
+	 * Méthode de désactivation - ne fait rien
+	 */
+	static function desactivation()
+	{
+	}
+
+	/**
 	 * Méthode de désinstallation du plugin
 	 */
 	static function desinstallation()

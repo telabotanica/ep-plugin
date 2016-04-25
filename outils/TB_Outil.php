@@ -8,8 +8,15 @@ class TB_Outil extends BP_Group_Extension {
 	/** configuration de l'outil pour l'instance (projet) en cours */
 	protected $config;
 
+	/** URL de la racine du plugin
+	 ex: "http://localhost/wordpress/wp-content/plugins/tela-botanica/outils/" */
 	protected $urlPlugin;
+	/** URL de la racine de l'outil, pour charger les ressources en HTTP 
+	    ex: "http://localhost/wordpress/wp-content/plugins/tela-botanica/outils/forum/" */
 	protected $urlOutil;
+
+	/** si true, l'outil ne sera disponible que pour les membres du projet */
+	protected $prive;
 
 	/**
 	 * Initialisation post-constructeur : définit les chemins, charge les scripts,
@@ -52,7 +59,6 @@ class TB_Outil extends BP_Group_Extension {
 
 	public function definirChemins()
 	{
-        // url to your plugin dir : site.url/wp-content/plugins/buddyplug/
         $this->urlPlugin = plugin_dir_url(__FILE__);
 		$this->urlOutil = trailingslashit($this->urlPlugin . $this->slug);
     }
@@ -64,6 +70,7 @@ class TB_Outil extends BP_Group_Extension {
 	 */
 	protected function getConfigDefautOutil()
 	{
+		// rien par défaut
 		return array();
 	}
 
@@ -162,9 +169,7 @@ class TB_Outil extends BP_Group_Extension {
 	 */
 	protected function outilCourant() {
 		$slug = $this->slug;
-		//echo "SLUG EN COURS: [$slug]<br/>";
 		$ok = bp_is_current_action($slug);
-		//echo "COURANT: "; var_dump($ok);
 		return $ok;
 	}
 
@@ -178,14 +183,12 @@ class TB_Outil extends BP_Group_Extension {
 	}
 
 	/**
-	 * Retourne l'URI de base de l'outil (sans le domaine)
-	 * ex: /wordpress/groups/mon-super-groupe/mon-outil
+	 * Retourne l'URI de base de l'outil pour le groupe en cours (sans le domaine)
+	 * ex: "/wordpress/groups/flore-d-afrique-du-nord/forum"
 	 */
 	protected function getBaseUri()
 	{
-		$pageGroupes = BP_GROUPS_SLUG; // marche pas @TODO réparer ça !!!
-		//$pageGroupes = 'projets'; // dépannage temporaire
-		// @TODO faire mieux
+		$pageGroupes = $this->getBPPageSlug("groups");
 		$dossierRacine = $this->getDossierRacine();
 
 		return '/' . $dossierRacine . '/' . $pageGroupes . '/' . bp_get_current_group_slug() . '/' . $this->slug;
@@ -193,7 +196,7 @@ class TB_Outil extends BP_Group_Extension {
 
 	/**
 	 * Retourne l'URI de base des données l'outil (sans le domaine)
-	 * ex: /wordpress/wp-content/plugins/tela-botanica/outils/mon-outil
+	 * ex: "/wordpress/wp-content/plugins/tela-botanica/outils/forum"
 	 */
 	protected function getDataBaseUri()
 	{
@@ -201,6 +204,10 @@ class TB_Outil extends BP_Group_Extension {
 		return '/' . $dossierRacine . '/wp-content/plugins/tela-botanica/outils/' . $this->slug;
 	}
 
+	/**
+	 * Retourne le dossier dans lequel est installé Wordpress
+	 * ex: "wordpress"
+	 */
 	protected function getDossierRacine()
 	{
 		$siteUrl = get_option("siteurl");
@@ -211,16 +218,31 @@ class TB_Outil extends BP_Group_Extension {
 	}
 
 	/**
+	 * Retourne le slug de la page Wordpress associée à unee "page" BuddyPress
+	 * ("members", "groups", "activity"...)
+	 *		=> ("inscrits", "projets", "activité"...)
+	 */
+	protected function getBPPageSlug($bpPage)
+	{
+		$wpToBpPages = get_option("bp-pages");
+		if (! array_key_exists($bpPage, $wpToBpPages)) {
+			throw new Exception('La page BuddyPress "' . $bpPage . '" n\'existe pas');
+		}
+		$wpPageSlug = get_post($wpToBpPages[$bpPage]);
+		return $wpPageSlug->post_name;
+	}
+
+	/**
 	 * Exécuté lors de l'installation du plugin TelaBotanica
 	 */
 	public function installation() {
-		
+		// rien par défaut
 	}
 
 	/**
 	 * Exécuté lors de la désinstallation du plugin TelaBotanica
 	 */
 	public function desinstallation() {
-		
+		// rien par défaut
 	}
 }
