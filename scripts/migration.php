@@ -2,7 +2,7 @@
 
 require_once "config.php";
 
-$actions = array("tout", "documents", "projets", "inscrits", "listes", "listes-permissions", "config-porte-docs", "utilisateurs");
+$actions = array("tout", "documents", "projets", "inscrits", "listes", "listes-permissions", "config-porte-docs", "utilisateurs", "wikis");
 
 function usage() {
 	global $argv;
@@ -53,6 +53,9 @@ switch($action) {
 		break;
 	case "utilisateurs":
 		migration_utilisateurs($argc, $argv);
+		break;
+	case "wikis":
+		migration_wikis($argc, $argv);
 		break;
 	case "remettoutcommeavant":
 		remet_tout_comme_avant($argc, $argv);
@@ -748,5 +751,47 @@ function migration_utilisateurs($argc, $argv) {
 		echo "Activité BP insérée" . PHP_EOL;
 	} catch(Exception $e) {
 		echo "-- ECHEC REQUÊTE: [$req5]\n";
+	}
+}
+
+/**
+ * Active ou non le pseudo-outil "wiki" dans les groupes, selon la présence d'un
+ * "espace-internet" dans leurs métadonnées
+ */
+function migration_wikis($argc, $argv) {
+	global $bdWordpress;
+	global $prefixe_tables_wp;
+
+	$tableOutilsReglages = $prefixe_tables_wp . "tb_outils_reglages";
+	$tableGroupesMeta = $prefixe_tables_wp . "bp_groups_groupmeta";
+
+	// suppression des réglages précédents
+	$req = "DELETE FROM $tableOutilsReglages WHERE id_outil = 'wiki';";
+	try {
+		$bdWordpress->exec($req);
+		echo "Réglages des wikis supprimés" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req]" . PHP_EOL;
+	}
+
+	// insertion des nouveaux réglages
+	// @TODO le faire en une fois avec un JOIN, la honte
+	$req2 = "INSERT INTO $tableOutilsReglages "
+		. "SELECT DISTINCT group_id, 'wiki', 'Wiki', 0, 75, 75, 0, '' "
+		. "FROM $tableGroupesMeta WHERE meta_key = 'espace-internet' AND meta_value = '';";
+	try {
+		$bdWordpress->exec($req2);
+		echo "Réglages insérés pour les projets sans wikis" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req2]" . PHP_EOL;
+	}
+	$req3 = "INSERT INTO $tableOutilsReglages "
+		. "SELECT DISTINCT group_id, 'wiki', 'Wiki', 0, 75, 75, 1, '' "
+		. "FROM $tableGroupesMeta WHERE meta_key = 'espace-internet' AND meta_value != '';";
+	try {
+		$bdWordpress->exec($req3);
+		echo "Réglages insérés pour les projets avec wikis" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req3]" . PHP_EOL;
 	}
 }
