@@ -28,7 +28,7 @@ class Wiki extends TB_Outil {
 	{
 		echo "<h3>Retrouvez votre espace wiki ici :</h3>";
 		$adresseWiki = groups_get_groupmeta(bp_get_group_id(), "wiki-externe");
-		echo '<a target="_blank" href="' . $adresseWiki . '">' . $adresseWiki . '</a>';
+		echo '<a style="font-size: 1.3em;" target="_blank" href="' . $adresseWiki . '">' . $adresseWiki . '</a>';
 	}
 }
 
