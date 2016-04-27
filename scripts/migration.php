@@ -2,7 +2,7 @@
 
 require_once "config.php";
 
-$actions = array("nettoyage", "tout", "documents", "projets", "inscrits", "listes", "listes-permissions", "config-porte-docs", "utilisateurs", "wikis");
+$actions = array("nettoyage", "tout_sauf_docs", "documents", "projets", "inscrits", "listes", "listes-permissions", "config-porte-docs", "utilisateurs", "wikis");
 
 function usage() {
 	global $argv;
@@ -59,6 +59,14 @@ switch($action) {
 		break;
 	case "nettoyage":
 		nettoyage($argc, $argv);
+		break;
+	case "tout_sauf_docs":
+		migration_projets($argc, $argv);
+		migration_utilisateurs($argc, $argv);
+		migration_inscrits($argc, $argv);
+		migration_listes($argc, $argv);
+		configuration_porte_documents($argc, $argv);
+		migration_wikis($argc, $argv);
 		break;
 	default:
 		throw new Exception('une action déclarée dans $actions devrait avoir un "case" correspondant dans le "switch"');
