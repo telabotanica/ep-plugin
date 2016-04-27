@@ -790,7 +790,7 @@ function migration_utilisateurs($argc, $argv) {
 			. "U_MAIL as user_email, '' as user_url, U_DATE as user_registered, "
 			. "'' as user_activation_key, 0 as user_status, CONCAT(U_SURNAME, ' ', U_NAME) as display_name, "
 			// ajout de 2 colonnes pour pouvoir générer les métadonnées ensuite
-			. "U_SURNAME as first_name, U_NAME as last_name"
+			. "U_SURNAME as first_name, U_NAME as last_name "
 			. "FROM $tableAnnuaire WHERE U_PASSWD != '';";
 		try {
 			$bdWordpress->exec($req2);
