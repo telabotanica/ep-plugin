@@ -763,12 +763,18 @@ function migration_utilisateurs($argc, $argv) {
 		// création d'une vue qui unit les utilisateurs Wordpress et les
 		// utilisateurs de Tela Botanica
 		$req2 = "CREATE VIEW $tableUtilisateurs AS "
-			. "SELECT * FROM $tableUtilisateursNouveauNom "
+			. "SELECT *, "
+			// ajout de 2 colonnes pour coller à l'astuce plus bas
+			. "'' as first_name, '' as last_name "
+			. "FROM $tableUtilisateursNouveauNom "
 			. "UNION "
 			. "SELECT U_ID as ID, LOWER(U_MAIL) as user_login, U_PASSWD as user_pass, "
 			// astuce pour avoir un user_nicename valide, unique, et pas trop explicite
 			. "REPLACE(LCASE(CONCAT(SUBSTRING(U_MAIL, 1, LOCATE('@', U_MAIL) - 1), '-',REVERSE(SUBSTRING(U_MAIL, LOCATE('@', U_MAIL) + 1)))),'.','-') as user_nicename, "
-			. "U_MAIL as user_email, '' as user_url, U_DATE as user_registered, '' as user_activation_key, 0 as user_status, CONCAT(U_SURNAME, ' ', U_NAME) as display_name "
+			. "U_MAIL as user_email, '' as user_url, U_DATE as user_registered, "
+			. "'' as user_activation_key, 0 as user_status, CONCAT(U_SURNAME, ' ', U_NAME) as display_name, "
+			// ajout de 2 colonnes pour pouvoir générer les métadonnées ensuite
+			. "U_SURNAME as first_name, U_NAME as last_name"
 			. "FROM $tableAnnuaire WHERE U_PASSWD != '';";
 		try {
 			$bdWordpress->exec($req2);
@@ -800,7 +806,44 @@ function migration_utilisateurs($argc, $argv) {
 		echo "-- ECHEC REQUÊTE: [$req4]\n";
 	}
 
-	// pareil dans la table {prefixewp}_bp_activity
+	// insertion des métadonnées "first_name", "last_name" et "nickname" pour
+	// tous les utilisateurs
+	$req4a = "INSERT INTO $tableMetadonneesUtilisateurs (user_id, meta_key, meta_value) "
+		. "SELECT ID, 'first_name', first_name "
+		. "FROM $tableUtilisateurs "
+		. "WHERE ID NOT IN(SELECT DISTINCT user_id FROM $tableMetadonneesUtilisateurs WHERE meta_key = 'first_name') "
+		. "AND ID NOT IN (SELECT ID FROM $tableUtilisateursNouveauNom);";
+	try {
+		$bdWordpress->exec($req4a);
+		echo "Prénoms WP insérés (meta)" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req4a]\n";
+	}
+	$req4b = "INSERT INTO $tableMetadonneesUtilisateurs (user_id, meta_key, meta_value) "
+		. "SELECT ID, 'last_name', last_name "
+		. "FROM $tableUtilisateurs "
+		. "WHERE ID NOT IN(SELECT DISTINCT user_id FROM $tableMetadonneesUtilisateurs WHERE meta_key = 'last_name') "
+		. "AND ID NOT IN (SELECT ID FROM $tableUtilisateursNouveauNom);";
+	try {
+		$bdWordpress->exec($req4b);
+		echo "Noms WP insérés (meta)" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req4b]\n";
+	}
+	$req4c = "INSERT INTO $tableMetadonneesUtilisateurs (user_id, meta_key, meta_value) "
+		. "SELECT ID, 'nickname', display_name "
+		. "FROM $tableUtilisateurs "
+		. "WHERE ID NOT IN(SELECT DISTINCT user_id FROM $tableMetadonneesUtilisateurs WHERE meta_key = 'nickname') "
+		. "AND ID NOT IN (SELECT ID FROM $tableUtilisateursNouveauNom);";
+	try {
+		$bdWordpress->exec($req4c);
+		echo "Surnoms WP insérés (meta)" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req4c]\n";
+	}
+
+	// insertion d'une métadonnée "last_activity" dans la table
+	// {prefixewp}_bp_activity
 	$req5 = "INSERT INTO $tableBPActivite (user_id, component, type, action, content, primary_link, item_id, secondary_item_id, date_recorded, hide_sitewide, mptt_left, mptt_right, is_spam)"
 		. "SELECT ID, 'members', 'last_activity', '', '','', 0, NULL, NOW(), 0, 0, 0, 0 "
 		. "FROM $tableUtilisateurs "
