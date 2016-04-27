@@ -765,7 +765,7 @@ function migration_utilisateurs($argc, $argv) {
 		$req2 = "CREATE VIEW $tableUtilisateurs AS "
 			. "SELECT * FROM $tableUtilisateursNouveauNom "
 			. "UNION "
-			. "SELECT U_ID as ID, LOWER(U_MAIL) as user_login, U_PASSWD as user_pass, '' as user_nicename, U_MAIL as user_email, '' as user_url, U_DATE as user_registered, '' as user_activation_key, 0 as user_status, CONCAT(U_SURNAME, ' ', U_NAME) as display_name "
+			. "SELECT U_ID as ID, LOWER(U_MAIL) as user_login, U_PASSWD as user_pass, REPLACE(LCASE(SUBSTRING(U_MAIL, 1, LOCATE('@', U_MAIL) - 1)),'.','-') as user_nicename, U_MAIL as user_email, '' as user_url, U_DATE as user_registered, '' as user_activation_key, 0 as user_status, CONCAT(U_SURNAME, ' ', U_NAME) as display_name "
 			. "FROM $tableAnnuaire WHERE U_PASSWD != '';";
 		try {
 			$bdWordpress->exec($req2);
