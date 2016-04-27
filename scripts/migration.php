@@ -2,7 +2,7 @@
 
 require_once "config.php";
 
-$actions = array("tout", "documents", "projets", "inscrits", "listes", "listes-permissions", "config-porte-docs", "utilisateurs", "wikis");
+$actions = array("nettoyage", "tout", "documents", "projets", "inscrits", "listes", "listes-permissions", "config-porte-docs", "utilisateurs", "wikis");
 
 function usage() {
 	global $argv;
@@ -57,26 +57,73 @@ switch($action) {
 	case "wikis":
 		migration_wikis($argc, $argv);
 		break;
-	case "remettoutcommeavant":
-		remet_tout_comme_avant($argc, $argv);
+	case "nettoyage":
+		nettoyage($argc, $argv);
 		break;
 	default:
 		throw new Exception('une action déclarée dans $actions devrait avoir un "case" correspondant dans le "switch"');
 }
 
 /**
- * Remet tout comme c'était avant (oui enfin en gros, quoi) : vide la table des
+ * Remet tout comme c'était avant, sauf les documents : vide la table des
  * projets, la table des inscrits, les métadonnées afférentes, et la config des
  * outils Tela Botanica
  */
-/*function remet_tout_comme_avant($argc, $argv) {
+function nettoyage($argc, $argv) {
 	global $bdProjet;
 	global $bdWordpress;
 	global $prefixe_tables_wp;
 
 	$tableGroupes = $prefixe_tables_wp . 'bp_groups';
 	$tableGroupesMeta = $prefixe_tables_wp . 'bp_groups_groupmeta';
-}*/
+	$tableMetadonneesUtilisateurs = $prefixe_tables_wp . 'usermeta';
+	$tableMembres = $prefixe_tables_wp . 'bp_groups_members';
+	$tableReglages = $prefixe_tables_wp . 'tb_outils_reglages';
+	$tableBPActivite = $prefixe_tables_wp . "bp_activity";
+
+	$req = "DELETE FROM $tableGroupes;";
+	try {
+		$bdWordpress->exec($req);
+		echo "Groupes supprimés" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req]" . PHP_EOL;
+	}
+	$req = "DELETE FROM $tableGroupesMeta;";
+	try {
+		$bdWordpress->exec($req);
+		echo "Métadonnées des groupes supprimées" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req]" . PHP_EOL;
+	}
+	$req = "DELETE FROM $tableMetadonneesUtilisateurs WHERE user_id > 1;";
+	try {
+		$bdWordpress->exec($req);
+		echo "Métadonnées des utilisateurs supprimées" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req]" . PHP_EOL;
+	}
+	$req = "DELETE FROM $tableMembres WHERE user_id > 1;";
+	try {
+		$bdWordpress->exec($req);
+		echo "Membres supprimés" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req]" . PHP_EOL;
+	}
+	$req = "DELETE FROM $tableReglages;";
+	try {
+		$bdWordpress->exec($req);
+		echo "Réglages des outils supprimés" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req]" . PHP_EOL;
+	}
+	$req = "DELETE FROM $tableBPActivite WHERE user_id > 1;";
+	try {
+		$bdWordpress->exec($req);
+		echo "Activité des membres supprimée" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req]" . PHP_EOL;
+	}
+}
 
 /**
  * Copie tous les documents (fichiers) des anciens projets vers Cumulus
@@ -342,7 +389,7 @@ function migration_projets($argc, $argv) {
 	$tableGroupesMeta = $prefixe_tables_wp . 'bp_groups_groupmeta';
 	$cpt = 0;
 	foreach ($projets as $id => $projet) {
-		$nom = $projet['p_titre'];
+		$nom = html_entity_decode($projet['p_titre']);
 		if (! preg_match('//u', $nom)) {
 			$nom = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $nom);
 		}
@@ -352,12 +399,12 @@ function migration_projets($argc, $argv) {
 			$slug = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $slug);
 		}
 		$slug = limacifier($slug);
-		$description = $projet['p_description'];
+		$description = html_entity_decode($projet['p_description']);
 		if (! preg_match('//u', $description)) {
 			$description = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $description);
 		}
 		$description = dqq($description);
-		$resume = $projet['p_resume'];
+		$resume = html_entity_decode($projet['p_resume']);
 		if (! preg_match('//u', $resume)) {
 			$resume = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $resume);
 		}
