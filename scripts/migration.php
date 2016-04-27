@@ -88,6 +88,8 @@ function nettoyage($argc, $argv) {
 	$tableMembres = $prefixe_tables_wp . 'bp_groups_members';
 	$tableReglages = $prefixe_tables_wp . 'tb_outils_reglages';
 	$tableBPActivite = $prefixe_tables_wp . "bp_activity";
+	$tableUtilisateurs = $prefixe_tables_wp . "users";
+	$tableUtilisateursNouveauNom = $prefixe_tables_wp . "users_original";
 
 	$req = "DELETE FROM $tableGroupes;";
 	try {
@@ -128,6 +130,20 @@ function nettoyage($argc, $argv) {
 	try {
 		$bdWordpress->exec($req);
 		echo "Activité des membres supprimée" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req]" . PHP_EOL;
+	}
+	$req = "DROP VIEW $tableUtilisateurs;";
+	try {
+		$bdWordpress->exec($req);
+		echo "Vue utilisateurs supprimée" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req]" . PHP_EOL;
+	}
+	$req = "RENAME TABLE $tableUtilisateursNouveauNom TO $tableUtilisateurs;";
+	try {
+		$bdWordpress->exec($req);
+		echo "Table utilisateurs d'origine restaurée" . PHP_EOL;
 	} catch(Exception $e) {
 		echo "-- ECHEC REQUÊTE: [$req]" . PHP_EOL;
 	}
