@@ -79,7 +79,7 @@ class TB_Outil extends BP_Group_Extension {
 	 * projet en cours; concernant la colonne "config" (JSON libre), mélange les
 	 * deux en donnant la priorité à la config du projet en cours et place le
 	 * tout dans $this->config;
-	 * 
+	 *
 	 * Si aucune configuration locale pour le projet en cours n'existe au moment
 	 * du chargement, un tuple sera écrit dans la table _tb_outils_reglages
 	 */
@@ -99,7 +99,7 @@ class TB_Outil extends BP_Group_Extension {
 
 		/* 1) Lecture de la table "wp_tb_outils" (config pour tous les projets) */
 		$requete = "
-			SELECT * 
+			SELECT *
 			FROM {$wpdb->prefix}tb_outils
 			WHERE id_outil='" . $this->slug . "'
 		";
@@ -116,7 +116,7 @@ class TB_Outil extends BP_Group_Extension {
 
 		/* 2) Lecture de la table "wp_tb_outils_reglages" (config pour le projet en cours) */
 		$requete = "
-			SELECT * 
+			SELECT *
 			FROM {$wpdb->prefix}tb_outils_reglages
 			WHERE id_projet='" . $id_projet . "'
 			AND id_outil='" . $this->slug . "'
