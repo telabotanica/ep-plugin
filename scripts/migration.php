@@ -240,6 +240,7 @@ function migration_documents($argc, $argv) {
 		$nouveauNomFichierUtf = $titreUtf . substr($nomFichier, strrpos($nomFichier, '.'));
 
 		$_path = $prefixe_stockage_projets_cumulus . '/' . $f['p_id'] . $cheminCumulus;
+		$_path = rtrim($_path, '/');
 		$_storage_path = $prefixe_bd . rtrim($cheminCumulus, '/') . '/' . $nouveauNomFichier;
 
 		// calcul de la clef
