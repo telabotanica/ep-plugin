@@ -35,8 +35,11 @@ function description_complete() {
 	add_filter( 'groups_custom_group_fields_editable', 'description_complete_formulaire' );
 	add_action( 'groups_group_details_edited', 'description_complete_enregistrement' );
 	add_action( 'groups_created_group',  'description_complete_enregistrement' );
+
+	// Affichage de la description complète surla page d'accueil
+	function affichage_description() {
+		echo '<div id="description-complete">' . nl2br(get_value('description-complete')) . '</div>';
+	}
+	// hook du template "groups/single/front"
+	add_action('bp_group_front_content' , 'affichage_description');
 }
-
-
-
-?>
