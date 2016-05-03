@@ -451,7 +451,6 @@ add_filter( 'bp_get_group_description', 'gtags_show_tags_in_header' );
 // show tags for an individual group with links
 function gtags_make_tags_for_group() {
 	global $bp, $wpdb;
-	global $pageProjets;
 	
 	$group_tags = gtags_get_group_tags();
 	$items = explode( ",", $group_tags );
@@ -459,7 +458,7 @@ function gtags_make_tags_for_group() {
 	foreach( $items as $item ) {
 		$item = trim( strtolower( $item ) );
 		if ($item=='') continue;
-		$link = $bp->root_domain . '/' . $pageProjets . '/tag/' . urlencode( $item );
+		$link = $bp->root_domain . '/projets/tag/' . urlencode( $item );
 		$output .= ' <a class="etiquette highlight" href="'.$link.'" title="Voir tous les projets ayant pour mots-clés '.$item.'">#'.$item.'</a> ';
 	}
 
