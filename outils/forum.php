@@ -82,6 +82,7 @@ class Forum extends TB_Outil {
 
 		// code de l'appli Forum
 		wp_enqueue_script('AuthAdapter', $this->urlOutil . 'js/AuthAdapter.js');
+		wp_enqueue_script('AuthAdapterTB', $this->urlOutil . 'js/auth/AuthAdapterTB.js');
 		wp_enqueue_script('EzmlmForum', $this->urlOutil . 'js/EzmlmForum.js');
 		wp_enqueue_script('ViewThread', $this->urlOutil . 'js/ViewThread.js');
 		wp_enqueue_script('ViewList', $this->urlOutil . 'js/ViewList.js');
