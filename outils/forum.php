@@ -2,7 +2,7 @@
 
 class Forum extends TB_Outil {
 
-	function forum()
+	public function __construct()
 	{
 		// identifiant de l'outil et nom par défaut
 		$this->slug = 'forum';
@@ -92,13 +92,7 @@ class Forum extends TB_Outil {
 	 */
 	function display($group_id = null)
 	{
-		if ($this->prive) {
-			// on ne devrait passer là que si les contrôles de sécurités précédents
-			// ont réussi, càd si on est dans un groupe auquel on a droit (soit
-			// le groupe est public, soit l'utilisateur en est membre)
-			echo "<h4>L'outil <?php echo $this->name ?> est réservé aux membres du groupe</h4>";
-			return;
-		}
+		$this->appliquerCaracterePrive();
 
 		// paramètres automatiques :
 		// - domaine racine
