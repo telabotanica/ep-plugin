@@ -18,12 +18,25 @@ class TB_Outil extends BP_Group_Extension {
 	/** si true, l'outil ne sera disponible que pour les membres du projet */
 	protected $prive;
 
+	/** id du groupe en cours */
+	protected $groupId;
+
+	/** id de l'utilisateur en cours */
+	protected $userId;
+
 	/**
 	 * Initialisation post-constructeur : définit les chemins, charge les scripts,
 	 * styles etc.
 	 */
 	public function initialisation()
 	{
+		// accès à l'objet magique BuddyPress
+		$bp = buddypress();
+		// copie de ce qui nous intéresse pour éviter d'y accédér cracratement
+		// et hétérogènement par la suite
+		$this->groupId = bp_get_current_group_id();
+		$this->userId = $bp->loggedin_user->id;
+
 		// recherche d'une config générale dans la base
 		$this->chargerConfig();
 
@@ -244,5 +257,20 @@ class TB_Outil extends BP_Group_Extension {
 	 */
 	public function desinstallation() {
 		// rien par défaut
+	}
+
+	/**
+	 * Si l'outil est privé, vérifie que l'utilisateur en cours est membre du
+	 * projet : si oui, ne fait rien; si non, affiche un message et interrompt
+	 * le chargement
+	 */
+	protected function appliquerCaracterePrive() {
+		if ($this->prive) {
+			$estMembre = groups_is_user_member($this->userId, $this->groupId);
+			if (! $estMembre) {
+				echo "<h4>L'outil <?php echo $this->name ?> est réservé aux membres du projet</h4>";
+				exit;
+			}
+		}
 	}
 }
