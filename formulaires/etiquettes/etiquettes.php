@@ -23,7 +23,14 @@ add_action( 'bp_setup_globals', 'bp_gtags_setup_globals' );
 function bp_gtags_setup_nav() {
 	global $bp;
 	global $pageProjets;
-	bp_core_new_subnav_item( array( 'name' => '&nbsp;', 'slug' => $bp->gtags->slug, 'parent_slug' => $pageProjets, 'parent_url' => $bp->root_domain .'/'. $pageProjets . '/', 'screen_function' => 'gtags_display_hook', 'position' => -1 ) );
+	bp_core_new_subnav_item(array(
+		'name' => '&nbsp;',
+		'slug' => $bp->gtags->slug,
+		'parent_slug' => BP_GROUPS_SLUG, // si on remplace par $pageProjets, ça marche plus :-/ WTF ?
+		'parent_url' => $bp->root_domain .'/'. $pageProjets . '/',
+		'screen_function' => 'gtags_display_hook',
+		'position' => -1 )
+	);
 }
 add_action( 'bp_setup_nav', 'bp_gtags_setup_nav', 1000 );
 
