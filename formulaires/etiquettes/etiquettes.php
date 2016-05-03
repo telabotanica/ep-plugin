@@ -336,7 +336,7 @@ function custom_gtags_show_tags_in_add_form() {
 
 	$i = 0;
 	foreach ( $tags as $tag ) {
-		echo '<a class="gtags-add highlight etiquette pointer" href="'.$bp->root_domain . '/' . $pageProjets . '/tag/'.$tag->name.'" title="Ajouter le mot-clé ' . $tag->name .'">' . $tag->name .'</a>';
+		echo '<a class="gtags-add highlight etiquette pointer" href="'.$bp->root_domain . '/projets/tag/'.$tag->name.'" title="Ajouter le mot-clé ' . $tag->name .'">' . $tag->name .'</a>';
 		++$i;
 		if ( $i >= $popular_tag_limit ) break;
 	}
