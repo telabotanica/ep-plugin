@@ -173,8 +173,17 @@ class Porte_Documents extends TB_Outil {
 		$this->appliquerCaracterePrive();
 		$id_projet = bp_get_current_group_id();
 
-		$this->config['path'] = 'http://betatela.dev/wordpress/wp-content/plugins/ep-plugin/outils/porte-documents/';
-		$this->config['path2'] = '_projets/' . $id_projet;
+		if ($this->prive) {
+			// on ne devrait passer là que si les contrôles de sécurités précédents
+			// ont réussi, càd si on est dans un groupe auquel on a droit (soit
+			// le groupe est public, soit l'utilisateur en est membre)
+			echo "<h4>L'outil <?php echo $this->name ?> est réservé aux membres du groupe</h4>";
+			return;
+		}
+
+		$this->config['ressourcesPath'] = $this->getServerRoot() . $this->getDataBaseUri() . '/';
+		// $this->config['filesServiceUrl'] = 'http://api.tela-botanica.org/service:cumulus:doc';
+		$this->config['projectFilesRootPath'] = '/_projets/' . $id_projet;
 		// var_dump($this->config);
 
 		// paramètres automatiques :
