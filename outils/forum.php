@@ -30,7 +30,7 @@ class Forum extends TB_Outil {
 			"adapters" => array(
 				"AuthAdapterTB" => array (
 					"annuaireURL" => "https://www.tela-botanica.org/service:annuaire:auth",
-					"headerName" => "Authorization"
+					"headerName" => "Auth" // Authorization est refusé par Sequoia
 				)
 			)
 		);
