@@ -204,7 +204,7 @@ class TB_Outil extends BP_Group_Extension {
 		$pageGroupes = $this->getBPPageSlug("groups");
 		$dossierRacine = $this->getDossierRacine();
 
-		return '/' . $dossierRacine . '/' . $pageGroupes . '/' . bp_get_current_group_slug() . '/' . $this->slug;
+		return '/' . (! empty($dossierRacine) ? $dossierRacine . '/' : '') . '/' . $pageGroupes . '/' . bp_get_current_group_slug() . '/' . $this->slug;
 	}
 
 	/**
@@ -214,7 +214,7 @@ class TB_Outil extends BP_Group_Extension {
 	protected function getDataBaseUri()
 	{
 		$dossierRacine = $this->getDossierRacine();
-		return '/' . $dossierRacine . '/wp-content/plugins/tela-botanica/outils/' . $this->slug;
+		return '/' . (! empty($dossierRacine) ? $dossierRacine . '/' : '') . 'wp-content/plugins/tela-botanica/outils/' . $this->slug;
 	}
 
 	/**
