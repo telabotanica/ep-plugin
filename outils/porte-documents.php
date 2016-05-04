@@ -2,7 +2,8 @@
 
 class Porte_Documents extends TB_Outil {
 
-	function porte_documents() {
+	public function __construct()
+	{
 		// identifiant de l'outil et nom par défaut
 		$this->slug = 'porte-documents';
 		$this->name = 'Porte-documents';
@@ -169,15 +170,8 @@ class Porte_Documents extends TB_Outil {
 
 	/* Vue onglet principal */
 	function display() {
+		$this->appliquerCaracterePrive();
 		$id_projet = bp_get_current_group_id();
-
-		if ($this->prive) {
-			// on ne devrait passer là que si les contrôles de sécurités précédents
-			// ont réussi, càd si on est dans un groupe auquel on a droit (soit
-			// le groupe est public, soit l'utilisateur en est membre)
-			echo "<h4>L'outil <?php echo $this->name ?> est réservé aux membres du groupe</h4>";
-			return;
-		}
 
 		$this->config['path'] = 'http://betatela.dev/wordpress/wp-content/plugins/ep-plugin/outils/porte-documents/';
 		$this->config['path2'] = '_projets/' . $id_projet;
