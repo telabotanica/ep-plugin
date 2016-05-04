@@ -78,7 +78,6 @@ switch($action) {
  * outils Tela Botanica
  */
 function nettoyage($argc, $argv) {
-	global $bdProjet;
 	global $bdWordpress;
 	global $prefixe_tables_wp;
 
@@ -871,6 +870,32 @@ function migration_utilisateurs($argc, $argv) {
 		echo "Activité BP insérée" . PHP_EOL;
 	} catch(Exception $e) {
 		echo "-- ECHEC REQUÊTE: [$req5]\n";
+	}
+
+	// insertion des valeurs "{wp_prefix}_capabilities" et  "{wp_prefix}_user_level"
+	$cleCapabilities = $prefixe_tables_wp . "capabilities";
+	$req6a = "INSERT INTO $tableMetadonneesUtilisateurs (user_id, meta_key, meta_value) "
+		. "SELECT ID, '$cleCapabilities', '{a:1:{s:11:\"contributor\";b:1;}' " // "contributeur"
+		. "FROM $tableUtilisateurs "
+		. "WHERE ID NOT IN(SELECT DISTINCT user_id FROM $tableMetadonneesUtilisateurs WHERE meta_key = '$cleCapabilities') "
+		. "AND ID NOT IN (SELECT ID FROM $tableUtilisateursNouveauNom);";
+	try {
+		$bdWordpress->exec($req6a);
+		echo "Capabilities WP insérées (meta)" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req6a]\n";
+	}
+	$cleUserLevel = $prefixe_tables_wp . "user_level";
+	$req6b = "INSERT INTO $tableMetadonneesUtilisateurs (user_id, meta_key, meta_value) "
+		. "SELECT ID, '$cleUserLevel', '1' " // user level 1 = "contributeur"
+		. "FROM $tableUtilisateurs "
+		. "WHERE ID NOT IN(SELECT DISTINCT user_id FROM $tableMetadonneesUtilisateurs WHERE meta_key = '$cleUserLevel') "
+		. "AND ID NOT IN (SELECT ID FROM $tableUtilisateursNouveauNom);";
+	try {
+		$bdWordpress->exec($req6b);
+		echo "User levels WP insérés (meta)" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req6b]\n";
 	}
 }
 
