@@ -208,7 +208,7 @@ function migration_documents($argc, $argv) {
 		$prefixe_disque = $prefixe_stockage_cumulus . $prefixe_stockage_projets_cumulus . '/' . $f['p_id'];
 
 		// merdier de partout avec les encodages pas cohérents etc.
-		$titre = $f['pd_nom'];
+		$titre = trim($f['pd_nom']);
 		$description = $f['pd_description'];
 		$nomFichier = $f['pd_lien'];
 		$nomFichierUtf = $nomFichier;
