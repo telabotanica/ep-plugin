@@ -243,7 +243,7 @@ function migration_documents($argc, $argv) {
 		$_storage_path = $prefixe_bd . rtrim($cheminCumulus, '/') . '/' . $nouveauNomFichier;
 
 		// calcul de la clef
-		$clef = sha1($cheminCumulus . $f['pd_lien']);
+		$clef = sha1($_path . $nouveauNomFichier);
 		//echo "=> clef: [$clef]\n";
 		// au kazoo que /i
 		if ($clef == "") {
