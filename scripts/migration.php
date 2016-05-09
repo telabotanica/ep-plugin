@@ -341,7 +341,7 @@ function migration_documents($argc, $argv) {
 function migration_proprietaires_documents($argc, $argv) {
 	global $bdCumulus;
 
-	$req = "UPDATE cumumus_files f LEFT JOIN tela_prod_v4.annuaire_tela a ON a.U_MAIL = f.owner SET f.owner = a.U_ID;";
+	$req = "UPDATE cumulus_files f LEFT JOIN tela_prod_v4.annuaire_tela a ON a.U_MAIL = f.owner SET f.owner = a.U_ID;";
 	try {
 		$bdCumulus->exec($req);
 	} catch (Exception $e) {
