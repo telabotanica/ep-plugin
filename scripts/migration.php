@@ -2,7 +2,7 @@
 
 require_once "config.php";
 
-$actions = array("nettoyage", "tout_sauf_docs", "documents", "projets", "inscrits", "listes", "listes-permissions", "config-porte-docs", "utilisateurs", "wikis");
+$actions = array("nettoyage", "tout_sauf_docs", "documents", "documents-proprietaires", "projets", "inscrits", "listes", "listes-permissions", "config-porte-docs", "utilisateurs", "wikis");
 
 function usage() {
 	global $argv;
@@ -35,6 +35,9 @@ $bdWordpress->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 switch($action) {
 	case "documents":
 		migration_documents($argc, $argv);
+		break;
+	case "documents-proprietaires":
+		migration_proprietaires_documents($argc, $argv);
 		break;
 	case "projets":
 		migration_projets($argc, $argv);
@@ -328,6 +331,21 @@ function migration_documents($argc, $argv) {
 		} else {
 			echo "-- FICHIER SOURCE INEXISTANT: [" . $fc['id'] . "] [" . $fc['ancien_chemin'] . "]\n";
 		}
+	}
+}
+
+/**
+ * Convertit les adresses email des propriétaires ("owner") des documents
+ * Cumulus importés en numéros d'utilisateurs dans l'annuaire TB
+ */
+function migration_proprietaires_documents($argc, $argv) {
+	global $bdCumulus;
+
+	$req = "UPDATE cumumus_files f LEFT JOIN tela_prod_v4.annuaire_tela a ON a.U_MAIL = f.owner SET f.owner = a.U_ID;";
+	try {
+		$bdCumulus->exec($req);
+	} catch (Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req]" . PHP_EOL;
 	}
 }
 
