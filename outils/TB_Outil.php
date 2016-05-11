@@ -204,7 +204,15 @@ class TB_Outil extends BP_Group_Extension {
 		$pageGroupes = $this->getBPPageSlug("groups");
 		$dossierRacine = $this->getDossierRacine();
 
-		return '/' . (! empty($dossierRacine) ? $dossierRacine . '/' : '') . '/' . $pageGroupes . '/' . bp_get_current_group_slug() . '/' . $this->slug;
+        $baseUri = '/';
+        if (! empty($dossierRacine)) {
+            $baseUri .= $dossierRacine . '/';
+        }
+        $baseUri .= $pageGroupes . '/';
+        $baseUri .= bp_get_current_group_slug() . '/';
+        $baseUri .= $this->slug;
+
+        return $baseUri;
 	}
 
 	/**
