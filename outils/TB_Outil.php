@@ -267,7 +267,7 @@ class TB_Outil extends BP_Group_Extension {
 	protected function appliquerCaracterePrive() {
 		if ($this->prive) {
 			$estMembre = groups_is_user_member($this->userId, $this->groupId);
-			if (! $estMembre) {
+			if (! $estMembre && ! is_super_admin()) {
 				echo "<h4>L'outil <?php echo $this->name ?> est réservé aux membres du projet</h4>";
 				exit;
 			}
