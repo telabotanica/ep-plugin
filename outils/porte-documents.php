@@ -90,7 +90,7 @@ class Porte_Documents extends TB_Outil {
 		wp_enqueue_script('ngtoast', $this->urlOutil . 'bower_components/ngtoast/dist/ngToast.js');
 
 
-		wp_enqueue_style('html5-boilerplate-normalize', $this->urlOutil . 'bower_components/html5-boilerplate/dist/css/normalize.css');
+		// wp_enqueue_style('html5-boilerplate-normalize', $this->urlOutil . 'bower_components/html5-boilerplate/dist/css/normalize.css');
 		wp_enqueue_style('html5-boilerplate', $this->urlOutil . 'bower_components/html5-boilerplate/dist/css/main.css');
 		wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bower_components/bootstrap/dist/css/bootstrap.css');
 		wp_enqueue_style('ngtoast-css', $this->urlOutil . 'bower_components/ngtoast/dist/ngToast.min.css');
@@ -184,6 +184,9 @@ class Porte_Documents extends TB_Outil {
 		$this->config['ressourcesPath'] = $this->getServerRoot() . $this->getDataBaseUri() . '/';
 		// $this->config['filesServiceUrl'] = 'http://api.tela-botanica.org/service:cumulus:doc';
 		$this->config['projectFilesRootPath'] = '/_projets/' . $id_projet;
+		$this->config['group'] = 'projet:' . $id_projet;
+		$this->config['authUrl'] = 'https://annuaire.dev/service:annuaire:auth';
+		$this->config['tokenUrl'] = 'https://annuaire.dev/service:annuaire:auth/identite';
 		// var_dump($this->config);
 
 		// paramètres automatiques :
