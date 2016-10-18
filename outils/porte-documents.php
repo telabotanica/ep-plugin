@@ -2,7 +2,7 @@
 
 class Porte_Documents extends TB_Outil {
 
-	function porte_documents() {
+	public function __construct() {
 	
 		global $wpdb, $bp;
 	
@@ -15,30 +15,44 @@ class Porte_Documents extends TB_Outil {
 		$this->initialisation();
 	}
 
+	// @TODO maintenir en cohésion avec le fichier main-config.js de cumulus-front
+	public function getConfigDefautOutil()
+	{
+		$configDefaut = array(
+			"ver" => '0.1',
+			"filesServiceUrl" => 'http://api.tela-botanica.org/service:cumulus:doc',
+			"userInfoByIdUrl" => 'https://www.tela-botanica.org/service:annuaire:utilisateur/infosParIds/',
+			"abstractionPath" => '/mon',
+			"ressourcesPath" => '', // in including mode, represents the path of application root path
+			"group" => null,
+			"authUrl" => 'https://www.tela-botanica.org/service:annuaire:auth',
+			"tokenUrl" => 'https://www.tela-botanica.org/service:annuaire:auth/identite'
+		);
+		return $configDefaut;
+	}
+
 	/**
 	 * Exécuté lors de l'installation du plugin TelaBotanica
-	 
-	public function installation() {
+	 */
+	public function installation()
+	{
 		global $wpdb;
 		$configDefaut = Porte_Documents::getConfigDefautOutil();
-
-		// l'id outil "forum" n'est pas tiré de $this->slug car la méthode d'install
+		// l'id outil "porte-documents" n'est pas tiré de $this->slug car la méthode d'install
 		// est appelée en contexte non-objet => mettre le slug dans un attribut statique ?
-		
-		add_option('tb_forum_config',json_encode($configDefaut));
+		add_option('tb_porte-documents_config',json_encode($configDefaut));
 	}
-	 */
 
 	/**
 	 * Exécuté lors de la désinstallation du plugin TelaBotanica
 	 */
-	public function desinstallation() {
-		
+	public function desinstallation()
+	{
 	}
-	
-	
+
 	/* Vue onglet admin */
-	function edit_screen() {
+	function edit_screen($group_id = null)
+	{
 		if ( !bp_is_group_admin_screen( $this->slug ) )
 		return false;
 		
@@ -77,7 +91,7 @@ class Porte_Documents extends TB_Outil {
 		do_action( 'bp_after_group_settings_admin' );
 	}
 
-	function edit_screen_save() {
+	function edit_screen_save($group_id = null) {
 		global $wpdb, $bp;
 		$id_projet = bp_get_current_group_id();
 		if ( !isset( $_POST ) )	return false;
@@ -109,7 +123,7 @@ class Porte_Documents extends TB_Outil {
 	
 
 	/* Vue onglet principal */
-	function display() {
+	function display($group_id = null) {
 		$id_projet = bp_get_current_group_id();
 		if ( (!$this->prive) || ($this->prive && bp_get_total_group_count_for_user( bp_loggedin_user_id() ) ) ) {
 		?>
@@ -135,6 +149,6 @@ class Porte_Documents extends TB_Outil {
 	
 }
 
-bp_register_group_extension( 'Porte_Documents' );
+bp_register_group_extension('Porte_Documents');
 
 ?>

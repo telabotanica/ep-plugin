@@ -1,4 +1,9 @@
 <?php
+/**
+ * Ajout d'une page d'administration au tableau de bord Wordpress.
+ * Permet à l'administrateur de définir la configuration globale des outils
+ * (chemins des services, des applications, etc.)
+ */
 
 // Hook pour le menu Admin
 add_action('admin_menu', 'tb_ajout_pages');
@@ -6,32 +11,12 @@ add_action('admin_menu', 'tb_ajout_pages');
 // Actions du hook
 function tb_ajout_pages() {
 
-    /* Ajoute un sous-menu 'Tela Botanica' dans 'Réglages'
-    add_options_page(
-    	'Tela Botanica', 
-    	'Tela Botanica', 
-    	'manage_options', 
-    	'tb-reglages', 
-    	'tb_ssmenu_reglages'
-    );
-
-    // Ajoute un sous-menu 'Tela Botanica' dans 'Outils'
-    add_management_page(
-    	'Tela Botanica', 
-    	'Tela Botanica', 
-    	'manage_options', 
-    	'tb-outils', 
-    	'tb_ssmenu_outils'
-    );
-    */
-
-    // Ajoute un menu 'Tela Botanica'
+    // Ajoute un menu 'Tela Botanica' au tableau de bord Wordpress
     add_menu_page(
 		'Espace Projets', 
 		'Espace Projets', 
 		'manage_options', 
-		'telabotanica', 
-		'tb_menu_telabotanica' 
+		'telabotanica'
 	);
 
     // Ajoute un sous-menu 'Présentation' dans 'Tela Botanica'
@@ -40,7 +25,7 @@ function tb_ajout_pages() {
     	'Présentation',
     	'Présentation', 
     	'manage_options', 
-    	'telabotanica', 	// On donne le même 'menu_slug' que celui du menu pour écraser le sous-menu automatique
+    	'telabotanica', // On donne le même 'menu_slug' que celui du menu pour écraser le sous-menu automatique
     	'tb_ssmenu_home'
     );
 
@@ -55,36 +40,26 @@ function tb_ajout_pages() {
     );
 }
 
-// tb_ssmenu_reglages() affiche le contenu de la page dans un sous-menu de Réglages
-function tb_settings_page() {
-    echo "<h2>Menu dans Réglages</h2>";
-}
-
-// tb_ssmenu_outils() affiche le contenu de la page du sous-menu de 'Outils'
-function tb_tools_page() {
-    echo "<h2>Menu dans Outils</h2>";
-}
-
-/* Inutile car remplacé par le sous-menu 'Home'
- * tb_tools_page() affiche le contenu de la page du menu 'Tela Botanica'
-function tb_menu_telabotanica() {
-    echo "<h2>Menu Tela Botanica</h2>";
-}
-*/
-
-// tb_ssmenu_home() affiche le contenu de la page du sous-menu 'Home' de 'Tela Botanica'
+/**
+ * Page de présentation et documentation du plugin
+ */
 function tb_ssmenu_home() {
 	?>
 	<div class="wrap">
 	
 		<h2>Plugin Espace projets</h2>
-	
+		<br>
+		@TODO Remplir cette page pour expliquer comment marche la configuration
+		<br>
+		Cliquer sur "configuration" dans le menu pour aller aux réglages des outils.
 	</div>
 	<?php
 }
 
-// tb_ssmenu_configuration() affiche le contenu de la page du sous-menu 'Configuration' de 'Tela Botanica'
-// of the custom Test Toplevel menu
+/**
+ * Affiche le sous-menu 'Configuration'; lit et enregistre les réglages dans
+ * la table "options" de WP (standard)
+ */
 function tb_ssmenu_configuration() {
     
     /* Gestion des onglets */
@@ -95,7 +70,7 @@ function tb_ssmenu_configuration() {
 		$onglet_actif = 'porte-documents';
 	}
 	?> 
-	
+
 	<!-- Vue du sous-menu 'Configuration' -->
 	<div class="wrap">
 	
@@ -268,4 +243,4 @@ function tb_ssmenu_configuration() {
 			
 
 	</div>
-	<?php }?>
+<?php }?>
