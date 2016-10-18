@@ -12,28 +12,10 @@ class Forum extends TB_Outil {
 		$this->initialisation();
 	}
 
-	// @TODO maintenir en cohésion avec le fichier config.defaut.json d'ezmlm-forum
 	public function getConfigDefautOutil()
 	{
-		$configDefaut = array(
-			//"domainRoot" => "http://localhost", // ne pas mentionner, autodétecté
-			//"baseUri" => "/ezmlm-forum", // ne pas mentionner, autodétecté
-			"title" => "", // laisser vide pour que WP/BP gèrent le titre
-			"hrefBuildMode" => "REST",
-			"defaultPage" => "view-list",
-			"displayListTitle" => true,
-			"ezmlm-php" => array(
-				"rootUri" => "http://vpopmail.tela-botanica.org/ezmlm-php-ng",
-				"list" => "" // si vide, cherchera une liste ayant le nom du projet
-			),
-			"authAdapter" => "AuthAdapterTB",
-			"adapters" => array(
-				"AuthAdapterTB" => array (
-					"annuaireURL" => "https://www.tela-botanica.org/service:annuaire:auth",
-					"headerName" => "Auth" // Authorization est refusé par Sequoia
-				)
-			)
-		);
+		$cheminConfig = __DIR__ . "/forum_config-defaut.json";
+		$configDefaut = json_decode(file_get_contents($cheminConfig), true);
 		return $configDefaut;
 	}
 

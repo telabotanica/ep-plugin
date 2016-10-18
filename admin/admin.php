@@ -44,16 +44,7 @@ function tb_ajout_pages() {
  * Page de présentation et documentation du plugin
  */
 function tb_ssmenu_home() {
-	?>
-	<div class="wrap">
-	
-		<h2>Plugin Espace projets</h2>
-		<br>
-		@TODO Remplir cette page pour expliquer comment marche la configuration
-		<br>
-		Cliquer sur "configuration" dans le menu pour aller aux réglages des outils.
-	</div>
-	<?php
+	include "admin_presentation.php";
 }
 
 /**
@@ -65,15 +56,14 @@ function tb_ssmenu_configuration() {
     /* Gestion des onglets */
 	if( isset( $_GET[ 'onglet' ] ) ) {  
 		$onglet_actif = $_GET[ 'onglet' ];  
-	} 
-	else {
+	} else {
 		$onglet_actif = 'porte-documents';
 	}
-	?> 
+	?>
 
 	<!-- Vue du sous-menu 'Configuration' -->
 	<div class="wrap">
-	
+
 		<?php
 		if (!current_user_can('manage_options'))
 		{
@@ -109,16 +99,13 @@ function tb_ssmenu_configuration() {
 			
 			if( isset($_POST[ $hidden_field_name_pd ]) && $_POST[ $hidden_field_name_pd ] == 'Y' ) {
 				$opt_val_pd = $_POST[ $data_field_name_pd ];
-				$configDefaut_pd = array(
-					"title" => "", // laisser vide pour que WP/BP gèrent le titre
-					"hrefBuildMode" => "REST",
-					"defaultPage" => "view-list",
-					"ezmlm-php" => array(
-						"rootUri" => $opt_val_pd,
-						"list" => "" // si vide, cherchera une liste ayant le nom du projet
-					)
-				);
-				update_option( $opt_name_pd, json_encode($configDefaut_pd) );
+				// config par défaut de l'outil
+				$cheminConfigDefautPd = __DIR__ . '/../outils/porte-documents_config-defaut.json';
+				$configDefautPd = json_decode(file_get_contents($cheminConfigDefautPd), true);
+				// injection des valeurs du formulaire
+				$configDefautPd['filesServiceUrl'] = $opt_val_pd;
+				// mise à jour de la BDD
+				update_option( $opt_name_pd, json_encode($configDefautPd) );
 			?>
 			
 			<!-- Confirmation de l'enregistrement -->
@@ -152,7 +139,7 @@ function tb_ssmenu_configuration() {
 					<!-- URL ezmlm-php -->
 					<div class="wrap">
 						<p>URL du porte-documents
-							<input type="text" name="<?php echo $data_field_name_pd; ?>" value="<?php echo $tab_json_pd['ezmlm-php']['rootUri']; ?>" />
+							<input type="text" name="<?php echo $data_field_name_pd; ?>" value="<?php echo $tab_json_pd['filesServiceUrl']; ?>" />
 						</p>	
 					</div>
 					
@@ -182,16 +169,13 @@ function tb_ssmenu_configuration() {
 			
 			if( isset($_POST[ $hidden_field_name_forum ]) && $_POST[ $hidden_field_name_forum ] == 'Y' ) {
 				$opt_val_forum = $_POST[ $data_field_name_forum ];
-				$configDefaut_forum = array(
-					"title" => "", // laisser vide pour que WP/BP gèrent le titre
-					"hrefBuildMode" => "REST",
-					"defaultPage" => "view-list",
-					"ezmlm-php" => array(
-						"rootUri" => $opt_val_forum,
-						"list" => "" // si vide, cherchera une liste ayant le nom du projet
-					)
-				);
-				update_option( $opt_name_forum, json_encode($configDefaut_forum) );
+				// config par défaut de l'outil
+				$cheminConfigDefautForum = __DIR__ . '/../outils/forum_config-defaut.json';
+				$configDefautForum = json_decode(file_get_contents($cheminConfigDefautForum), true);
+				// injection des valeurs du formulaire
+				$configDefautForum['ezmlm-php']['rootUri'] = $opt_val_forum;
+				// mise à jour de la BDD
+				update_option( $opt_name_forum, json_encode($configDefautForum) );
 			?>
 			
 			<!-- Confirmation de l'enregistrement -->

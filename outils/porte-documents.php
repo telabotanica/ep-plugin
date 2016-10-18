@@ -13,18 +13,8 @@ class Porte_Documents extends TB_Outil {
 
 	protected function getConfigDefautOutil()
 	{
-		// @TODO maintenir en cohésion avec le fichier main-config.js de cumulus-front
-		$configDefaut = array(
-			"title" => "", // laisser vide pour que WP/BP gèrent le titre
-			"ver" => '0.1',
-			"filesServiceUrl" => 'http://api.tela-botanica.org/service:cumulus:doc',
-			"userInfoByIdUrl" => 'https://www.tela-botanica.org/service:annuaire:utilisateur/infosParIds/',
-			"abstractionPath" => '/mon',
-			"ressourcesPath" => '', // in including mode, represents the path of application root path
-			"group" => null,
-			"authUrl" => 'https://www.tela-botanica.org/service:annuaire:auth',
-			"tokenUrl" => 'https://www.tela-botanica.org/service:annuaire:auth/identite'
-		);
+		$cheminConfig = __DIR__ . "/porte-documents_config-defaut.json";
+		$configDefaut = json_decode(file_get_contents($cheminConfig), true);
 		return $configDefaut;
 	}
 

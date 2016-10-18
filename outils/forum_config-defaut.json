@@ -1,0 +1,18 @@
+{
+	"domainRoot": "http://localhost",
+	"title": "",
+	"hrefBuildMode": "REST",
+	"defaultPage": "view-list",
+	"displayListTitle": true,
+	"ezmlm-php": {
+		"rootUri": "http://vpopmail.tela-botanica.org/ezmlm-php-ng",
+		"list": ""
+	},
+	"authAdapter": "AuthAdapterTB",
+	"adapters": {
+		"AuthAdapterTB": {
+			"annuaireURL": "https://www.tela-botanica.org/service:annuaire:auth",
+			"headerName": "Auth"
+		}
+	}
+}
