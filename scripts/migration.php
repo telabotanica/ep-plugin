@@ -2,7 +2,7 @@
 
 require_once "config.php";
 
-$actions = array("nettoyage", "tout_sauf_docs", "documents", "projets", "inscrits", "listes", "listes-permissions", "config-porte-docs", "utilisateurs", "wikis");
+$actions = array("nettoyage", "tout_sauf_docs", "documents", "documents-proprietaires", "projets", "inscrits", "listes", "listes-permissions", "config-porte-docs", "utilisateurs", "wikis");
 
 function usage() {
 	global $argv;
@@ -35,6 +35,9 @@ $bdWordpress->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 switch($action) {
 	case "documents":
 		migration_documents($argc, $argv);
+		break;
+	case "documents-proprietaires":
+		migration_proprietaires_documents($argc, $argv);
 		break;
 	case "projets":
 		migration_projets($argc, $argv);
@@ -78,7 +81,6 @@ switch($action) {
  * outils Tela Botanica
  */
 function nettoyage($argc, $argv) {
-	global $bdProjet;
 	global $bdWordpress;
 	global $prefixe_tables_wp;
 
@@ -209,7 +211,7 @@ function migration_documents($argc, $argv) {
 		$prefixe_disque = $prefixe_stockage_cumulus . $prefixe_stockage_projets_cumulus . '/' . $f['p_id'];
 
 		// merdier de partout avec les encodages pas cohérents etc.
-		$titre = $f['pd_nom'];
+		$titre = trim($f['pd_nom']);
 		$description = $f['pd_description'];
 		$nomFichier = $f['pd_lien'];
 		$nomFichierUtf = $nomFichier;
@@ -240,10 +242,11 @@ function migration_documents($argc, $argv) {
 		$nouveauNomFichierUtf = $titreUtf . substr($nomFichier, strrpos($nomFichier, '.'));
 
 		$_path = $prefixe_stockage_projets_cumulus . '/' . $f['p_id'] . $cheminCumulus;
+		$_path = rtrim($_path, '/');
 		$_storage_path = $prefixe_bd . rtrim($cheminCumulus, '/') . '/' . $nouveauNomFichier;
 
 		// calcul de la clef
-		$clef = sha1($cheminCumulus . $f['pd_lien']);
+		$clef = sha1($_path . $nouveauNomFichier);
 		//echo "=> clef: [$clef]\n";
 		// au kazoo que /i
 		if ($clef == "") {
@@ -328,6 +331,21 @@ function migration_documents($argc, $argv) {
 		} else {
 			echo "-- FICHIER SOURCE INEXISTANT: [" . $fc['id'] . "] [" . $fc['ancien_chemin'] . "]\n";
 		}
+	}
+}
+
+/**
+ * Convertit les adresses email des propriétaires ("owner") des documents
+ * Cumulus importés en numéros d'utilisateurs dans l'annuaire TB
+ */
+function migration_proprietaires_documents($argc, $argv) {
+	global $bdCumulus;
+
+	$req = "UPDATE cumulus_files f LEFT JOIN tela_prod_v4.annuaire_tela a ON a.U_MAIL = f.owner SET f.owner = a.U_ID;";
+	try {
+		$bdCumulus->exec($req);
+	} catch (Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req]" . PHP_EOL;
 	}
 }
 
@@ -870,6 +888,32 @@ function migration_utilisateurs($argc, $argv) {
 		echo "Activité BP insérée" . PHP_EOL;
 	} catch(Exception $e) {
 		echo "-- ECHEC REQUÊTE: [$req5]\n";
+	}
+
+	// insertion des valeurs "{wp_prefix}_capabilities" et  "{wp_prefix}_user_level"
+	$cleCapabilities = $prefixe_tables_wp . "capabilities";
+	$req6a = "INSERT INTO $tableMetadonneesUtilisateurs (user_id, meta_key, meta_value) "
+		. "SELECT ID, '$cleCapabilities', '{a:1:{s:11:\"contributor\";b:1;}' " // "contributeur"
+		. "FROM $tableUtilisateurs "
+		. "WHERE ID NOT IN(SELECT DISTINCT user_id FROM $tableMetadonneesUtilisateurs WHERE meta_key = '$cleCapabilities') "
+		. "AND ID NOT IN (SELECT ID FROM $tableUtilisateursNouveauNom);";
+	try {
+		$bdWordpress->exec($req6a);
+		echo "Capabilities WP insérées (meta)" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req6a]\n";
+	}
+	$cleUserLevel = $prefixe_tables_wp . "user_level";
+	$req6b = "INSERT INTO $tableMetadonneesUtilisateurs (user_id, meta_key, meta_value) "
+		. "SELECT ID, '$cleUserLevel', '1' " // user level 1 = "contributeur"
+		. "FROM $tableUtilisateurs "
+		. "WHERE ID NOT IN(SELECT DISTINCT user_id FROM $tableMetadonneesUtilisateurs WHERE meta_key = '$cleUserLevel') "
+		. "AND ID NOT IN (SELECT ID FROM $tableUtilisateursNouveauNom);";
+	try {
+		$bdWordpress->exec($req6b);
+		echo "User levels WP insérés (meta)" . PHP_EOL;
+	} catch(Exception $e) {
+		echo "-- ECHEC REQUÊTE: [$req6b]\n";
 	}
 }
 

@@ -1,5 +1,13 @@
 <?php
 
+// récupération du nom de la page "groupes"
+$wpToBpPages = get_option("bp-pages");
+if (! array_key_exists('groups', $wpToBpPages)) {
+	throw new Exception('La page BuddyPress "groups" n\'existe pas');
+}
+$wpPageSlug = get_post($wpToBpPages['groups']);
+$pageProjets = $wpPageSlug->post_name;
+
 function bp_gtags_setup_globals() {
 	global $bp;
     if ( ! isset ( $bp->gtags ) )
@@ -14,7 +22,15 @@ add_action( 'bp_setup_globals', 'bp_gtags_setup_globals' );
 // in order for tags to show as /groups/tag/mytag I am using this function. however it is not optimal because it's not really a sub menu item
 function bp_gtags_setup_nav() {
 	global $bp;
-	bp_core_new_subnav_item( array( 'name' => '&nbsp;', 'slug' => $bp->gtags->slug, 'parent_slug' => BP_GROUPS_SLUG, 'parent_url' => $bp->root_domain .'/'. BP_GROUPS_SLUG . '/', 'screen_function' => 'gtags_display_hook', 'position' => -1 ) );
+	global $pageProjets;
+	bp_core_new_subnav_item(array(
+		'name' => '&nbsp;',
+		'slug' => $bp->gtags->slug,
+		'parent_slug' => BP_GROUPS_SLUG, // si on remplace par $pageProjets, ça marche plus :-/ WTF ?
+		'parent_url' => $bp->root_domain .'/'. $pageProjets . '/',
+		'screen_function' => 'gtags_display_hook',
+		'position' => -1 )
+	);
 }
 add_action( 'bp_setup_nav', 'bp_gtags_setup_nav', 1000 );
 
@@ -155,6 +171,7 @@ function gtags_get_groups_by_tag( $limit = null, $page = null, $user_id = false,
 // Return an array with tag objects
 function gtags_make_tags( $urlencode=false, $exclude_tags='', $include_tags='' ) {
 	global $bp, $wpdb;
+	global $pageProjets;
 	
 	$all_group_tags = $wpdb->get_col( "SELECT meta_value FROM " . $bp->groups->table_name_groupmeta . " WHERE meta_key = 'gtags_group_tags'" );
 
@@ -204,7 +221,7 @@ function gtags_make_tags( $urlencode=false, $exclude_tags='', $include_tags='' )
 	$tags = array();
 	foreach( (array)$all_tags as $tag => $count ) {
 		$tag = stripcslashes( $tag );
-		$link = $bp->root_domain . '/' . BP_GROUPS_SLUG . '/tag/' . urlencode( $tag ) ;
+		$link = $bp->root_domain . '/' . $pageProjets . '/tag/' . urlencode( $tag ) ;
 		$tags[ $tag ] = (object)array( 'name' => $tag, 'count' => $count, 'link' => $link );
 	}
 
@@ -307,6 +324,7 @@ function gtags_show_tags_in_add_form() {
 function custom_gtags_show_tags_in_add_form() {
 
 	global $bp;
+	global $pageProjets;
 
 	if ( !get_option('gtags_popular_limit') ) 
 		$popular_tag_limit = 36; 
@@ -318,7 +336,7 @@ function custom_gtags_show_tags_in_add_form() {
 
 	$i = 0;
 	foreach ( $tags as $tag ) {
-		echo '<a class="gtags-add highlight etiquette pointer" href="'.$bp->root_domain . '/' . BP_GROUPS_SLUG . '/tag/'.$tag->name.'" title="Ajouter le mot-clé ' . $tag->name .'">' . $tag->name .'</a>';
+		echo '<a class="gtags-add highlight etiquette pointer" href="'.$bp->root_domain . '/projets/tag/'.$tag->name.'" title="Ajouter le mot-clé ' . $tag->name .'">' . $tag->name .'</a>';
 		++$i;
 		if ( $i >= $popular_tag_limit ) break;
 	}
@@ -440,7 +458,7 @@ function gtags_make_tags_for_group() {
 	foreach( $items as $item ) {
 		$item = trim( strtolower( $item ) );
 		if ($item=='') continue;
-		$link = $bp->root_domain . '/' . BP_GROUPS_SLUG . '/tag/' . urlencode( $item );
+		$link = $bp->root_domain . '/projets/tag/' . urlencode( $item );
 		$output .= ' <a class="etiquette highlight" href="'.$link.'" title="Voir tous les projets ayant pour mots-clés '.$item.'">#'.$item.'</a> ';
 	}
 

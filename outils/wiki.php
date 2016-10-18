@@ -26,10 +26,14 @@ class Wiki extends TB_Outil {
 	 */
 	function display($group_id = null)
 	{
-		echo "<h3>Retrouvez votre espace wiki à l'adresse ci-dessous</h3>";
-		echo "<p>Prochainement, un wiki intégré sera disponible ici pour accueillir vos pages.</p>";
 		$adresseWiki = groups_get_groupmeta(bp_get_group_id(), "wiki-externe");
-		echo '<a style="font-size: 1.3em;" target="_blank" href="' . $adresseWiki . '">' . $adresseWiki . '</a>';
+		if (! empty($adresseWiki)) {
+			echo "<h3>Retrouvez votre espace wiki à l'adresse ci-dessous</h3>";
+			echo "<p>Prochainement, un wiki intégré sera disponible ici pour accueillir vos pages.</p>";
+			echo '<a style="font-size: 1.3em;" target="_blank" href="' . $adresseWiki . '">' . $adresseWiki . '</a>';
+		} else {
+			echo "<h3>Aucun wiki n'est défini pour ce projet</h3>";
+		}
 	}
 }
 

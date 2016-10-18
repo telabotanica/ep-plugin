@@ -18,12 +18,25 @@ class TB_Outil extends BP_Group_Extension {
 	/** si true, l'outil ne sera disponible que pour les membres du projet */
 	protected $prive;
 
+	/** id du groupe en cours */
+	protected $groupId;
+
+	/** id de l'utilisateur en cours */
+	protected $userId;
+
 	/**
 	 * Initialisation post-constructeur : définit les chemins, charge les scripts,
 	 * styles etc.
 	 */
 	public function initialisation()
 	{
+		// accès à l'objet magique BuddyPress
+		$bp = buddypress();
+		// copie de ce qui nous intéresse pour éviter d'y accédér cracratement
+		// et hétérogènement par la suite
+		$this->groupId = bp_get_current_group_id();
+		$this->userId = $bp->loggedin_user->id;
+
 		// recherche d'une config générale dans la base
 		$this->chargerConfig();
 
@@ -79,7 +92,7 @@ class TB_Outil extends BP_Group_Extension {
 	 * projet en cours; concernant la colonne "config" (JSON libre), mélange les
 	 * deux en donnant la priorité à la config du projet en cours et place le
 	 * tout dans $this->config;
-	 * 
+	 *
 	 * Si aucune configuration locale pour le projet en cours n'existe au moment
 	 * du chargement, un tuple sera écrit dans la table _tb_outils_reglages
 	 */
@@ -99,7 +112,7 @@ class TB_Outil extends BP_Group_Extension {
 
 		/* 1) Lecture de la table "wp_tb_outils" (config pour tous les projets) */
 		$requete = "
-			SELECT * 
+			SELECT *
 			FROM {$wpdb->prefix}tb_outils
 			WHERE id_outil='" . $this->slug . "'
 		";
@@ -116,7 +129,7 @@ class TB_Outil extends BP_Group_Extension {
 
 		/* 2) Lecture de la table "wp_tb_outils_reglages" (config pour le projet en cours) */
 		$requete = "
-			SELECT * 
+			SELECT *
 			FROM {$wpdb->prefix}tb_outils_reglages
 			WHERE id_projet='" . $id_projet . "'
 			AND id_outil='" . $this->slug . "'
@@ -191,7 +204,15 @@ class TB_Outil extends BP_Group_Extension {
 		$pageGroupes = $this->getBPPageSlug("groups");
 		$dossierRacine = $this->getDossierRacine();
 
-		return '/' . $dossierRacine . '/' . $pageGroupes . '/' . bp_get_current_group_slug() . '/' . $this->slug;
+        $baseUri = '/';
+        if (! empty($dossierRacine)) {
+            $baseUri .= $dossierRacine . '/';
+        }
+        $baseUri .= $pageGroupes . '/';
+        $baseUri .= bp_get_current_group_slug() . '/';
+        $baseUri .= $this->slug;
+
+        return $baseUri;
 	}
 
 	/**
@@ -201,7 +222,7 @@ class TB_Outil extends BP_Group_Extension {
 	protected function getDataBaseUri()
 	{
 		$dossierRacine = $this->getDossierRacine();
-		return '/' . $dossierRacine . '/wp-content/plugins/tela-botanica/outils/' . $this->slug;
+		return '/' . (! empty($dossierRacine) ? $dossierRacine . '/' : '') . 'wp-content/plugins/tela-botanica/outils/' . $this->slug;
 	}
 
 	/**
@@ -244,5 +265,20 @@ class TB_Outil extends BP_Group_Extension {
 	 */
 	public function desinstallation() {
 		// rien par défaut
+	}
+
+	/**
+	 * Si l'outil est privé, vérifie que l'utilisateur en cours est membre du
+	 * projet : si oui, ne fait rien; si non, affiche un message et interrompt
+	 * le chargement
+	 */
+	protected function appliquerCaracterePrive() {
+		if ($this->prive) {
+			$estMembre = groups_is_user_member($this->userId, $this->groupId);
+			if (! $estMembre && ! is_super_admin()) {
+				echo "<h4>L'outil <?php echo $this->name ?> est réservé aux membres du projet</h4>";
+				exit;
+			}
+		}
 	}
 }

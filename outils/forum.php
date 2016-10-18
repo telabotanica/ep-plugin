@@ -2,7 +2,7 @@
 
 class Forum extends TB_Outil {
 
-	function forum()
+	public function __construct()
 	{
 		// identifiant de l'outil et nom par défaut
 		$this->slug = 'forum';
@@ -30,7 +30,7 @@ class Forum extends TB_Outil {
 			"adapters" => array(
 				"AuthAdapterTB" => array (
 					"annuaireURL" => "https://www.tela-botanica.org/service:annuaire:auth",
-					"headerName" => "Authorization"
+					"headerName" => "Auth" // Authorization est refusé par Sequoia
 				)
 			)
 		);
@@ -82,6 +82,7 @@ class Forum extends TB_Outil {
 
 		// code de l'appli Forum
 		wp_enqueue_script('AuthAdapter', $this->urlOutil . 'js/AuthAdapter.js');
+		wp_enqueue_script('AuthAdapterTB', $this->urlOutil . 'js/auth/AuthAdapterTB.js');
 		wp_enqueue_script('EzmlmForum', $this->urlOutil . 'js/EzmlmForum.js');
 		wp_enqueue_script('ViewThread', $this->urlOutil . 'js/ViewThread.js');
 		wp_enqueue_script('ViewList', $this->urlOutil . 'js/ViewList.js');
@@ -92,13 +93,7 @@ class Forum extends TB_Outil {
 	 */
 	function display($group_id = null)
 	{
-		if ($this->prive) {
-			// on ne devrait passer là que si les contrôles de sécurités précédents
-			// ont réussi, càd si on est dans un groupe auquel on a droit (soit
-			// le groupe est public, soit l'utilisateur en est membre)
-			echo "<h4>L'outil <?php echo $this->name ?> est réservé aux membres du groupe</h4>";
-			return;
-		}
+		$this->appliquerCaracterePrive();
 
 		// paramètres automatiques :
 		// - domaine racine
