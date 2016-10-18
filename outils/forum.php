@@ -57,7 +57,7 @@ class Forum extends TB_Outil {
 	{
 		// l'id outil "forum" n'est pas tiré de $this->slug car la méthode d'install
 		// est appelée en contexte non-objet => mettre le slug dans un attribut statique ?
-		add_option('tb_forum_config');
+		delete_option('tb_forum_config');
 	}
 
 	public function scriptsEtStylesAvant()

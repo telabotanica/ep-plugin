@@ -4,7 +4,6 @@ class Porte_Documents extends TB_Outil {
 
 	public function __construct()
 	{
-		// identifiant de l'outil et nom par défaut
 		$this->slug = 'porte-documents';
 		$this->name = 'Porte-documents';
 
@@ -14,26 +13,29 @@ class Porte_Documents extends TB_Outil {
 
 	protected function getConfigDefautOutil()
 	{
-		return array(
+		// @TODO maintenir en cohésion avec le fichier main-config.js de cumulus-front
+		$configDefaut = array(
 			"title" => "", // laisser vide pour que WP/BP gèrent le titre
-			"hrefBuildMode" => "REST",
-			"cumulus-api" => array(
-				"rootUri" => "http://localhost/cumulus",
-				"list" => "" // si vide, cherchera une liste ayant le nom du projet
-			)
+			"ver" => '0.1',
+			"filesServiceUrl" => 'http://api.tela-botanica.org/service:cumulus:doc',
+			"userInfoByIdUrl" => 'https://www.tela-botanica.org/service:annuaire:utilisateur/infosParIds/',
+			"abstractionPath" => '/mon',
+			"ressourcesPath" => '', // in including mode, represents the path of application root path
+			"group" => null,
+			"authUrl" => 'https://www.tela-botanica.org/service:annuaire:auth',
+			"tokenUrl" => 'https://www.tela-botanica.org/service:annuaire:auth/identite'
 		);
+		return $configDefaut;
 	}
 
 	/**
 	 * Exécuté lors de l'installation du plugin TelaBotanica
 	 */
-	public function installation() {
-		global $wpdb;
+	public function installation()
+	{
 		$configDefaut = Porte_Documents::getConfigDefautOutil();
-
-		// l'id outil "forum" n'est pas tiré de $this->slug car la méthode d'install
+		// l'id outil "porte-documents" n'est pas tiré de $this->slug car la méthode d'install
 		// est appelée en contexte non-objet => mettre le slug dans un attribut statique ?
-
 		add_option('tb_porte-documents_config', json_encode($configDefaut));
 	}
 
@@ -43,14 +45,9 @@ class Porte_Documents extends TB_Outil {
 	 */
 	public function desinstallation()
 	{
-		global $wpdb;
-
 		// l'id outil "porte-documents" n'est pas tiré de $this->slug car la méthode d'install
 		// est appelée en contexte non-objet => mettre le slug dans un attribut statique ?
-		$delete_config_defaut = "
-			DELETE FROM `{$wpdb->prefix}tb_outils` WHERE `id_outil` = 'porte-documents';
-		";
-		// $wpdb->query($delete_config_defaut); // @DEBUG désactivé
+		delete_option('tb_porte-documents_config');
 	}
 
 	public function scriptsEtStylesAvant() {
@@ -89,7 +86,6 @@ class Porte_Documents extends TB_Outil {
 		wp_enqueue_script('angular-sanitize', $this->urlOutil . 'bower_components/angular-sanitize/angular-sanitize.js');
 		wp_enqueue_script('ngtoast', $this->urlOutil . 'bower_components/ngtoast/dist/ngToast.js');
 
-
 		// wp_enqueue_style('html5-boilerplate-normalize', $this->urlOutil . 'bower_components/html5-boilerplate/dist/css/normalize.css');
 		wp_enqueue_style('html5-boilerplate', $this->urlOutil . 'bower_components/html5-boilerplate/dist/css/main.css');
 		wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bower_components/bootstrap/dist/css/bootstrap.css');
@@ -98,7 +94,8 @@ class Porte_Documents extends TB_Outil {
 	}
 
 	/* Vue onglet admin */
-	function edit_screen() {
+	function edit_screen($group_id = null)
+	{
 		if ( !bp_is_group_admin_screen( $this->slug ) )
 		return false;
 
@@ -137,7 +134,7 @@ class Porte_Documents extends TB_Outil {
 		do_action( 'bp_after_group_settings_admin' );
 	}
 
-	function edit_screen_save() {
+	function edit_screen_save($group_id = null) {
 		global $wpdb, $bp;
 		$id_projet = bp_get_current_group_id();
 		if ( !isset( $_POST ) )	return false;
@@ -169,17 +166,10 @@ class Porte_Documents extends TB_Outil {
 
 
 	/* Vue onglet principal */
-	function display() {
+	function display($group_id = null) {
 		$this->appliquerCaracterePrive();
-		$id_projet = bp_get_current_group_id();
 
-		if ($this->prive) {
-			// on ne devrait passer là que si les contrôles de sécurités précédents
-			// ont réussi, càd si on est dans un groupe auquel on a droit (soit
-			// le groupe est public, soit l'utilisateur en est membre)
-			echo "<h4>L'outil <?php echo $this->name ?> est réservé aux membres du groupe</h4>";
-			return;
-		}
+		$id_projet = bp_get_current_group_id();
 
 		$this->config['ressourcesPath'] = $this->getServerRoot() . $this->getDataBaseUri() . '/';
 		// $this->config['filesServiceUrl'] = 'http://api.tela-botanica.org/service:cumulus:doc';
@@ -206,6 +196,6 @@ class Porte_Documents extends TB_Outil {
 	}
 }
 
-bp_register_group_extension( 'Porte_Documents' );
+bp_register_group_extension('Porte_Documents');
 
 ?>

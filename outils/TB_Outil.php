@@ -83,7 +83,6 @@ class TB_Outil extends BP_Group_Extension {
 	 */
 	protected function getConfigDefautOutil()
 	{
-		// rien par défaut
 		return array();
 	}
 
@@ -110,24 +109,16 @@ class TB_Outil extends BP_Group_Extension {
 		$this->enable_nav_item = 1;
 		$this->config = $this->getConfigDefautOutil();
 
-		/* 1) Lecture de la table "wp_tb_outils" (config pour tous les projets) */
-		$requete = "
-			SELECT *
-			FROM {$wpdb->prefix}tb_outils
-			WHERE id_outil='" . $this->slug . "'
-		";
-		$res1 = $wpdb->get_results($requete) ;
+		/* 1) Lecture de la table "options" (config pour tous les projets) */
+		$options_name = 'tb_' . $this->slug . '_config';
+		$config_options_json = get_option($options_name);
+		$config_options = json_decode($config_options_json, true);
 
-		if (count($res1 > 0)) {
-			$meta = array_pop($res1);
-			// @TODO gérer l'activation / désactivation générale
-			$configGenerale = json_decode($meta->config, true);
-			if (is_array($configGenerale)) {
-				$this->config = array_merge($this->config, $configGenerale); // priorité à la config générale
-			}
+		if (is_array($config_options)) {
+			$this->config = array_merge($this->config, $config_options); // priorité à la config générale
 		}
 
-		/* 2) Lecture de la table "wp_tb_outils_reglages" (config pour le projet en cours) */
+		/* 2) Lecture de la table "tb_outils_reglages" (config pour le projet en cours) */
 		$requete = "
 			SELECT *
 			FROM {$wpdb->prefix}tb_outils_reglages
