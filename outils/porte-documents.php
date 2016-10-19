@@ -62,29 +62,29 @@ class Porte_Documents extends TB_Outil {
 	}
 
 	public function scriptsEtStylesApres() {
-		wp_enqueue_script('app', $this->urlOutil . 'app.js');
-		wp_enqueue_script('autofocus', $this->urlOutil . 'utils/autofocus.directive.js');
-		wp_enqueue_script('mimetype', $this->urlOutil . 'utils/mimetype-icon.directive.js');
-		wp_enqueue_script('click', $this->urlOutil . 'utils/select-on-click.directive.js');
-		wp_enqueue_script('config', $this->urlOutil . 'utils/main-config.js');
-		wp_enqueue_script('details-pane', $this->urlOutil . 'details-pane/details-pane.directive.js');
-		wp_enqueue_script('data-cell', $this->urlOutil . 'details-pane/data-cell.directive.js');
-		wp_enqueue_script('modal', $this->urlOutil . 'modal/modal.controller.js');
-		wp_enqueue_script('files', $this->urlOutil . 'files/files.controller.js');
-		wp_enqueue_script('files-service', $this->urlOutil . 'files/files.service.js');
-		wp_enqueue_script('add-files', $this->urlOutil . 'files/add-files.controller.js');
-		wp_enqueue_script('breadcrumbs', $this->urlOutil . 'breadcrumbs/breadcrumbs.directive.js');
-		wp_enqueue_script('breadcrumbs-service', $this->urlOutil . 'breadcrumbs/breadcrumbs.service.js');
-		wp_enqueue_script('files-search', $this->urlOutil . 'search/files-search.directive.js');
+		wp_enqueue_script('app', $this->urlOutil . 'app.js', array(), false, true);
+		wp_enqueue_script('autofocus', $this->urlOutil . 'utils/autofocus.directive.js', array(), false, true);
+		wp_enqueue_script('mimetype', $this->urlOutil . 'utils/mimetype-icon.directive.js', array(), false, true);
+		wp_enqueue_script('click', $this->urlOutil . 'utils/select-on-click.directive.js', array(), false, true);
+		wp_enqueue_script('config', $this->urlOutil . 'utils/main-config.js', array(), false, true);
+		wp_enqueue_script('details-pane', $this->urlOutil . 'details-pane/details-pane.directive.js', array(), false, true);
+		wp_enqueue_script('data-cell', $this->urlOutil . 'details-pane/data-cell.directive.js', array(), false, true);
+		wp_enqueue_script('modal', $this->urlOutil . 'modal/modal.controller.js', array(), false, true);
+		wp_enqueue_script('files', $this->urlOutil . 'files/files.controller.js', array(), false, true);
+		wp_enqueue_script('files-service', $this->urlOutil . 'files/files.service.js', array(), false, true);
+		wp_enqueue_script('add-files', $this->urlOutil . 'files/add-files.controller.js', array(), false, true);
+		wp_enqueue_script('breadcrumbs', $this->urlOutil . 'breadcrumbs/breadcrumbs.directive.js', array(), false, true);
+		wp_enqueue_script('breadcrumbs-service', $this->urlOutil . 'breadcrumbs/breadcrumbs.service.js', array(), false, true);
+		wp_enqueue_script('files-search', $this->urlOutil . 'search/files-search.directive.js', array(), false, true);
 
-		wp_enqueue_script('ng-file-upload-shim', $this->urlOutil . 'bower_components/ng-file-upload-shim/ng-file-upload-shim.js');
-		wp_enqueue_script('ng-file-upload', $this->urlOutil . 'bower_components/ng-file-upload/ng-file-upload.js');
-		wp_enqueue_script('ng-contextmenu', $this->urlOutil . 'bower_components/ng-contextmenu/dist/ng-contextmenu.js');
-		wp_enqueue_script('moment', $this->urlOutil . 'bower_components/moment/moment.js');
-		wp_enqueue_script('angular-moment', $this->urlOutil . 'bower_components/angular-moment/angular-moment.js');
-		wp_enqueue_script('angular-modal-service', $this->urlOutil . 'bower_components/angular-modal-service/dst/angular-modal-service.js');
-		wp_enqueue_script('angular-sanitize', $this->urlOutil . 'bower_components/angular-sanitize/angular-sanitize.js');
-		wp_enqueue_script('ngtoast', $this->urlOutil . 'bower_components/ngtoast/dist/ngToast.js');
+		wp_enqueue_script('ng-file-upload-shim', $this->urlOutil . 'bower_components/ng-file-upload-shim/ng-file-upload-shim.js', array(), false, true);
+		wp_enqueue_script('ng-file-upload', $this->urlOutil . 'bower_components/ng-file-upload/ng-file-upload.js', array(), false, true);
+		wp_enqueue_script('ng-contextmenu', $this->urlOutil . 'bower_components/ng-contextmenu/dist/ng-contextmenu.js', array(), false, true);
+		wp_enqueue_script('moment', $this->urlOutil . 'bower_components/moment/moment.js', array(), false, true);
+		wp_enqueue_script('angular-moment', $this->urlOutil . 'bower_components/angular-moment/angular-moment.js', array(), false, true);
+		wp_enqueue_script('angular-modal-service', $this->urlOutil . 'bower_components/angular-modal-service/dst/angular-modal-service.js', array(), false, true);
+		wp_enqueue_script('angular-sanitize', $this->urlOutil . 'bower_components/angular-sanitize/angular-sanitize.js', array(), false, true);
+		wp_enqueue_script('ngtoast', $this->urlOutil . 'bower_components/ngtoast/dist/ngToast.js', array(), false, true);
 
 		// wp_enqueue_style('html5-boilerplate-normalize', $this->urlOutil . 'bower_components/html5-boilerplate/dist/css/normalize.css');
 		wp_enqueue_style('html5-boilerplate', $this->urlOutil . 'bower_components/html5-boilerplate/dist/css/main.css');
@@ -173,7 +173,7 @@ class Porte_Documents extends TB_Outil {
 
 		$this->config['ressourcesPath'] = $this->getServerRoot() . $this->getDataBaseUri() . '/';
 		// $this->config['filesServiceUrl'] = 'http://api.tela-botanica.org/service:cumulus:doc';
-		$this->config['projectFilesRootPath'] = '/_projets/' . $id_projet;
+		$this->config['rootPath'] = '/_projets/' . $id_projet;
 		$this->config['group'] = 'projet:' . $id_projet;
 		$this->config['authUrl'] = 'https://annuaire.dev/service:annuaire:auth';
 		$this->config['tokenUrl'] = 'https://annuaire.dev/service:annuaire:auth/identite';
@@ -189,8 +189,8 @@ class Porte_Documents extends TB_Outil {
 		chdir(dirname(__FILE__) . "/porte-documents");
 		$code = file_get_contents('index_pouet.html');
 
+		echo '<i id="cumulus-config-holder" data-config=\''. json_encode($this->config) .'\'></i>'; //caca
 		echo '<div class="wp-bootstrap" ng-app="cumulus">';
-		echo "<script>var tarace = JSON.parse('" . json_encode($this->config) . "');</script>";
 		echo $code;
 		echo '</div>';
 	}
