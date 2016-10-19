@@ -115,9 +115,15 @@ function tb_ssmenu_configuration() {
 				// récupération des valeurs du formulaire
 				$filesServiceUrl = $_POST['filesServiceUrl'];
 				$active = ($_POST['active'] == 'true');
+				$abstractionPath = $_POST['abstractionPath'];
+				$userInfoByIdUrl = $_POST['userInfoByIdUrl'];
+				$authUrl = $_POST['authUrl'];
 				// injection des valeurs du formulaire
 				$configActuellePd['filesServiceUrl'] = $filesServiceUrl;
 				$configActuellePd['active'] = $active;
+				$configActuellePd['abstractionPath'] = $abstractionPath;
+				$configActuellePd['userInfoByIdUrl'] = $userInfoByIdUrl;
+				$configActuellePd['authUrl'] = $authUrl;
 				// mise à jour de la BDD
 				update_option($opt_name_pd, json_encode($configActuellePd));
 			?>
@@ -158,6 +164,34 @@ function tb_ssmenu_configuration() {
 								<p class="description">Ne pas mettre de "/" (slash) à la fin.</p>
 							</td>
 						</tr>
+						<tr>
+							<th scope="row">
+								<label>Chemin du dossier "projets"</label>
+							</th>
+							<td>
+								<input type="text" name="abstractionPath" value="<?php echo $configActuellePd['abstractionPath']; ?>" />
+								<p class="description">Chemin de Cumulus contenant les dossiers des projets.</p>
+								<p class="description">Doit commencer par "/" (slash). Ne pas mettre de "/" (slash) à la fin.</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label>URL du service d'authentification (SSO)</label>
+							</th>
+							<td>
+								<input type="text" name="authUrl" value="<?php echo $configActuellePd['authUrl']; ?>" class="regular-text" />
+								<p class="description">Ne pas mettre de "/" (slash) à la fin.</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label>URL du service d'information sur les utilisateurs</label>
+							</th>
+							<td>
+								<input type="text" name="userInfoByIdUrl" value="<?php echo $configActuellePd['userInfoByIdUrl']; ?>" class="regular-text" />
+								<p class="description">Ne pas mettre de "/" (slash) à la fin.</p>
+							</td>
+						</tr>
 					</tbody>
 				</table>
 				<hr/>
@@ -191,9 +225,15 @@ function tb_ssmenu_configuration() {
 			if( isset($_POST[$hidden_field_name_forum]) && $_POST[$hidden_field_name_forum] == 'Y' ) {
 				// récupération des valeurs du formulaire
 				$ezmlmPhpRootUri = $_POST['ezmlmPhpRootUri'];
+				$annuaireUrl = $_POST['annuaireUrl'];
+				$headerName = $_POST['headerName'];
 				$active = ($_POST['active'] == 'true');
+				$displayListTitle = ($_POST['displayListTitle'] == 'true');
 				// injection des valeurs du formulaire
 				$configActuelleForum['ezmlm-php']['rootUri'] = $ezmlmPhpRootUri;
+				$configActuelleForum['adapters']['AuthAdapterTB']['annuaireURL'] = $annuaireUrl;
+				$configActuelleForum['adapters']['AuthAdapterTB']['headerName'] = $headerName;
+				$configActuelleForum['displayListTitle'] = $displayListTitle;
 				$configActuelleForum['active'] = $active;
 				// mise à jour de la BDD
 				update_option($opt_name_forum, json_encode($configActuelleForum));
@@ -219,7 +259,7 @@ function tb_ssmenu_configuration() {
 							<th scope="row">
 								<label>Disponibilité</label>
 							</th>
-							<td>								
+							<td>
 								<select name="active">
 									<option value="true" <?php echo ($configActuelleForum['active'] ? 'selected' : '') ?>>Activé</option>
 									<option value="false" <?php echo ($configActuelleForum['active'] ? '' : 'selected') ?>>Désactivé</option>
@@ -234,6 +274,35 @@ function tb_ssmenu_configuration() {
 							<td>
 								<input type="text" name="ezmlmPhpRootUri" value="<?php echo $configActuelleForum['ezmlm-php']['rootUri']; ?>" class="regular-text" />
 								<p class="description">Ne pas mettre de "/" (slash) à la fin.</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label>URL du service d'authentification (SSO)</label>
+							</th>
+							<td>
+								<input type="text" name="annuaireUrl" value="<?php echo $configActuelleForum['adapters']['AuthAdapterTB']['annuaireURL']; ?>" class="regular-text" />
+								<p class="description">Ne pas mettre de "/" (slash) à la fin.</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label>Header à envoyer au service d'authentification</label>
+							</th>
+							<td>
+								<input type="text" name="headerName" value="<?php echo $configActuelleForum['adapters']['AuthAdapterTB']['headerName']; ?>" />
+								<p class="description">"Authorization" (par défaut) est refusé / traité incorrectement par certains serveurs.</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label>Afficher l'adresse de la liste dans l'interface</label>
+							</th>
+							<td>
+								<select name="displayListTitle">
+									<option value="true" <?php echo ($configActuelleForum['displayListTitle'] ? 'selected' : '') ?>>Oui</option>
+									<option value="false" <?php echo ($configActuelleForum['displayListTitle'] ? '' : 'selected') ?>>Non</option>
+								</select>
 							</td>
 						</tr>
 					</tbody>

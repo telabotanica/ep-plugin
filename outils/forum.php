@@ -75,6 +75,7 @@ class Forum extends TB_Outil {
 	 */
 	function display($group_id = null)
 	{
+		$this->verifierSiActive();
 		$this->appliquerCaracterePrive();
 
 		// paramètres automatiques :
@@ -112,9 +113,7 @@ class Forum extends TB_Outil {
 
 	/* Vue onglet admin */
 	function edit_screen($group_id = null) {
-		if ( !bp_is_group_admin_screen( $this->slug ) )
-		return false;
-		
+		$this->controleAccesReglages();
 		?>
 		<h4>Paramètres de l'outil <?php echo $this->name ?></h4>
 		
