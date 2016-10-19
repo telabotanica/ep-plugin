@@ -147,7 +147,7 @@ function tb_ssmenu_configuration() {
 							<th scope="row">
 								<label>Disponibilité</label>
 							</th>
-							<td>								
+							<td>
 								<select name="active">
 									<option value="true" <?php echo ($configActuellePd['active'] ? 'selected' : '') ?>>Activé</option>
 									<option value="false" <?php echo ($configActuellePd['active'] ? '' : 'selected') ?>>Désactivé</option>

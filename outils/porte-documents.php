@@ -91,12 +91,11 @@ class Porte_Documents extends TB_Outil {
 		<h4>Paramètres de l'outil <?php echo $this->name ?></h4>
 
 		<p class="editfield">
-			<?php
-				if ( $this->enable_nav_item ) { $activation = "actif"; }
-				else { $activation = "inactif"; }
-			?>
-			<label for="activation-outil">Activation de l'outil <br/>(<?php echo $activation ?>)</label>
-			<input type="range" min="0" max="1" id="activation-outil" class="pointer on-off" name="activation-outil" value="<?php echo $this->enable_nav_item ?>"/>
+			<label for="activation-outil">Activation de l'outil</label>
+			<select name="activation-outil">
+				<option value="true" <?php echo ($this->enable_nav_item ? 'selected' : '') ?>>Activé</option>
+				<option value="false" <?php echo ($this->enable_nav_item ? '' : 'selected') ?>>Désactivé</option>
+			</select>
 		</p>
 
 		<p class="editfield">
@@ -105,51 +104,52 @@ class Porte_Documents extends TB_Outil {
 		</p>
 
 		<p class="editfield">
+			<label for="confidentialite-outil">Visibilité</label>
+			<select name="confidentialite-outil">
+				<option value="false" <?php echo ($this->prive ? '' : 'selected') ?>>Public</option>
+				<option value="true" <?php echo ($this->prive ? 'selected' : '') ?>>Privé</option>
+			</select>
+			<br/>
+			<span class="description">Si "privé", seuls les membres pourront y accéder (ne s'applique qu'aux groupes publics)</span>
+		</p>
+
+		<!--<p class="editfield">
 			<label for="position-outil">Position de l'outil <br/>(<?php echo $this->nav_item_position ?>)</label>
 			<input type="range" min="0" max="100" step="5" id="position-outil" class="pointer" name="position-outil" value="<?php echo $this->nav_item_position ?>"/>
-		</p>
-
-		<!-- Marche pas
-		<p class="editfield">
-			<label for="confidentialite-outil">Outil privé <br/>(<?php echo $this->prive ?>)</label>
-			<input type="range" min="0" max="1" id="confidentialite-outil" class="pointer on-off" name="confidentialite-outil" value="<?php echo $this->prive ?>"/>
-		</p>
-		-->
+		</p>-->
 
 		<?php
-
 		wp_nonce_field( 'groups_edit_save_' . $this->slug );
 		do_action( 'bp_after_group_settings_admin' );
 	}
 
+	/** traitement de la page de réglages */
 	function edit_screen_save($group_id = null) {
 		global $wpdb, $bp;
 		$id_projet = bp_get_current_group_id();
-		if ( !isset( $_POST ) )	return false;
+		if ( !isset( $_POST ) )	return false; // gni?
 		check_admin_referer( 'groups_edit_save_' . $this->slug );
 
 		/* Mise à jour de la ligne dans la base de données */
 		$table = "{$wpdb->prefix}tb_outils_reglages";
 		$data = array(
-			'enable_nav_item' => $_POST['activation-outil'],
+			'enable_nav_item' => ($_POST['activation-outil'] == 'true'),
 			'name' => $_POST['nom-outil'],
-			'nav_item_position' => $_POST['position-outil']
-			//'prive' => $_POST['confidentialite-outil']
+			//'nav_item_position' => $_POST['position-outil']
+			'prive' => ($_POST['confidentialite-outil'] == 'true')
 		);
 		$where = array(
 			'id_projet' => $id_projet,
 			'id_outil' => $this->slug
 		);
-		$format = null;
-		$where_format = null;
-		$wpdb->update($table, $data, $where, $format, $where_format);
+		$success = $wpdb->update($table, $data, $where);
 
-		$success = 1;
-		if ( !$success )
-		bp_core_add_message( __( 'There was an error saving, please try again', 'buddypress' ), 'error' );
-		else
-		bp_core_add_message( __( 'Settings saved successfully', 'buddypress' ) );
-		bp_core_redirect( bp_get_group_permalink( $bp->groups->current_group ) . '/admin/' . $this->slug );
+		if ($success === false) {
+			bp_core_add_message( __( 'There was an error saving, please try again', 'buddypress' ), 'error' );
+		} else {
+			bp_core_add_message( __( 'Settings saved successfully', 'buddypress' ) );
+			bp_core_redirect( bp_get_group_permalink( $bp->groups->current_group ) . '/admin/' . $this->slug );
+		}
 	}
 
 

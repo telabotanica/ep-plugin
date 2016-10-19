@@ -15,7 +15,8 @@ class TB_Outil extends BP_Group_Extension {
 	    ex: "http://localhost/wordpress/wp-content/plugins/tela-botanica/outils/forum/" */
 	protected $urlOutil;
 
-	/** si true, l'outil ne sera disponible que pour les membres du projet */
+	/** si true, l'outil ne sera disponible que pour les membres du projet 
+	 * (s'applique uniquement aux groupes publics) */
 	protected $prive;
 
 	/** mis à true lors du chargement de la config, si l'outil est désactivé
@@ -183,8 +184,7 @@ class TB_Outil extends BP_Group_Extension {
 	 * de n'effectuer certaines actions que pour un outil donné
 	 */
 	protected function outilCourant() {
-		$slug = $this->slug;
-		$ok = bp_is_current_action($slug);
+		$ok = bp_is_current_action($this->slug);
 		return $ok;
 	}
 
@@ -194,7 +194,6 @@ class TB_Outil extends BP_Group_Extension {
 	protected function getServerRoot()
 	{
 		return (!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
-		//return "http://localhost";
 	}
 
 	/**
@@ -278,7 +277,7 @@ class TB_Outil extends BP_Group_Extension {
 			(! bp_is_group_admin_screen($this->slug)) ||
 			($this->desactive_globalement)
 		) {
-			echo "<p>Cet outil a été désactivé par l'administrateur du site.</p>";
+			echo "<p>L'outil " . $this->name . " a été désactivé par l'administrateur du site.</p>";
 			exit;
 		}
 	}
@@ -292,7 +291,7 @@ class TB_Outil extends BP_Group_Extension {
 		if ($this->prive) {
 			$estMembre = groups_is_user_member($this->userId, $this->groupId);
 			if (! $estMembre && ! is_super_admin()) {
-				echo "<h4>L'outil <?php echo $this->name ?> est réservé aux membres du projet</h4>";
+				echo "<p>L'outil " . $this->name . " est réservé aux membres du projet</p>";
 				exit;
 			}
 		}
