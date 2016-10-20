@@ -75,7 +75,6 @@ class Forum extends TB_Outil {
 	 */
 	function display($group_id = null)
 	{
-		$this->verifierSiActive();
 		$this->appliquerCaracterePrive();
 
 		// paramètres automatiques :

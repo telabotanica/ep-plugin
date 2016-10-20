@@ -155,7 +155,6 @@ class Porte_Documents extends TB_Outil {
 
 	/* Vue onglet principal */
 	function display($group_id = null) {
-		$this->verifierSiActive();
 		$this->appliquerCaracterePrive();
 
 		$id_projet = bp_get_current_group_id();
