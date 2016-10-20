@@ -152,7 +152,6 @@ class Porte_Documents extends TB_Outil {
 		}
 	}
 
-
 	/* Vue onglet principal */
 	function display($group_id = null) {
 		$this->appliquerCaracterePrive();
@@ -160,18 +159,8 @@ class Porte_Documents extends TB_Outil {
 		$id_projet = bp_get_current_group_id();
 
 		$this->config['ressourcesPath'] = $this->getServerRoot() . $this->getDataBaseUri() . '/';
-		// $this->config['filesServiceUrl'] = 'http://api.tela-botanica.org/service:cumulus:doc';
-		$this->config['rootPath'] = '/_projets/' . $id_projet;
+		$this->config['abstractionPath'] .= '/' . $id_projet;
 		$this->config['group'] = 'projet:' . $id_projet;
-		$this->config['authUrl'] = 'https://annuaire.dev/service:annuaire:auth';
-		$this->config['tokenUrl'] = 'https://annuaire.dev/service:annuaire:auth/identite';
-		// var_dump($this->config);
-
-		// paramètres automatiques :
-		// - nom de la liste
-		// - domaine racine
-		// - URI de base
-		// - titre de la page
 
 		// amorcer l'outil
 		chdir(dirname(__FILE__) . "/porte-documents");
