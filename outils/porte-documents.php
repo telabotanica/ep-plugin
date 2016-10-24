@@ -13,7 +13,7 @@ class Porte_Documents extends TB_Outil {
 
 	protected function getConfigDefautOutil()
 	{
-		$cheminConfig = __DIR__ . "/porte-documents_config-defaut.json";
+		$cheminConfig = __DIR__ . "/porte-documents_config.json";
 		$configDefaut = json_decode(file_get_contents($cheminConfig), true);
 		return $configDefaut;
 	}

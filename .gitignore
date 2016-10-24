@@ -5,3 +5,5 @@
 /outils/porte-documents
 /scripts/config.php
 config.json
+outils/forum_config.json
+outils/porte-documents_config.json

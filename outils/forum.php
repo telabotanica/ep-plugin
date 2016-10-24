@@ -14,7 +14,7 @@ class Forum extends TB_Outil {
 
 	public function getConfigDefautOutil()
 	{
-		$cheminConfig = __DIR__ . "/forum_config-defaut.json";
+		$cheminConfig = __DIR__ . "/forum_config.json";
 		$configDefaut = json_decode(file_get_contents($cheminConfig), true);
 		return $configDefaut;
 	}
