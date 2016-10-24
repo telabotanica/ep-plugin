@@ -44,16 +44,7 @@ function tb_ajout_pages() {
  * Page de présentation et documentation du plugin
  */
 function tb_ssmenu_home() {
-	?>
-	<div class="wrap">
-	
-		<h2>Plugin Espace projets</h2>
-		<br>
-		@TODO Remplir cette page pour expliquer comment marche la configuration
-		<br>
-		Cliquer sur "configuration" dans le menu pour aller aux réglages des outils.
-	</div>
-	<?php
+	include "admin_presentation.php";
 }
 
 /**
@@ -65,60 +56,76 @@ function tb_ssmenu_configuration() {
     /* Gestion des onglets */
 	if( isset( $_GET[ 'onglet' ] ) ) {  
 		$onglet_actif = $_GET[ 'onglet' ];  
-	} 
-	else {
+	} else {
+		// on glet par défaut
 		$onglet_actif = 'porte-documents';
 	}
-	?> 
 
+	?>
 	<!-- Vue du sous-menu 'Configuration' -->
 	<div class="wrap">
-	
+
 		<?php
 		if (!current_user_can('manage_options'))
 		{
 			wp_die( __('Vous n\'avez pas les droits suffisants pour accéder à cette page.') );
 		}
 		?>
-	
+
 		<?php screen_icon(); ?>
-	
+
 		<!-- Titre -->
 		<h2>Configuration des outils de l'Espace projets</h2>
-		
+
 		<!-- Description -->
-		<!--<div class="description">Cette page vous permet de configurer les outils sur l'ensemble des projets actifs sur le site.</div>-->
-		
-		<?php settings_errors(); ?> 
+		<div class="description">
+			Cette configuration affecte les outils pour l'ensemble des projets.
+			Elle est écrasée par la configuration de chaque projet, si celle-ci est présente.
+		</div>
+
+		<?php settings_errors(); ?>
 
 		<!-- Menu des onglets -->
 		<h2 class="nav-tab-wrapper">  
 		    <a href="?page=configuration&onglet=porte-documents" class="nav-tab <?php echo $onglet_actif == 'porte-documents' ? 'nav-tab-active' : ''; ?>">Porte-documents</a>  
 		    <a href="?page=configuration&onglet=forum" class="nav-tab <?php echo $onglet_actif == 'forum' ? 'nav-tab-active' : ''; ?>">Forum</a>  
+			<!--<a href="?page=configuration&onglet=autre" class="nav-tab <?php echo $onglet_actif == 'autre' ? 'nav-tab-active' : ''; ?>">Autre machin</a>  -->
 		</h2>
-		
+
 		<!-- Onglet Porte-documents -->
 		<?php
-	    if( $onglet_actif == 'porte-documents' ) {  
-	       
+	    if( $onglet_actif == 'porte-documents' ) {
 	       	$opt_name_pd = 'tb_porte-documents_config';
 			$hidden_field_name_pd = 'tb_submit_hidden';
-			$data_field_name_pd = 'tb_porte-documents_config';
-			
-			$opt_val_pd = get_option( $opt_name );
-			
-			if( isset($_POST[ $hidden_field_name_pd ]) && $_POST[ $hidden_field_name_pd ] == 'Y' ) {
-				$opt_val_pd = $_POST[ $data_field_name_pd ];
-				$configDefaut_pd = array(
-					"title" => "", // laisser vide pour que WP/BP gèrent le titre
-					"hrefBuildMode" => "REST",
-					"defaultPage" => "view-list",
-					"ezmlm-php" => array(
-						"rootUri" => $opt_val_pd,
-						"list" => "" // si vide, cherchera une liste ayant le nom du projet
-					)
-				);
-				update_option( $opt_name_pd, json_encode($configDefaut_pd) );
+
+			// chargement de la config actuelle
+			$configActuellePd = json_decode(get_option($opt_name_pd), true);
+			//var_dump($configActuellePd);
+
+			// si la config actuelle est vide, on charge la config par défaut
+			if (empty($configActuellePd)) {
+				// config par défaut de l'outil
+				$cheminConfigDefautPd = __DIR__ . '/../outils/porte-documents_config-defaut.json';
+				$configDefautPd = json_decode(file_get_contents($cheminConfigDefautPd), true);
+				$configActuellePd = $configDefautPd;
+			}
+
+			// si le formulaire est validé
+			if( isset($_POST[$hidden_field_name_pd]) && $_POST[$hidden_field_name_pd] == 'Y' ) {
+				// récupération des valeurs du formulaire
+				$filesServiceUrl = $_POST['filesServiceUrl'];
+				$active = ($_POST['active'] == 'true');
+				$abstractionPath = $_POST['abstractionPath'];
+				$userInfoByIdUrl = $_POST['userInfoByIdUrl'];
+				$authUrl = $_POST['authUrl'];
+				// injection des valeurs du formulaire
+				$configActuellePd['filesServiceUrl'] = $filesServiceUrl;
+				$configActuellePd['active'] = $active;
+				$configActuellePd['abstractionPath'] = $abstractionPath;
+				$configActuellePd['userInfoByIdUrl'] = $userInfoByIdUrl;
+				$configActuellePd['authUrl'] = $authUrl;
+				// mise à jour de la BDD
+				update_option($opt_name_pd, json_encode($configActuellePd));
 			?>
 			
 			<!-- Confirmation de l'enregistrement -->
@@ -127,73 +134,111 @@ function tb_ssmenu_configuration() {
 					<strong>Options mises à jour</strong>
 				</p>
 			</div>
-			
+
 			<?php
 			}
-			
 			?>
-			
-			<div class="wrap">
 
-				<form method="post" action="">
-				
-					<input type="hidden" name="<?php echo $hidden_field_name_pd; ?>" value="Y">
-					
-					<?php 
-			
-					/* Lecture du JSON dans 'wp_options' */
-					$config__pd = get_option('tb_porte-documents_config');
-					
-					/* Parsage du JSON */
-					$tab_json_pd = json_decode($config__pd, true);
-					
-					?>
-		
-					<!-- URL ezmlm-php -->
-					<div class="wrap">
-						<p>URL du porte-documents
-							<input type="text" name="<?php echo $data_field_name_pd; ?>" value="<?php echo $tab_json_pd['ezmlm-php']['rootUri']; ?>" />
-						</p>	
-					</div>
-					
-					<hr/>
-
-					<!-- Enregistrer les modifications -->
-					<p class="submit">
-						<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
-					</p>
-
-				</form>
-				
-			</div>
+			<form method="post" action="">
+				<input type="hidden" name="<?php echo $hidden_field_name_pd; ?>" value="Y">
+				<table class="form-table">
+					<tbody>
+						<tr>
+							<th scope="row">
+								<label>Disponibilité</label>
+							</th>
+							<td>
+								<select name="active">
+									<option value="true" <?php echo ($configActuellePd['active'] ? 'selected' : '') ?>>Activé</option>
+									<option value="false" <?php echo ($configActuellePd['active'] ? '' : 'selected') ?>>Désactivé</option>
+								</select>
+								<p class="description">Si "désactivé", l'outil ne sera disponible dans aucun projet.</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label>URL du service Cumulus</label>
+							</th>
+							<td>
+								<input name="filesServiceUrl" type="text" value="<?php echo $configActuellePd['filesServiceUrl']; ?>" class="regular-text">
+								<p class="description">Ne pas mettre de "/" (slash) à la fin.</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label>Chemin du dossier "projets"</label>
+							</th>
+							<td>
+								<input type="text" name="abstractionPath" value="<?php echo $configActuellePd['abstractionPath']; ?>" />
+								<p class="description">Chemin de Cumulus contenant les dossiers des projets.</p>
+								<p class="description">Doit commencer par "/" (slash). Ne pas mettre de "/" (slash) à la fin.</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label>URL du service d'authentification (SSO)</label>
+							</th>
+							<td>
+								<input type="text" name="authUrl" value="<?php echo $configActuellePd['authUrl']; ?>" class="regular-text" />
+								<p class="description">Ne pas mettre de "/" (slash) à la fin.</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label>URL du service d'information sur les utilisateurs</label>
+							</th>
+							<td>
+								<input type="text" name="userInfoByIdUrl" value="<?php echo $configActuellePd['userInfoByIdUrl']; ?>" class="regular-text" />
+								<p class="description">Ne pas mettre de "/" (slash) à la fin.</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<hr/>
+				<!-- Enregistrer les modifications -->
+				<p class="submit">
+					<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
+				</p>
+			</form>
 	       
 	       <?php
-	       
 	    } 
 	    
 	    /* Onglet Forum */
 	    elseif( $onglet_actif == 'forum' ) {
-
 			$opt_name_forum = 'tb_forum_config';
 			$hidden_field_name_forum = 'tb_submit_hidden';
-			$data_field_name_forum = 'tb_forum_config';
-			
-			$opt_val_forum = get_option( $opt_name_forum );
-			
-			if( isset($_POST[ $hidden_field_name_forum ]) && $_POST[ $hidden_field_name_forum ] == 'Y' ) {
-				$opt_val_forum = $_POST[ $data_field_name_forum ];
-				$configDefaut_forum = array(
-					"title" => "", // laisser vide pour que WP/BP gèrent le titre
-					"hrefBuildMode" => "REST",
-					"defaultPage" => "view-list",
-					"ezmlm-php" => array(
-						"rootUri" => $opt_val_forum,
-						"list" => "" // si vide, cherchera une liste ayant le nom du projet
-					)
-				);
-				update_option( $opt_name_forum, json_encode($configDefaut_forum) );
+
+			// chargement de la config actuelle
+			$configActuelleForum = json_decode(get_option($opt_name_forum), true);
+			//var_dump($configActuelleForum);
+
+			// si la config actuelle est vide, on charge la config par défaut
+			if (empty($configActuelleForum)) {
+				// config par défaut de l'outil
+				$cheminConfigDefautForum = __DIR__ . '/../outils/forum_config-defaut.json';
+				$configDefautForum = json_decode(file_get_contents($cheminConfigDefautForum), true);
+				$configActuelleForum = $configDefautForum;
+			}
+
+			// si le formulaire est validé
+			if( isset($_POST[$hidden_field_name_forum]) && $_POST[$hidden_field_name_forum] == 'Y' ) {
+				// récupération des valeurs du formulaire
+				$ezmlmPhpRootUri = $_POST['ezmlmPhpRootUri'];
+				$annuaireUrl = $_POST['annuaireUrl'];
+				$headerName = $_POST['headerName'];
+				$active = ($_POST['active'] == 'true');
+				$displayListTitle = ($_POST['displayListTitle'] == 'true');
+				// injection des valeurs du formulaire
+				$configActuelleForum['ezmlm-php']['rootUri'] = $ezmlmPhpRootUri;
+				$configActuelleForum['adapters']['AuthAdapterTB']['annuaireURL'] = $annuaireUrl;
+				$configActuelleForum['adapters']['AuthAdapterTB']['headerName'] = $headerName;
+				$configActuelleForum['displayListTitle'] = $displayListTitle;
+				$configActuelleForum['active'] = $active;
+				// mise à jour de la BDD
+				update_option($opt_name_forum, json_encode($configActuelleForum));
 			?>
-			
+
 			<!-- Confirmation de l'enregistrement -->
 			<div class="updated">
 				<p>
@@ -205,42 +250,70 @@ function tb_ssmenu_configuration() {
 			}
 			
 			?>
-			
-			<div class="wrap">
 
-				<form method="post" action="">
-				
-					<input type="hidden" name="<?php echo $hidden_field_name_forum; ?>" value="Y">
-					
-			<?php 
-					/* Lecture du JSON dans 'wp_options' */
-					$config_forum = get_option('tb_forum_config');
-					
-					/* Parsage du JSON */
-					$tab_json_forum = json_decode($config_forum, true);
-					
-					
-			?>
-		
-					<!-- URL ezmlm-php -->
-					<div class="wrap">
-						<p>URL de la librairie ezmlm-php
-							<input type="text" name="<?php echo $data_field_name_forum; ?>" value="<?php echo $tab_json_forum['ezmlm-php']['rootUri']; ?>" />
-						</p>	
-					</div>
-					
-					<hr/>
-
-					<!-- Enregistrer les modifications -->
-					<p class="submit">
-						<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
-					</p>
-
-				</form>
-			</div>
-		
+			<form method="post" action="">
+				<input type="hidden" name="<?php echo $hidden_field_name_forum; ?>" value="Y">
+				<table class="form-table">
+					<tbody>
+						<tr>
+							<th scope="row">
+								<label>Disponibilité</label>
+							</th>
+							<td>
+								<select name="active">
+									<option value="true" <?php echo ($configActuelleForum['active'] ? 'selected' : '') ?>>Activé</option>
+									<option value="false" <?php echo ($configActuelleForum['active'] ? '' : 'selected') ?>>Désactivé</option>
+								</select>
+								<p class="description">Si "désactivé", l'outil ne sera disponible dans aucun projet.</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label>URL du service ezmlm-php</label>
+							</th>
+							<td>
+								<input type="text" name="ezmlmPhpRootUri" value="<?php echo $configActuelleForum['ezmlm-php']['rootUri']; ?>" class="regular-text" />
+								<p class="description">Ne pas mettre de "/" (slash) à la fin.</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label>URL du service d'authentification (SSO)</label>
+							</th>
+							<td>
+								<input type="text" name="annuaireUrl" value="<?php echo $configActuelleForum['adapters']['AuthAdapterTB']['annuaireURL']; ?>" class="regular-text" />
+								<p class="description">Ne pas mettre de "/" (slash) à la fin.</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label>Header à envoyer au service d'authentification</label>
+							</th>
+							<td>
+								<input type="text" name="headerName" value="<?php echo $configActuelleForum['adapters']['AuthAdapterTB']['headerName']; ?>" />
+								<p class="description">"Authorization" (par défaut) est refusé / traité incorrectement par certains serveurs.</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label>Afficher l'adresse de la liste dans l'interface</label>
+							</th>
+							<td>
+								<select name="displayListTitle">
+									<option value="true" <?php echo ($configActuelleForum['displayListTitle'] ? 'selected' : '') ?>>Oui</option>
+									<option value="false" <?php echo ($configActuelleForum['displayListTitle'] ? '' : 'selected') ?>>Non</option>
+								</select>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<hr/>
+				<!-- Enregistrer les modifications -->
+				<p class="submit">
+					<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
+				</p>
+			</form>
 	<?php } ?>
-			
 
 	</div>
 <?php }?>

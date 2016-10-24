@@ -62,7 +62,7 @@ class TelaBotanica
 		$plugins = get_option('active_plugins');
 		$buddypressActif = in_array("buddypress/bp-loader.php", $plugins);
 		if (! $buddypressActif) {
-			throw new Exception("Vous devez installer et activer Buddypress pour utiliser ce plugin");
+			trigger_error("Vous devez installer et activer Buddypress pour utiliser ce plugin", E_USER_WARNING);
 		}
 
 		// MODE TEST (évite de désintaller / réinstaller pour tester les hooks)

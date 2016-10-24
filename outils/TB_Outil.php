@@ -15,8 +15,13 @@ class TB_Outil extends BP_Group_Extension {
 	    ex: "http://localhost/wordpress/wp-content/plugins/tela-botanica/outils/forum/" */
 	protected $urlOutil;
 
-	/** si true, l'outil ne sera disponible que pour les membres du projet */
+	/** si true, l'outil ne sera disponible que pour les membres du projet 
+	 * (s'applique uniquement aux groupes publics) */
 	protected $prive;
+
+	/** mis à true lors du chargement de la config, si l'outil est désactivé
+	 * globalement dans le TdB WP */
+	protected $desactive_globalement = false;
 
 	/** id du groupe en cours */
 	protected $groupId;
@@ -37,7 +42,7 @@ class TB_Outil extends BP_Group_Extension {
 		$this->groupId = bp_get_current_group_id();
 		$this->userId = $bp->loggedin_user->id;
 
-		// recherche d'une config générale dans la base
+		// chargement de la config : défaut < générale < locale
 		$this->chargerConfig();
 
 		$this->definirChemins();
@@ -128,19 +133,26 @@ class TB_Outil extends BP_Group_Extension {
 		$res2 = $wpdb->get_results($requete) ;
 
 		if (count($res2) > 0) {
-			$meta = array_pop($res2);
-			$this->name = $meta->name;
-			$this->prive = $meta->prive;
-			$this->create_step_position = $meta->create_step_position;
-			$this->nav_item_position = $meta->nav_item_position;
-			$this->enable_nav_item = $meta->enable_nav_item;
-			$configLocale = json_decode($meta->config, true);
+			$config_locale = array_pop($res2);
+			$this->name = $config_locale->name;
+			$this->prive = $config_locale->prive;
+			$this->create_step_position = $config_locale->create_step_position;
+			$this->nav_item_position = $config_locale->nav_item_position;
+			$this->enable_nav_item = $config_locale->enable_nav_item;
+			$configLocale = json_decode($config_locale->config, true);
 			if (is_array($configLocale)) {
 				$this->config = array_replace_recursive($this->config, $configLocale); // priorité à la config locale
 			}
 		} else {
 			// écriture de la config locale (projet en cours) s'il n'y en avait pas
 			$this->ecrireConfigLocale();
+		}
+
+		// gestion de la désactivation globale d'un outil - ne pas reporter dans
+		// la config locale
+		if (isset($config_options['active']) && ($config_options['active'] == false)) {
+			$this->desactive_globalement = true;
+			$this->enable_nav_item = 0;
 		}
 	}
 
@@ -172,8 +184,7 @@ class TB_Outil extends BP_Group_Extension {
 	 * de n'effectuer certaines actions que pour un outil donné
 	 */
 	protected function outilCourant() {
-		$slug = $this->slug;
-		$ok = bp_is_current_action($slug);
+		$ok = bp_is_current_action($this->slug);
 		return $ok;
 	}
 
@@ -183,7 +194,6 @@ class TB_Outil extends BP_Group_Extension {
 	protected function getServerRoot()
 	{
 		return (!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
-		//return "http://localhost";
 	}
 
 	/**
@@ -259,6 +269,20 @@ class TB_Outil extends BP_Group_Extension {
 	}
 
 	/**
+	 * Si l'outil est désactivé dans la config générale, vide le panneau de
+	 * réglages de l'outil et affiche un message à la place des réglages
+	 */
+	protected function controleAccesReglages() {
+		if (
+			(! bp_is_group_admin_screen($this->slug)) ||
+			($this->desactive_globalement)
+		) {
+			echo "<p>L'outil " . $this->name . " a été désactivé par l'administrateur du site.</p>";
+			exit;
+		}
+	}
+
+	/**
 	 * Si l'outil est privé, vérifie que l'utilisateur en cours est membre du
 	 * projet : si oui, ne fait rien; si non, affiche un message et interrompt
 	 * le chargement
@@ -267,7 +291,7 @@ class TB_Outil extends BP_Group_Extension {
 		if ($this->prive) {
 			$estMembre = groups_is_user_member($this->userId, $this->groupId);
 			if (! $estMembre && ! is_super_admin()) {
-				echo "<h4>L'outil <?php echo $this->name ?> est réservé aux membres du projet</h4>";
+				echo "<p>L'outil " . $this->name . " est réservé aux membres du projet</p>";
 				exit;
 			}
 		}
