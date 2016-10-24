@@ -19,6 +19,20 @@ class Forum extends TB_Outil {
 		return $configDefaut;
 	}
 
+	protected function preparer_config_locale()
+	{
+		$config_locale = $this->config;
+
+		unset($config_locale['active']);
+		unset($config_locale['domainRoot']); // inutile, toujours redéfini
+		unset($config_locale['displayListTitle']);
+		unset($config_locale['ezmlm-php']['rootUri']);
+		unset($config_locale['adapters']['AuthAdapterTB']['annuaireURL']);
+		unset($config_locale['adapters']['AuthAdapterTB']['headerName']);
+
+		return $config_locale;
+	}
+
 	/**
 	 * Exécuté lors de l'installation du plugin TelaBotanica; ATTENTION, à ce
 	 * moment elle est appelée en contexte non-objet
@@ -84,10 +98,8 @@ class Forum extends TB_Outil {
 		$this->config['baseUri'] = $this->getBaseUri();
 		// - URI de base pour les données (/wp-content/*)
 		$this->config['dataBaseUri'] = $this->getDataBaseUri();
-		//echo "DBU: [" . $this->config['dataBaseUri'] . "]";
 		// - nom de la liste
 		if (empty($this->config['ezmlm-php']['list'])) {
-			//$this->config['ezmlm-php']['list'] = "botadrome";
 			$this->config['ezmlm-php']['list'] = bp_get_current_group_slug();
 		}
 

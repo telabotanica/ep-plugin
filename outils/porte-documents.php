@@ -18,6 +18,19 @@ class Porte_Documents extends TB_Outil {
 		return $configDefaut;
 	}
 
+	protected function preparer_config_locale()
+	{
+		$config_locale = $this->config;
+
+		unset($config_locale['active']);
+		unset($config_locale['abstractionPath']);
+		unset($config_locale['filesServiceUrl']);
+		unset($config_locale['userInfoByIdUrl']);
+		unset($config_locale['authUrl']);
+
+		return $config_locale;
+	}
+
 	/**
 	 * Exécuté lors de l'installation du plugin TelaBotanica
 	 */

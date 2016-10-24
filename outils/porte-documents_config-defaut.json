@@ -7,6 +7,5 @@
 	"abstractionPath": "/_projets",
 	"ressourcesPath": "",
 	"group": null,
-	"authUrl": "https://www.tela-botanica.org/service:annuaire:auth",
-	"tokenUrl": "https://www.tela-botanica.org/service:annuaire:auth/identite"
+	"authUrl": "https://www.tela-botanica.org/service:annuaire:auth"
 }

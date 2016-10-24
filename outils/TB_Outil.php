@@ -156,10 +156,19 @@ class TB_Outil extends BP_Group_Extension {
 		}
 	}
 
-	// @TODO génériciser pour en faire un insert/update automatique
+	/**
+	 * Écrit dans la configuration locale (pour le projet en cours) les valeurs
+	 * par défaut des options qui peuvent être changées par le menu "réglages du
+	 * projet"; attention à ne pas écrire les options qui sont manipulées par le
+	 * réglage général du plugin dans le TdB WP, sans quoi ce réglage général ne
+	 * fonctionnera plus ! Voir preparer_config_locale()
+	 */
 	protected function ecrireConfigLocale()
 	{
 		global $wpdb;
+
+		// différence entre la config totale et les options générales du TdB
+		$config_locale = $this->preparer_config_locale();
 
 		$bpGroupId = bp_get_current_group_id();
 		// 0 signifie qu'on n'est pas dans une page de groupe
@@ -173,10 +182,24 @@ class TB_Outil extends BP_Group_Extension {
 				"create_step_position" => $this->create_step_position,
 				"nav_item_position" => $this->nav_item_position,
 				"enable_nav_item" => $this->enable_nav_item,
-				"config" => json_encode($this->config)
+				"config" => json_encode($config_locale)
 			);
 			$wpdb->insert($table, $data);
 		}
+	}
+
+	/**
+	 * Retourne une sous-partie de $this->config ne contenant que les options de
+	 * l'outil en cours pouvant être modifiées dans l'onglet Réglages du projet
+	 * @TODO améliorer cette stratégie (définition positive plutôt que négative
+	 * => généricisation ?)
+	 */
+	protected function preparer_config_locale()
+	{
+		// par défaut tous les outils ont au moins un paramètre général "active"
+		$config_locale = $this->config;
+		unset($config_locale['active']);
+		return $config_locale;
 	}
 
 	/**
