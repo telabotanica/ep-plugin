@@ -87,8 +87,10 @@ function tb_ssmenu_configuration() {
 
 		<!-- Menu des onglets -->
 		<h2 class="nav-tab-wrapper">  
-		    <a href="?page=configuration&onglet=porte-documents" class="nav-tab <?php echo $onglet_actif == 'porte-documents' ? 'nav-tab-active' : ''; ?>">Porte-documents</a>  
-		    <a href="?page=configuration&onglet=forum" class="nav-tab <?php echo $onglet_actif == 'forum' ? 'nav-tab-active' : ''; ?>">Forum</a>  
+		    <a href="?page=configuration&onglet=porte-documents" class="nav-tab <?php echo $onglet_actif == 'porte-documents' ? 'nav-tab-active' : ''; ?>">Porte-documents</a>
+		    <a href="?page=configuration&onglet=forum" class="nav-tab <?php echo $onglet_actif == 'forum' ? 'nav-tab-active' : ''; ?>">Forum</a>
+			<a href="?page=configuration&onglet=wiki" class="nav-tab <?php echo $onglet_actif == 'wiki' ? 'nav-tab-active' : ''; ?>">Wiki</a>
+			<a href="?page=configuration&onglet=flora-data" class="nav-tab <?php echo $onglet_actif == 'flora-data' ? 'nav-tab-active' : ''; ?>">FloraData</a>
 			<!--<a href="?page=configuration&onglet=autre" class="nav-tab <?php echo $onglet_actif == 'autre' ? 'nav-tab-active' : ''; ?>">Autre machin</a>  -->
 		</h2>
 
@@ -202,7 +204,7 @@ function tb_ssmenu_configuration() {
 			</form>
 	       
 	       <?php
-	    } 
+	    }
 	    
 	    /* Onglet Forum */
 	    elseif( $onglet_actif == 'forum' ) {
@@ -313,7 +315,158 @@ function tb_ssmenu_configuration() {
 					<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
 				</p>
 			</form>
-	<?php } ?>
+	<?php }
 
+	    /* Onglet Wiki */
+	    elseif( $onglet_actif == 'wiki' ) {
+			$opt_name_wiki = 'tb_wiki_config';
+			$hidden_field_name_wiki = 'tb_submit_hidden';
+
+			// chargement de la config actuelle
+			$configActuelleWiki = json_decode(get_option($opt_name_wiki), true);
+			//var_dump($configActuelleForum);
+
+			// si la config actuelle est vide, on charge la config par défaut
+			if (empty($configActuelleWiki)) {
+				// config par défaut de l'outil
+				$cheminConfigDefautWiki = __DIR__ . '/../outils/wiki_config-defaut.json';
+				$configDefautWiki = json_decode(file_get_contents($cheminConfigDefautWiki), true);
+				$configActuelleWiki = $configDefautWiki;
+			}
+
+			// si le formulaire est validé
+			if( isset($_POST[$hidden_field_name_wiki]) && $_POST[$hidden_field_name_wiki] == 'Y' ) {
+				// récupération des valeurs du formulaire
+				$rootUrl = $_POST['rootUrl'];
+				$active = ($_POST['active'] == 'true');
+				// injection des valeurs du formulaire
+				$configActuelleWiki['rootUrl'] = $rootUrl;
+				$configActuelleWiki['active'] = $active;
+				// mise à jour de la BDD
+				update_option($opt_name_wiki, json_encode($configActuelleWiki));
+			?>
+
+			<!-- Confirmation de l'enregistrement -->
+			<div class="updated">
+				<p>
+					<strong>Options mises à jour</strong>
+				</p>
+			</div>
+			
+			<?php
+			}
+			
+			?>
+
+			<form method="post" action="">
+				<input type="hidden" name="<?php echo $hidden_field_name_wiki; ?>" value="Y">
+				<table class="form-table">
+					<tbody>
+						<tr>
+							<th scope="row">
+								<label>Disponibilité</label>
+							</th>
+							<td>
+								<select name="active">
+									<option value="true" <?php echo ($configActuelleWiki['active'] ? 'selected' : '') ?>>Activé</option>
+									<option value="false" <?php echo ($configActuelleWiki['active'] ? '' : 'selected') ?>>Désactivé</option>
+								</select>
+								<p class="description">Si "désactivé", l'outil ne sera disponible dans aucun projet.</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label>URL racine des wikini</label>
+							</th>
+							<td>
+								<input type="text" name="rootUrl" value="<?php echo $configActuelleWiki['rootUrl']; ?>" class="regular-text" />
+								<p class="description">Ne pas mettre de "/" (slash) à la fin.</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<hr/>
+				<!-- Enregistrer les modifications -->
+				<p class="submit">
+					<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
+				</p>
+			</form>
+	<?php }
+
+	    /* Onglet FloraData */
+	    elseif( $onglet_actif == 'flora-data' ) {
+			$opt_name_floradata = 'tb_flora-data_config';
+			$hidden_field_name_floradata = 'tb_submit_hidden';
+
+			// chargement de la config actuelle
+			$configActuelleFloraData = json_decode(get_option($opt_name_floradata), true);
+			//var_dump($configActuelleFloraData);
+
+			// si la config actuelle est vide, on charge la config par défaut
+			if (empty($configActuelleFloraData)) {
+				// config par défaut de l'outil
+				$cheminConfigDefautFloraData = __DIR__ . '/../outils/flora-data_config-defaut.json';
+				$configDefautFloraData = json_decode(file_get_contents($cheminConfigDefautFloraData), true);
+				$configActuelleFloraData = $configDefautFloraData;
+			}
+
+			// si le formulaire est validé
+			if( isset($_POST[$hidden_field_name_floradata]) && $_POST[$hidden_field_name_floradata] == 'Y' ) {
+				// récupération des valeurs du formulaire
+				$rootUrl = $_POST['rootUrl'];
+				$active = ($_POST['active'] == 'true');
+				// injection des valeurs du formulaire
+				$configActuelleFloraData['rootUrl'] = $rootUrl;
+				$configActuelleFloraData['active'] = $active;
+				// mise à jour de la BDD
+				update_option($opt_name_floradata, json_encode($configActuelleFloraData));
+			?>
+
+			<!-- Confirmation de l'enregistrement -->
+			<div class="updated">
+				<p>
+					<strong>Options mises à jour</strong>
+				</p>
+			</div>
+			
+			<?php
+			}
+			
+			?>
+
+			<form method="post" action="">
+				<input type="hidden" name="<?php echo $hidden_field_name_floradata; ?>" value="Y">
+				<table class="form-table">
+					<tbody>
+						<tr>
+							<th scope="row">
+								<label>Disponibilité</label>
+							</th>
+							<td>
+								<select name="active">
+									<option value="true" <?php echo ($configActuelleFloraData['active'] ? 'selected' : '') ?>>Activé</option>
+									<option value="false" <?php echo ($configActuelleFloraData['active'] ? '' : 'selected') ?>>Désactivé</option>
+								</select>
+								<p class="description">Si "désactivé", l'outil ne sera disponible dans aucun projet.</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label>URL racine des widgets</label>
+							</th>
+							<td>
+								<input type="text" name="rootUrl" value="<?php echo $configActuelleFloraData['rootUrl']; ?>" class="regular-text" />
+								<p class="description">Ne pas mettre de "/" (slash) à la fin.</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<hr/>
+				<!-- Enregistrer les modifications -->
+				<p class="submit">
+					<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
+				</p>
+			</form>
+		<?php } ?>
 	</div>
 <?php }?>

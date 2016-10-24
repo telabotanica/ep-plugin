@@ -1,7 +1,6 @@
 {
 	"active": true,
 	"domainRoot": "http://localhost",
-	"title": "",
 	"hrefBuildMode": "REST",
 	"defaultPage": "view-list",
 	"displayListTitle": true,

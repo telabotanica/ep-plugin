@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Intégration de l'appli "forum" pour ezmlm-php-ng
+ * Pseudo-outil : intégration d'un flora-data existant (FloraDatani) dans un <iframe>
  */
-class Forum extends TB_Outil {
+class FloraData extends TB_Outil {
 
 	public function __construct()
 	{
 		// identifiant de l'outil et nom par défaut
-		$this->slug = 'forum';
-		$this->name = 'Forum';
+		$this->slug = 'flora-data';
+		$this->name = 'FloraData';
 
 		// init du parent
 		$this->initialisation();
@@ -20,11 +20,7 @@ class Forum extends TB_Outil {
 		$config_locale = $this->config;
 
 		unset($config_locale['active']);
-		unset($config_locale['domainRoot']); // inutile, toujours redéfini
-		unset($config_locale['displayListTitle']);
-		unset($config_locale['ezmlm-php']['rootUri']);
-		unset($config_locale['adapters']['AuthAdapterTB']['annuaireURL']);
-		unset($config_locale['adapters']['AuthAdapterTB']['headerName']);
+		unset($config_locale['rootUrl']);
 
 		return $config_locale;
 	}
@@ -36,9 +32,9 @@ class Forum extends TB_Outil {
 	public function installation()
 	{
 		$configDefaut = Forum::getConfigDefautOutil();
-		// l'id outil "forum" n'est pas tiré de $this->slug car la méthode d'install
+		// l'id outil "flora-data" n'est pas tiré de $this->slug car la méthode d'install
 		// est appelée en contexte non-objet => mettre le slug dans un attribut statique ?
-		add_option('tb_forum_config',json_encode($configDefaut));
+		add_option('tb_flora-data_config',json_encode($configDefaut));
 	}
 
 	/**
@@ -47,14 +43,37 @@ class Forum extends TB_Outil {
 	 */
 	public function desinstallation()
 	{
-		// l'id outil "forum" n'est pas tiré de $this->slug car la méthode d'install
+		// l'id outil "flora-data" n'est pas tiré de $this->slug car la méthode d'install
 		// est appelée en contexte non-objet => mettre le slug dans un attribut statique ?
-		delete_option('tb_forum_config');
+		delete_option('tb_flora-data_config');
 	}
 
 	public function scriptsEtStylesAvant()
 	{
-		wp_enqueue_script('bootstrap-js', $this->urlOutil . 'bower_components/bootstrap/dist/js/bootstrap.min.js');
+		wp_enqueue_style('FloraData-CSS', $this->urlOutil . 'css/ezmlm-forum-internal.css');
+		// astuce crado pour éviter d'utiliser un fichier CSS @TODO faire mieux
+		function styleEnLigneEPFloraData() {
+			echo '
+			<style type="text/css">
+				#flora-data-cartoPoint {
+					height: 600px;
+				}
+				#flora-data-saisie {
+					height: 1800px;
+				}
+				#flora-data-export {
+					height: 600px;
+				}
+				#flora-data-photo {
+					height: 600px;
+				}
+				#flora-data-observation {
+					height: 400px;
+				}
+			</style>
+			';
+		}
+		add_action( 'wp_print_styles', 'styleEnLigneEPFloraData' );
 		// @WTF le style n'est pas écrasé par le BS du thème, malgré son ID
 		// identique et sa priorité faible, c'est lui qui écrase l'autre :-/
 		// @TODO trouver une solution, car si on utilise le plugin sans le thème,
@@ -62,60 +81,32 @@ class Forum extends TB_Outil {
 		// wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bower_components/bootstrap/dist/css/bootstrap.min.css');
 	}
 
+
 	public function scriptsEtStylesApres()
 	{
-		wp_enqueue_script('jquery-noconflict-compat', $this->urlOutil . 'js/jquery-noconflict-compat.js');
-		wp_enqueue_script('moment', $this->urlOutil . 'bower_components/moment/min/moment.min.js');
-		wp_enqueue_script('moment-fr', $this->urlOutil . 'bower_components/moment/locale/fr.js');
-		wp_enqueue_script('mustache', $this->urlOutil . 'bower_components/mustache.js/mustache.min.js');
-		wp_enqueue_script('binette', $this->urlOutil . 'bower_components/binette.js/binette.js');
-
-		wp_enqueue_style('EzmlmForum-CSS', $this->urlOutil . 'css/ezmlm-forum-internal.css');
-
-		// code de l'appli Forum
-		wp_enqueue_script('AuthAdapter', $this->urlOutil . 'js/AuthAdapter.js');
-		wp_enqueue_script('AuthAdapterTB', $this->urlOutil . 'js/auth/AuthAdapterTB.js');
-		wp_enqueue_script('EzmlmForum', $this->urlOutil . 'js/EzmlmForum.js');
-		wp_enqueue_script('ViewThread', $this->urlOutil . 'js/ViewThread.js');
-		wp_enqueue_script('ViewList', $this->urlOutil . 'js/ViewList.js');
+		//wp_enqueue_style('EzmlmForum-CSS', $this->urlOutil . 'css/ezmlm-forum-internal.css');
 	}
 
 	/*
-	 * Vue onglet principal - affichage du forum dans la page
+	 * Vue onglet principal - affichage du flora-data dans la page
 	 */
 	function display($group_id = null)
 	{
-		$this->appliquerCaracterePrive();
+		$urlRacine = $this->config['rootUrl'];
+		$modules = $this->config['modules'];
+		$projet = $this->config['projet'];
 
-		// paramètres automatiques :
-		// - domaine racine
-		$this->config['domainRoot'] = $this->getServerRoot();
-		// - URI de base
-		$this->config['baseUri'] = $this->getBaseUri();
-		// - URI de base pour les données (/wp-content/*)
-		$this->config['dataBaseUri'] = $this->getDataBaseUri();
-		// - nom de la liste
-		if (empty($this->config['ezmlm-php']['list'])) {
-			$this->config['ezmlm-php']['list'] = bp_get_current_group_slug();
+		if (! empty($urlRacine) && !empty($projet)) {
+			foreach($modules as $nomModule => $actif) {
+				if (! $actif) continue;
+				// inclusion d'une iframe
+				$adresseWidget = $urlRacine . '/widget:cel:' . $nomModule . '?projet=' . $projet;
+				echo '<iframe id="flora-data-' . $nomModule . '" src="' . $adresseWidget . '" style="width: 100%; margin-bottom: 100px;">';
+				echo '</iframe>';
+			}
+		} else {
+			echo "<p>Mot-clé du projet vide ou URL racine manquante; vérifiez la configuration.</p>";
 		}
-
-		//var_dump($this->config);
-
-		// portée des styles
-		echo '<div class="wp-bootstrap">';
-		echo '<div id="ezmlm-forum-main">';
-
-		// amorcer l'outil
-		chdir(dirname(__FILE__) . "/forum/");
-		require "ezmlm-forum.php";
-		$fc = new EzmlmForum($this->config); // front controller
-
-		// - définir le titre
-
-		// - inclure le corps de page
-		$fc->renderPage();
-		echo "</div>";
-		echo "</div>";
 	}
 
 	/* Vue onglet admin */
@@ -138,9 +129,32 @@ class Forum extends TB_Outil {
 		</p>
 
 		<p class="editfield">
-			<label for="liste-outil">Nom de la liste</label>
-			<input type="text" disabled="disabled" id="liste-outil" placeholder="automatique (nom du projet)" value="<?php echo $this->config['ezmlm-php']['list'] ?>" />
-			<span class="description">Vous ne pouvez pas modifier ce paramètre.</span>
+			<label for="mot-cle-projet">Mot-clé du projet flora-data</label>
+			<input type="text" name="mot-cle-projet" value="<?php echo $this->config['projet'] ?>" />
+		</p>
+
+		<p class="editfield">
+			<label>Modules</label>
+			<label for="module-cartoPoint">
+				<input id="module-cartoPoint" type="checkbox" name="module-cartoPoint" <?php echo $this->config['modules']['cartoPoint'] ? 'checked' : '' ?> >
+				Carte des observations
+			</label>
+			<label for="module-photo">
+				<input id="module-photo" type="checkbox" name="module-photo" <?php echo $this->config['modules']['photo'] ? 'checked' : '' ?> >
+				Galerie photo
+			</label>
+			<label for="module-observation">
+				<input id="module-observation" type="checkbox" name="module-observation" <?php echo $this->config['modules']['observation'] ? 'checked' : '' ?> >
+				Flux des dernières observations
+			</label>
+			<label for="module-saisie">
+				<input id="module-saisie" type="checkbox" name="module-saisie" <?php echo $this->config['modules']['saisie'] ? 'checked' : '' ?> >
+				Saisie d'observations
+			</label>
+			<label for="module-export">
+				<input id="module-export" type="checkbox" name="module-export" <?php echo $this->config['modules']['export'] ? 'checked' : '' ?> >
+				Export des observations
+			</label>
 		</p>
 
 		<p class="editfield">
@@ -170,6 +184,10 @@ class Forum extends TB_Outil {
 		if ( !isset( $_POST ) )	return false; // gni?
 		check_admin_referer( 'groups_edit_save_' . $this->slug );
 
+		// mise à jour de la config
+		$configModifiee = $this->config;
+		$configModifiee['projet'] = $_POST['mot-cle-projet'];
+
 		/* Mise à jour de la ligne dans la base de données */
 		$table = "{$wpdb->prefix}tb_outils_reglages";
 		//var_dump($_POST); exit;
@@ -177,7 +195,8 @@ class Forum extends TB_Outil {
 			'enable_nav_item' => ($_POST['activation-outil'] == 'true'),
 			'name' => $_POST['nom-outil'],
 			//'nav_item_position' => $_POST['position-outil'],
-			'prive' => ($_POST['confidentialite-outil'] == 'true')
+			'prive' => ($_POST['confidentialite-outil'] == 'true'),
+			'config' => json_encode($configModifiee)
 		);
 		$where = array( 												
 			'id_projet' => $id_projet,
@@ -194,4 +213,4 @@ class Forum extends TB_Outil {
 	}
 }
 
-bp_register_group_extension( 'Forum' );
+bp_register_group_extension( 'FloraData' );

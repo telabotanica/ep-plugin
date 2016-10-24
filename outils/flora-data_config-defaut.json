@@ -1,0 +1,12 @@
+{
+	"active": true,
+	"rootUrl": "https://www.tela-botanica.org",
+	"projet": "",
+	"modules": {
+		"cartoPoint": true,
+		"photo": false,
+		"observation": false,
+		"saisie": true,
+		"export": false
+	}
+}
