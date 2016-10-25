@@ -1,6 +1,6 @@
 {
 	"active": true,
-	"rootUrl": "https://www.tela-botanica.org",
+	"rootUrl": "https://www.tela-botanica.org/widget:cel",
 	"projet": "",
 	"modules": {
 		"cartoPoint": true,

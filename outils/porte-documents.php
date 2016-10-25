@@ -18,9 +18,12 @@ class Porte_Documents extends TB_Outil {
 		return $configDefaut;
 	}
 
-	protected function preparer_config_locale()
+	protected function preparer_config_locale($config=null)
 	{
-		$config_locale = $this->config;
+		$config_locale = $config;
+		if ($config_locale === null) {
+			$config_locale = $this->config;
+		}
 
 		unset($config_locale['active']);
 		unset($config_locale['abstractionPath']);

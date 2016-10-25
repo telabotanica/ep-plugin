@@ -22,9 +22,12 @@ class FloraData extends TB_Outil {
 		return $configDefaut;
 	}
 
-	protected function preparer_config_locale()
+	protected function preparer_config_locale($config=null)
 	{
-		$config_locale = $this->config;
+		$config_locale = $config;
+		if ($config_locale === null) {
+			$config_locale = $this->config;
+		}
 
 		unset($config_locale['active']);
 		unset($config_locale['rootUrl']);
@@ -106,7 +109,7 @@ class FloraData extends TB_Outil {
 			foreach($modules as $nomModule => $actif) {
 				if (! $actif) continue;
 				// inclusion d'une iframe
-				$adresseWidget = $urlRacine . '/widget:cel:' . $nomModule . '?projet=' . $projet;
+				$adresseWidget = $urlRacine . ':' . $nomModule . '?projet=' . $projet;
 				echo '<iframe id="flora-data-' . $nomModule . '" src="' . $adresseWidget . '" style="width: 100%; margin-bottom: 100px;">';
 				echo '</iframe>';
 			}
@@ -191,7 +194,8 @@ class FloraData extends TB_Outil {
 		check_admin_referer( 'groups_edit_save_' . $this->slug );
 
 		// mise à jour de la config
-		$configModifiee = $this->config;
+		$configModifiee = FloraData::getConfigDefautOutil();
+		$configModifiee = $this->preparer_config_locale($configModifiee);
 		$configModifiee['projet'] = $_POST['mot-cle-projet'];
 
 		foreach ($configModifiee['modules'] as $nomModule => &$active) {

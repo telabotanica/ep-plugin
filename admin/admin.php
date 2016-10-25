@@ -456,7 +456,7 @@ function tb_ssmenu_configuration() {
 							</th>
 							<td>
 								<input type="text" name="rootUrl" value="<?php echo $configActuelleFloraData['rootUrl']; ?>" class="regular-text" />
-								<p class="description">Ne pas mettre de "/" (slash) à la fin.</p>
+								<p class="description">Ne pas mettre de ":" (slash) à la fin (ex: ".../widget:cel").</p>
 							</td>
 						</tr>
 					</tbody>

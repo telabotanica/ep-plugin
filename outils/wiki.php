@@ -22,9 +22,12 @@ class Wiki extends TB_Outil {
 		return $configDefaut;
 	}
 
-	protected function preparer_config_locale()
+	protected function preparer_config_locale($config=null)
 	{
-		$config_locale = $this->config;
+		$config_locale = $config;
+		if ($config_locale === null) {
+			$config_locale = $this->config;
+		}
 
 		unset($config_locale['active']);
 		unset($config_locale['rootUrl']);
@@ -81,7 +84,7 @@ class Wiki extends TB_Outil {
 		$nomWiki = $this->config['wikiName'];
 
 		if (! empty($nomWiki) && ! empty($urlRacine)) {
-			$adresseWiki = $urlRacine . '/' . $nomWiki
+			$adresseWiki = $urlRacine . '/' . $nomWiki . '/wakka.php?wiki=PagePrincipale/iframe';
 			//. '/iframe'
 			;
 			echo '<iframe id="wiki-integre" src="' . $adresseWiki . '" style="width: 100%; height: 1000px;">';
