@@ -15,6 +15,13 @@ class FloraData extends TB_Outil {
 		$this->initialisation();
 	}
 
+	public function getConfigDefautOutil()
+	{
+		$cheminConfig = __DIR__ . "/flora-data_config-defaut.json";
+		$configDefaut = json_decode(file_get_contents($cheminConfig), true);
+		return $configDefaut;
+	}
+
 	protected function preparer_config_locale()
 	{
 		$config_locale = $this->config;
@@ -31,7 +38,7 @@ class FloraData extends TB_Outil {
 	 */
 	public function installation()
 	{
-		$configDefaut = Forum::getConfigDefautOutil();
+		$configDefaut = FloraData::getConfigDefautOutil();
 		// l'id outil "flora-data" n'est pas tiré de $this->slug car la méthode d'install
 		// est appelée en contexte non-objet => mettre le slug dans un attribut statique ?
 		add_option('tb_flora-data_config',json_encode($configDefaut));
@@ -50,7 +57,6 @@ class FloraData extends TB_Outil {
 
 	public function scriptsEtStylesAvant()
 	{
-		wp_enqueue_style('FloraData-CSS', $this->urlOutil . 'css/ezmlm-forum-internal.css');
 		// astuce crado pour éviter d'utiliser un fichier CSS @TODO faire mieux
 		function styleEnLigneEPFloraData() {
 			echo '

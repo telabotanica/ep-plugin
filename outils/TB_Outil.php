@@ -82,13 +82,13 @@ class TB_Outil extends BP_Group_Extension {
     }
 
 	/**
-	 * Retourne la "configuration" par défaut d'un outil
+	 * Retourne la "configuration" par défaut d'un outil : pas les réglages de
+	 * l'onglet BP (position, nom, etc.) mais les réglages de l'outil, par exemple
+	 * pour le forum : URL racine de la lib ezmlm-php, etc.
 	 */
 	protected function getConfigDefautOutil()
 	{
-		$cheminConfig = __DIR__ . "/" . $this->slug . "_config-defaut.json";
-		$configDefaut = json_decode(file_get_contents($cheminConfig), true);
-		return $configDefaut;
+		return array();
 	}
 
 	/**

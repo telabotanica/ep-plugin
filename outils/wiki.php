@@ -15,6 +15,13 @@ class Wiki extends TB_Outil {
 		$this->initialisation();
 	}
 
+	public function getConfigDefautOutil()
+	{
+		$cheminConfig = __DIR__ . "/wiki_config-defaut.json";
+		$configDefaut = json_decode(file_get_contents($cheminConfig), true);
+		return $configDefaut;
+	}
+
 	protected function preparer_config_locale()
 	{
 		$config_locale = $this->config;
@@ -32,7 +39,7 @@ class Wiki extends TB_Outil {
 	 */
 	public function installation()
 	{
-		$configDefaut = Forum::getConfigDefautOutil();
+		$configDefaut = Wiki::getConfigDefautOutil();
 		// l'id outil "wiki" n'est pas tiré de $this->slug car la méthode d'install
 		// est appelée en contexte non-objet => mettre le slug dans un attribut statique ?
 		add_option('tb_wiki_config',json_encode($configDefaut));

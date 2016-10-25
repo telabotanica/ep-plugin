@@ -1,8 +1,5 @@
 <?php
 
-/**
- * Intégration de l'appli "forum" pour ezmlm-php-ng
- */
 class Forum extends TB_Outil {
 
 	public function __construct()
@@ -13,6 +10,13 @@ class Forum extends TB_Outil {
 
 		// init du parent
 		$this->initialisation();
+	}
+
+	public function getConfigDefautOutil()
+	{
+		$cheminConfig = __DIR__ . "/forum_config-defaut.json";
+		$configDefaut = json_decode(file_get_contents($cheminConfig), true);
+		return $configDefaut;
 	}
 
 	protected function preparer_config_locale()
