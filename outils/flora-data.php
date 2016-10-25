@@ -194,6 +194,13 @@ class FloraData extends TB_Outil {
 		$configModifiee = $this->config;
 		$configModifiee['projet'] = $_POST['mot-cle-projet'];
 
+		foreach ($configModifiee['modules'] as $nomModule => &$active) {
+			$cle = 'module-' . $nomModule;
+			$active = false;
+			if (isset($_POST[$cle])) {
+				$active = ($_POST[$cle] == 'on');
+			}
+		}
 		/* Mise à jour de la ligne dans la base de données */
 		$table = "{$wpdb->prefix}tb_outils_reglages";
 		//var_dump($_POST); exit;
@@ -204,7 +211,7 @@ class FloraData extends TB_Outil {
 			'prive' => ($_POST['confidentialite-outil'] == 'true'),
 			'config' => json_encode($configModifiee)
 		);
-		$where = array( 												
+		$where = array(
 			'id_projet' => $id_projet,
 			'id_outil' => $this->slug
 		);
