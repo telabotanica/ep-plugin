@@ -1,6 +1,5 @@
 {
 	"active": true,
-	"title": "",
 	"ver": "0.1",
 	"filesServiceUrl": "http://api.tela-botanica.org/service:cumulus:doc",
 	"userInfoByIdUrl": "https://www.tela-botanica.org/service:annuaire:utilisateur/infosParIds",

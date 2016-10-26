@@ -3,6 +3,8 @@
 
 	"outils": [
 		"porte-documents",
-		"forum"
+		"forum",
+		"wiki",
+		"flora-data"
 	]
 }
