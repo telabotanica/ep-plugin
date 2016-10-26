@@ -22,6 +22,11 @@ class Wiki extends TB_Outil {
 		return $configDefaut;
 	}
 
+	/**
+	 * Prend en entrée un tableau de config (si $config est null, prendra
+	 * $this->config) et retire tous les paramètres qui ne se définissent pas
+	 * au niveau local (projet en cours) mais au niveau général (TdB WP)
+	 */
 	protected function preparer_config_locale($config=null)
 	{
 		$config_locale = $config;
@@ -115,8 +120,10 @@ class Wiki extends TB_Outil {
 
 		<p class="editfield">
 			<label for="liste-outil">Nom du wiki</label>
-			<input type="text" disabled="disabled" id="nom-wiki" placeholder="automatique (nom du projet)" value="<?php echo $this->config['wikiName'] ?>" />
-			<span class="description">Vous ne pouvez pas modifier ce paramètre.</span>
+			<input type="text" <?php echo is_super_admin() ? '' : 'disabled="disabled"' ?> id="nom-wiki" name="wikiName" placeholder="automatique (nom du projet)" value="<?php echo $this->config['wikiName'] ?>" />
+			<?php if (! is_super_admin()) { ?>
+				<span class="description">Vous ne pouvez pas modifier ce paramètre.</span>
+			<?php } ?>
 		</p>
 
 		<p class="editfield">
@@ -146,16 +153,24 @@ class Wiki extends TB_Outil {
 		if ( !isset( $_POST ) )	return false; // gni?
 		check_admin_referer( 'groups_edit_save_' . $this->slug );
 
+		// mise à jour de la config
+		$configModifiee = Wiki::getConfigDefautOutil();
+		$configModifiee = $this->preparer_config_locale($configModifiee);
+		if (is_super_admin()) {
+			$configModifiee['wikiName'] = $_POST['wikiName'];
+		}
+
 		/* Mise à jour de la ligne dans la base de données */
 		$table = "{$wpdb->prefix}tb_outils_reglages";
 		//var_dump($_POST); exit;
-		$data = array( 												
+		$data = array(
 			'enable_nav_item' => ($_POST['activation-outil'] == 'true'),
 			'name' => $_POST['nom-outil'],
 			//'nav_item_position' => $_POST['position-outil'],
-			'prive' => ($_POST['confidentialite-outil'] == 'true')
+			'prive' => ($_POST['confidentialite-outil'] == 'true'),
+			'config' => json_encode($configModifiee)
 		);
-		$where = array( 												
+		$where = array(
 			'id_projet' => $id_projet,
 			'id_outil' => $this->slug
 		);

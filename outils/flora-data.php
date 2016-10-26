@@ -22,6 +22,11 @@ class FloraData extends TB_Outil {
 		return $configDefaut;
 	}
 
+	/**
+	 * Prend en entrée un tableau de config (si $config est null, prendra
+	 * $this->config) et retire tous les paramètres qui ne se définissent pas
+	 * au niveau local (projet en cours) mais au niveau général (TdB WP)
+	 */
 	protected function preparer_config_locale($config=null)
 	{
 		$config_locale = $config;
@@ -105,9 +110,20 @@ class FloraData extends TB_Outil {
 		$modules = $this->config['modules'];
 		$projet = $this->config['projet'];
 
+		// @TODO mettre dans une config qqpart
+		$titres = array(
+			"cartoPoint" => "Carte des observations",
+			"photo" => "Galerie photo",
+			"observation" => "Flux des dernières observations",
+			"saisie" => "Saisie de nouvelles observations",
+			"export" => "Export des observations"
+		);
+
 		if (! empty($urlRacine) && !empty($projet)) {
 			foreach($modules as $nomModule => $actif) {
 				if (! $actif) continue;
+				// titre
+				echo '<h3>' . $titres[$nomModule] . '</h3>';
 				// inclusion d'une iframe
 				$adresseWidget = $urlRacine . ':' . $nomModule . '?projet=' . $projet;
 				echo '<iframe id="flora-data-' . $nomModule . '" src="' . $adresseWidget . '" style="width: 100%; margin-bottom: 100px;">';
