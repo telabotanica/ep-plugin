@@ -6,7 +6,7 @@
 		"cartoPoint": true,
 		"photo": false,
 		"observation": false,
-		"saisie": true,
-		"export": false
+		"export": false,
+		"saisie": true
 	}
 }
