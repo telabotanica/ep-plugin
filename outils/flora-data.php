@@ -172,13 +172,13 @@ class FloraData extends TB_Outil {
 				<input id="module-observation" type="checkbox" name="module-observation" <?php echo $this->config['modules']['observation'] ? 'checked' : '' ?> >
 				Flux des dernières observations
 			</label>
-			<label for="module-saisie">
-				<input id="module-saisie" type="checkbox" name="module-saisie" <?php echo $this->config['modules']['saisie'] ? 'checked' : '' ?> >
-				Saisie d'observations
-			</label>
 			<label for="module-export">
 				<input id="module-export" type="checkbox" name="module-export" <?php echo $this->config['modules']['export'] ? 'checked' : '' ?> >
 				Export des observations
+			</label>
+			<label for="module-saisie">
+				<input id="module-saisie" type="checkbox" name="module-saisie" <?php echo $this->config['modules']['saisie'] ? 'checked' : '' ?> >
+				Saisie d'observations
 			</label>
 		</p>
 
