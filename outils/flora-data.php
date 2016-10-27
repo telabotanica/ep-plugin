@@ -69,20 +69,29 @@ class FloraData extends TB_Outil {
 		function styleEnLigneEPFloraData() {
 			echo '
 			<style type="text/css">
+				iframe {
+					border: none;
+					margin-bottom: 50px;
+				}
 				#flora-data-cartoPoint {
 					height: 600px;
+					width: 100%;
 				}
 				#flora-data-saisie {
-					height: 1800px;
+					height: 1600px;
+					width: 100%;
 				}
 				#flora-data-export {
 					height: 600px;
+					width: auto;
 				}
 				#flora-data-photo {
 					height: 600px;
+					width: 100%;
 				}
 				#flora-data-observation {
 					height: 400px;
+					width: 100%;
 				}
 			</style>
 			';
@@ -126,7 +135,7 @@ class FloraData extends TB_Outil {
 				echo '<h3>' . $titres[$nomModule] . '</h3>';
 				// inclusion d'une iframe
 				$adresseWidget = $urlRacine . ':' . $nomModule . '?projet=' . $projet;
-				echo '<iframe id="flora-data-' . $nomModule . '" src="' . $adresseWidget . '" style="width: 100%; margin-bottom: 100px;">';
+				echo '<iframe id="flora-data-' . $nomModule . '" src="' . $adresseWidget . '">';
 				echo '</iframe>';
 			}
 		} else {
