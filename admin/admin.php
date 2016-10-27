@@ -13,56 +13,156 @@ function tb_ajout_pages() {
 
     // Ajoute un menu 'Tela Botanica' au tableau de bord Wordpress
     add_menu_page(
-		'Espace Projets', 
-		'Espace Projets', 
-		'manage_options', 
-		'telabotanica'
+		'Tela Botanica',
+		'Tela Botanica',
+		'manage_options',
+		'telabotanica',
+		'',
+		'dashicons-carrot'
 	);
 
     // Ajoute un sous-menu 'Présentation' dans 'Tela Botanica'
     add_submenu_page(
-    	'telabotanica', 
+    	'telabotanica',
     	'Présentation',
-    	'Présentation', 
-    	'manage_options', 
+    	'Présentation',
+    	'manage_options',
     	'telabotanica', // On donne le même 'menu_slug' que celui du menu pour écraser le sous-menu automatique
-    	'tb_ssmenu_home'
+    	'tb_menu_home'
     );
 
-    // Ajoute un sous-menu 'Configuration' dans 'Tela Botanica'
+    // Ajoute un sous-menu 'Espace projets' dans 'Tela Botanica'
     add_submenu_page(
-    	'telabotanica', 
-    	'Configuration', 
-    	'Configuration', 
-    	'manage_options', 
-    	'configuration', 
-    	'tb_ssmenu_configuration'
+    	'telabotanica',
+    	'Espace projets',
+    	'Espace projets',
+    	'manage_options',
+    	'espace_projets',
+    	'tb_menu_espace_projets'
+    );
+
+    add_submenu_page(
+    	'telabotanica',
+    	'Hooks',
+    	'Hooks',
+    	'manage_options',
+    	'hooks',
+    	'tb_menu_hooks'
     );
 }
 
 /**
  * Page de présentation et documentation du plugin
  */
-function tb_ssmenu_home() {
+function tb_menu_home() {
 	include "admin_presentation.php";
 }
 
+function tb_menu_hooks() {
+
+	// function display_lines($config_hooks) {
+	// 	var_dump($config_hooks);
+	// 	foreach ($config_hooks['email-modification-urls'] as $url) {
+	// 		var_dump($url);
+	// 		echo $url . '\n';
+	// 	}
+	// }
+?>
+	<!-- Vue du sous-menu 'espace_projets' -->
+	<div class="wrap">
+
+		<?php
+		if (!current_user_can('manage_options'))
+		{
+			wp_die( __('Vous n\'avez pas les droits suffisants pour accéder à cette page.') );
+		}
+		?>
+
+		<?php screen_icon(); ?>
+
+		<!-- Titre -->
+		<h2>Configuration des hooks de synchro</h2>
+
+		<!-- Description -->
+		<div class="description">
+			<p>Permet de modifier les URLs à appeler pour synchroniser des modifications de données entre les différents outils Tela.<br>Par exemple, lorsqu'un utilisateur change son adresse email dans le profil.</p>
+		</div>
+
+		<?php settings_errors(); ?>
+
+		<?php
+
+			$hooks_option_name = 'tb_hooks_config';
+			$hidden_field_name = 'tb_submit_hidden';
+
+			// chargement de la config depuis la BdD
+			$config_hooks = json_decode(get_option($hooks_option_name), true);
+
+			// si elle est vide on charge celle par défaut
+			if (empty($config_hooks)) {
+				$config_hooks = json_decode(file_get_contents(__DIR__ . '/hooks_config-defaut.json'), true);
+
+			}
+
+			// enregistre les changements de config en BdD
+			if (isset($_POST[$hidden_field_name]) && $_POST[$hidden_field_name] == 'Y') {
+				$config_hooks['email-modification-urls'] = stripslashes($_POST['email-modification-urls']);
+
+				update_option($hooks_option_name, json_encode($config_hooks));
+
+		?>
+
+				<!-- Confirmation de l'enregistrement -->
+				<div class="updated">
+					<p><strong>Mise à jour effectuée</strong></p>
+				</div>
+
+		<?php
+
+			}
+
+		?>
+
+		<form method="post" action="">
+			<input type="hidden" name="<?php echo $hidden_field_name; ?>" value="Y">
+			<table class="form-table">
+				<tbody>
+					</tr>
+						<th scope="row">
+							<label>URLs à appeler en cas de modification de l'adresse mail d'un utilisateur</label>
+						</th>
+						<td>
+							<textarea name="email-modification-urls" rows="10" cols="80" class="regular-text"><?php echo $config_hooks['email-modification-urls']; ?></textarea>
+							<p class="description">Une URL par ligne</p>
+						</td>
+					<tr>
+				</tbody>
+			</table>
+			<hr/>
+
+			<p class="submit">
+				<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
+			</p>
+		</form>
+<?php
+}
+
 /**
- * Affiche le sous-menu 'Configuration'; lit et enregistre les réglages dans
+ * Affiche le sous-menu 'Espace projets'; lit et enregistre les réglages dans
  * la table "options" de WP (standard)
  */
-function tb_ssmenu_configuration() {
-    
+function tb_menu_espace_projets() {
+
     /* Gestion des onglets */
-	if( isset( $_GET[ 'onglet' ] ) ) {  
-		$onglet_actif = $_GET[ 'onglet' ];  
+	if( isset( $_GET[ 'onglet' ] ) ) {
+		$onglet_actif = $_GET[ 'onglet' ];
 	} else {
 		// on glet par défaut
 		$onglet_actif = 'porte-documents';
 	}
 
-	?>
-	<!-- Vue du sous-menu 'Configuration' -->
+?>
+	<!-- Vue du sous-menu 'espace_projets' -->
 	<div class="wrap">
 
 		<?php
@@ -86,12 +186,12 @@ function tb_ssmenu_configuration() {
 		<?php settings_errors(); ?>
 
 		<!-- Menu des onglets -->
-		<h2 class="nav-tab-wrapper">  
-		    <a href="?page=configuration&onglet=porte-documents" class="nav-tab <?php echo $onglet_actif == 'porte-documents' ? 'nav-tab-active' : ''; ?>">Porte-documents</a>
-		    <a href="?page=configuration&onglet=forum" class="nav-tab <?php echo $onglet_actif == 'forum' ? 'nav-tab-active' : ''; ?>">Forum</a>
-			<a href="?page=configuration&onglet=wiki" class="nav-tab <?php echo $onglet_actif == 'wiki' ? 'nav-tab-active' : ''; ?>">Wiki</a>
-			<a href="?page=configuration&onglet=flora-data" class="nav-tab <?php echo $onglet_actif == 'flora-data' ? 'nav-tab-active' : ''; ?>">FloraData</a>
-			<!--<a href="?page=configuration&onglet=autre" class="nav-tab <?php echo $onglet_actif == 'autre' ? 'nav-tab-active' : ''; ?>">Autre machin</a>  -->
+		<h2 class="nav-tab-wrapper">
+		    <a href="?page=espace_projets&onglet=porte-documents" class="nav-tab <?php echo $onglet_actif == 'porte-documents' ? 'nav-tab-active' : ''; ?>">Porte-documents</a>
+		    <a href="?page=espace_projets&onglet=forum" class="nav-tab <?php echo $onglet_actif == 'forum' ? 'nav-tab-active' : ''; ?>">Forum</a>
+			<a href="?page=espace_projets&onglet=wiki" class="nav-tab <?php echo $onglet_actif == 'wiki' ? 'nav-tab-active' : ''; ?>">Wiki</a>
+			<a href="?page=espace_projets&onglet=flora-data" class="nav-tab <?php echo $onglet_actif == 'flora-data' ? 'nav-tab-active' : ''; ?>">FloraData</a>
+			<!--<a href="?page=espace_projets&onglet=autre" class="nav-tab <?php echo $onglet_actif == 'autre' ? 'nav-tab-active' : ''; ?>">Autre machin</a>  -->
 		</h2>
 
 		<!-- Onglet Porte-documents -->
@@ -128,18 +228,20 @@ function tb_ssmenu_configuration() {
 				$configActuellePd['authUrl'] = $authUrl;
 				// mise à jour de la BDD
 				update_option($opt_name_pd, json_encode($configActuellePd));
-			?>
-			
-			<!-- Confirmation de l'enregistrement -->
-			<div class="updated">
-				<p>
-					<strong>Options mises à jour</strong>
-				</p>
-			</div>
+		?>
 
-			<?php
+				<!-- Confirmation de l'enregistrement -->
+				<div class="updated">
+					<p>
+						<strong>Options mises à jour</strong>
+					</p>
+				</div>
+
+		<?php
+
 			}
-			?>
+
+		?>
 
 			<form method="post" action="">
 				<input type="hidden" name="<?php echo $hidden_field_name_pd; ?>" value="Y">
@@ -202,10 +304,10 @@ function tb_ssmenu_configuration() {
 					<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
 				</p>
 			</form>
-	       
-	       <?php
+
+    	<?php
 	    }
-	    
+
 	    /* Onglet Forum */
 	    elseif( $onglet_actif == 'forum' ) {
 			$opt_name_forum = 'tb_forum_config';
@@ -239,19 +341,20 @@ function tb_ssmenu_configuration() {
 				$configActuelleForum['active'] = $active;
 				// mise à jour de la BDD
 				update_option($opt_name_forum, json_encode($configActuelleForum));
-			?>
+		?>
 
-			<!-- Confirmation de l'enregistrement -->
-			<div class="updated">
-				<p>
-					<strong>Options mises à jour</strong>
-				</p>
-			</div>
-			
-			<?php
+				<!-- Confirmation de l'enregistrement -->
+				<div class="updated">
+					<p>
+						<strong>Options mises à jour</strong>
+					</p>
+				</div>
+
+		<?php
+
 			}
-			
-			?>
+
+		?>
 
 			<form method="post" action="">
 				<input type="hidden" name="<?php echo $hidden_field_name_forum; ?>" value="Y">
@@ -352,10 +455,10 @@ function tb_ssmenu_configuration() {
 					<strong>Options mises à jour</strong>
 				</p>
 			</div>
-			
+
 			<?php
 			}
-			
+
 			?>
 
 			<form method="post" action="">
@@ -428,10 +531,10 @@ function tb_ssmenu_configuration() {
 					<strong>Options mises à jour</strong>
 				</p>
 			</div>
-			
+
 			<?php
 			}
-			
+
 			?>
 
 			<form method="post" action="">
