@@ -90,10 +90,20 @@ class Wiki extends TB_Outil {
 
 		if (! empty($nomWiki) && ! empty($urlRacine)) {
 			$adresseWiki = $urlRacine . '/' . $nomWiki . '/wakka.php?wiki=PagePrincipale/iframe';
-			//. '/iframe'
 			;
-			echo '<iframe id="wiki-integre" src="' . $adresseWiki . '" style="width: 100%; height: 1000px;">';
-			echo '</iframe>';
+			?>
+			<script type="text/javascript">
+				// ramène l'iframe à l'accueil du Wiki
+				function wikiAccueil() {
+					var iframe = document.getElementById("wiki-integre");
+					var nouvelleUrl = '<?php echo $adresseWiki ?>';
+					iframe.src = nouvelleUrl;
+				}
+			</script>
+			<button onclick="wikiAccueil()">accueil du wiki</button>
+			<iframe id="wiki-integre" src="<?php echo $adresseWiki ?>" style="width: 100%; height: 1000px;">
+			</iframe>
+			<?php
 		} else {
 			echo "<p>Aucun wiki défini ou URL racine manquante; vérifiez la configuration.</p>";
 		}
