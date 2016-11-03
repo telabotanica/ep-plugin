@@ -29,7 +29,7 @@ class Hooks {
 		$message = 'Uhoh, we\'ve got a problemouz ! ' . "\r\n"
 			. "\r\n"
 			. 'URL du hook appelé : ' . curl_getinfo($ch, CURLINFO_EFFECTIVE_URL) . "\r\n"
-			. 'et son code d\'erreur : ' . curl_error($ch)
+			. 'et son code d\'erreur : ' . curl_getinfo($ch, CURLINFO_HTTP_CODE) . ' (' . curl_error($ch) . ')'
 		;
 
 		$headers = 'Content-Type: text/plain; charset="utf-8"' . "\r\n"
@@ -42,6 +42,7 @@ class Hooks {
 		foreach ($this->chargerHooksConfig()['error-recipients-emails'] as $error_recipient) {
 			if ('' != $error_recipient) {
 				error_log($message, 1, $error_recipient, $headers);
+				error_log($message);
 			}
 		}
 	}
@@ -55,7 +56,7 @@ class Hooks {
 					$count = 0;
 
 					$hook_service_url = preg_replace(
-						array('/{old_email}/', '/{new_email}/', '/{user_id}/'),
+						array('/{old_email}/i', '/{new_email}/i', '/{user_id}/i'),
 						array($old_user_data->user_email, $user->user_email, $user_id),
 						$hook_service_pattern, -1, $count
 					);
