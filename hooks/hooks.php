@@ -40,7 +40,7 @@ class Hooks {
 		;
 
 		foreach ($this->chargerHooksConfig()['error-recipients-emails'] as $error_recipient) {
-			if ('' != $error_recipients) {
+			if ('' != $error_recipient) {
 				error_log($message, 1, $error_recipient, $headers);
 			}
 		}
