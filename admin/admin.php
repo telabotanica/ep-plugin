@@ -100,9 +100,11 @@ function tb_menu_hooks() {
 			if (isset($_POST[$hidden_field_name]) && $_POST[$hidden_field_name] == 'Y') {
 				$hooks_config['email-modification-urls'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['email-modification-urls']));
 				$hooks_config['error-recipients-emails'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['error-recipients-emails']));
+				// suppression des lignes vides
+				$hooks_config['email-modification-urls'] = array_filter($hooks_config['email-modification-urls']);
+				$hooks_config['error-recipients-emails'] = array_filter($hooks_config['error-recipients-emails']);
 
 				update_option(Hooks::STORAGE_OPTION_NAME, json_encode($hooks_config));
-
 		?>
 
 				<!-- Confirmation de l'enregistrement -->
