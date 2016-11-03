@@ -47,6 +47,10 @@ add_action( 'bp_include', 'initialisation_bp' );
 add_action( 'bp_include', 'description_complete' );
 add_action( 'bp_include', 'categorie' );
 
+// Charge les hooks de synchronisation des données de wordpress vers les autres outils
+require( dirname( __FILE__ ) . '/hooks/hooks.php' );
+new Hooks;
+
 class TelaBotanica
 {
 

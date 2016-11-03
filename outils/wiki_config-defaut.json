@@ -1,4 +1,5 @@
 {
+	"_comments": "configuration par défaut, pour modifier ces valeurs il faut passer par l'interface d'admin Wordpress et trouver le sous-menu Tela-botanica",
 	"active": true,
 	"rootUrl": "https://www.tela-botanica.org/wikini",
 	"wikiName": ""

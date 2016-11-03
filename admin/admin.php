@@ -60,15 +60,7 @@ function tb_menu_home() {
 
 function tb_menu_hooks() {
 
-	// function display_lines($config_hooks) {
-	// 	var_dump($config_hooks);
-	// 	foreach ($config_hooks['email-modification-urls'] as $url) {
-	// 		var_dump($url);
-	// 		echo $url . '\n';
-	// 	}
-	// }
 ?>
-	<!-- Vue du sous-menu 'espace_projets' -->
 	<div class="wrap">
 
 		<?php
@@ -92,23 +84,24 @@ function tb_menu_hooks() {
 
 		<?php
 
-			$hooks_option_name = 'tb_hooks_config';
+			require_once(dirname( __FILE__ ) . '/../hooks/hooks.php');
+
 			$hidden_field_name = 'tb_submit_hidden';
 
 			// chargement de la config depuis la BdD
-			$config_hooks = json_decode(get_option($hooks_option_name), true);
+			$hooks_config = json_decode(get_option(Hooks::STORAGE_OPTION_NAME), true);
 
 			// si elle est vide on charge celle par défaut
-			if (empty($config_hooks)) {
-				$config_hooks = json_decode(file_get_contents(__DIR__ . '/hooks_config-defaut.json'), true);
-
+			if (empty($hooks_config)) {
+				$hooks_config = json_decode(file_get_contents(__DIR__ . '/../hooks/hooks_config.json'), true);
 			}
 
 			// enregistre les changements de config en BdD
 			if (isset($_POST[$hidden_field_name]) && $_POST[$hidden_field_name] == 'Y') {
-				$config_hooks['email-modification-urls'] = stripslashes($_POST['email-modification-urls']);
+				$hooks_config['email-modification-urls'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['email-modification-urls']));
+				$hooks_config['error-recipients-emails'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['error-recipients-emails']));
 
-				update_option($hooks_option_name, json_encode($config_hooks));
+				update_option(Hooks::STORAGE_OPTION_NAME, json_encode($hooks_config));
 
 		?>
 
@@ -132,8 +125,21 @@ function tb_menu_hooks() {
 							<label>URLs à appeler en cas de modification de l'adresse mail d'un utilisateur</label>
 						</th>
 						<td>
-							<textarea name="email-modification-urls" rows="10" cols="80" class="regular-text"><?php echo $config_hooks['email-modification-urls']; ?></textarea>
-							<p class="description">Une URL par ligne</p>
+							<textarea name="email-modification-urls" rows="8" cols="80" class="regular-text"><?php echo implode(PHP_EOL, $hooks_config['email-modification-urls']); ?></textarea>
+							<p class="description">
+								Une URL par ligne.<br>
+								Ex : http://example.org/changeusermail/{user_id}/{old_email}/to/{new_email}<br>
+								Les paramètres {user_id}, {old_email} et {new_email} sont remplacés par les valeurs utilisateur lors de l'appel
+							</p>
+						</td>
+					<tr>
+					</tr>
+						<th scope="row">
+							<label>Destinataires des emails d'erreurs des hooks</label>
+						</th>
+						<td>
+							<textarea name="error-recipients-emails" rows="3" cols="80" class="regular-text"><?php echo implode(PHP_EOL, $hooks_config['error-recipients-emails']); ?></textarea>
+							<p class="description">Une adresse par ligne</p>
 						</td>
 					<tr>
 				</tbody>
