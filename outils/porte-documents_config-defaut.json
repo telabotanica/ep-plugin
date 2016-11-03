@@ -1,4 +1,5 @@
 {
+	"_comments": "configuration par défaut, pour modifier ces valeurs il faut passer par l'interface d'admin Wordpress et trouver le sous-menu Tela-botanica",
 	"active": true,
 	"ver": "0.1",
 	"filesServiceUrl": "http://api.tela-botanica.org/service:cumulus:doc",

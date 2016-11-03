@@ -1,0 +1,9 @@
+{
+	"_comments": "configuration par défaut, pour modifier ces valeurs il faut passer par l'interface d'admin Wordpress et trouver le sous-menu Tela-botanica -> Hooks",
+	"email-modification-urls": [
+		"http://example.org/changeusermail/{user_id}/{old_email}/to/{new_email}"
+	],
+	"error-recipients-emails": [
+		"dev-log@tela-botanica.org"
+	]
+}
