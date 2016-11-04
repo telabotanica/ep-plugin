@@ -5,7 +5,8 @@ class Hooks {
 	const STORAGE_OPTION_NAME = 'tb_hooks_config';
 
 	function __construct() {
-		add_action('profile_update', array($this, 'callCaptainHooks'), 10, 2);
+		add_action('profile_update', array($this, 'callProfileUpdateHooks'), 10, 2);
+		add_action('user_register', array($this, 'callUserRegisterHooks'), 10, 1);
 	}
 
 	/**
@@ -13,13 +14,17 @@ class Hooks {
 	 *
 	 * @return     array
 	 */
-	private function chargerHooksConfig() {
+	static function getConfig() {
 		// chargement de la config depuis la BdD
 		$hooks_config = json_decode(get_option(self::STORAGE_OPTION_NAME), true);
+		// chargement de la config par défaut
+		$hooks_config_defaut = json_decode(file_get_contents(__DIR__ . '/hooks_config.json'), true);
 
-		// si elle est vide on charge celle par défaut
-		if (empty($hooks_config)) {
-			$hooks_config = json_decode(file_get_contents(__DIR__ . '/hooks_config.json'), true);
+		// si un champ est vide on utilise celui par défaut
+		foreach (array_keys($hooks_config_defaut) as $hook_name) {
+			if (!isset($hooks_config[$hook_name])) {
+				$hooks_config[$hook_name] = $hooks_config_defaut[$hook_name];
+			}
 		}
 
 		return $hooks_config;
@@ -39,48 +44,58 @@ class Hooks {
 			. 'X-Mailer: PHP/' . phpversion()
 		;
 
-		foreach ($this->chargerHooksConfig()['error-recipients-emails'] as $error_recipient) {
-			if ('' != $error_recipient) {
+		foreach ($this->getConfig()['error-recipients-emails'] as $error_recipient) {
+			if ($error_recipient && '#' !== substr($error_recipient, 0, 1)) {
 				error_log($message, 1, $error_recipient, $headers);
 				error_log($message);
 			}
 		}
 	}
 
-	function callCaptainHooks($user_id, $old_user_data) {
-		$user = get_userdata( $user_id );
+	private function callCaptainHooks($hooks_name, $user_id, $new_email, $old_email = '') {
+		foreach ($this->getConfig()[$hooks_name] as $hook_service_pattern) {
+			if ($hook_service_pattern && '#' !== substr($hook_service_pattern, 0, 1)) {
+				$count = 0;
 
-		if ($old_user_data->user_email != $user->user_email) {
-			foreach ($this->chargerHooksConfig()['email-modification-urls'] as $hook_service_pattern) {
-				if ('' != $hook_service_pattern) {
-					$count = 0;
+				$hook_service_url = preg_replace(
+					array('/{old_email}/i', '/{new_email}/i', '/{user_id}/i'),
+					array($old_email, $new_email, $user_id),
+					$hook_service_pattern, -1, $count
+				);
 
-					$hook_service_url = preg_replace(
-						array('/{old_email}/i', '/{new_email}/i', '/{user_id}/i'),
-						array($old_user_data->user_email, $user->user_email, $user_id),
-						$hook_service_pattern, -1, $count
-					);
+				if ($count > 0) {
+					$ch = curl_init();
+					curl_setopt_array($ch, array(
+						CURLOPT_RETURNTRANSFER => 1,
+						CURLOPT_FAILONERROR => 1,
+						CURLOPT_URL => $hook_service_url
+					));
 
-					if ($count > 0) {
-						$ch = curl_init();
-						curl_setopt_array($ch, array(
-							CURLOPT_RETURNTRANSFER => 1,
-							CURLOPT_FAILONERROR => 1,
-							CURLOPT_URL => $hook_service_url
-						));
+					curl_exec($ch);
 
-						curl_exec($ch);
-
-						$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-						if ($http_code != 200) {
-							$this->handleErrors($ch);
-						}
-
-						curl_close($ch);
+					$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+					if ($http_code != 200) {
+						$this->handleErrors($ch);
 					}
+
+					curl_close($ch);
 				}
 			}
 		}
+	}
+
+	function callProfileUpdateHooks($user_id, $old_user_data) {
+		$user = get_userdata( $user_id );
+
+		if ($old_user_data->user_email != $user->user_email) {
+			$this->callCaptainHooks('email-modification-urls', $user_id, $user->user_email, $old_user_data->user_email);
+		}
+	}
+
+	function callUserRegisterHooks($user_id) {
+		$user = get_userdata( $user_id );
+
+		$this->callCaptainHooks('user-creation-urls', $user_id, $user->user_email);
 	}
 }
 

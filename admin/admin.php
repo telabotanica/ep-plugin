@@ -88,20 +88,16 @@ function tb_menu_hooks() {
 
 			$hidden_field_name = 'tb_submit_hidden';
 
-			// chargement de la config depuis la BdD
-			$hooks_config = json_decode(get_option(Hooks::STORAGE_OPTION_NAME), true);
-
-			// si elle est vide on charge celle par défaut
-			if (empty($hooks_config)) {
-				$hooks_config = json_decode(file_get_contents(__DIR__ . '/../hooks/hooks_config.json'), true);
-			}
+			$hooks_config = Hooks::getConfig();
 
 			// enregistre les changements de config en BdD
 			if (isset($_POST[$hidden_field_name]) && $_POST[$hidden_field_name] == 'Y') {
 				$hooks_config['email-modification-urls'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['email-modification-urls']));
+				$hooks_config['user-creation-urls'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['user-creation-urls']));
 				$hooks_config['error-recipients-emails'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['error-recipients-emails']));
 				// suppression des lignes vides
 				$hooks_config['email-modification-urls'] = array_filter($hooks_config['email-modification-urls']);
+				$hooks_config['user-creation-urls'] = array_filter($hooks_config['user-creation-urls']);
 				$hooks_config['error-recipients-emails'] = array_filter($hooks_config['error-recipients-emails']);
 
 				update_option(Hooks::STORAGE_OPTION_NAME, json_encode($hooks_config));
@@ -124,24 +120,42 @@ function tb_menu_hooks() {
 				<tbody>
 					</tr>
 						<th scope="row">
-							<label>URLs à appeler en cas de modification de l'adresse mail d'un utilisateur</label>
+							<label for="email-modification-urls">URLs à appeler en cas de modification de l'adresse mail d'un utilisateur</label>
 						</th>
 						<td>
-							<textarea name="email-modification-urls" rows="8" cols="80" class="regular-text"><?php echo implode(PHP_EOL, $hooks_config['email-modification-urls']); ?></textarea>
+							<textarea id="email-modification-urls" name="email-modification-urls" rows="5" cols="80" class="regular-text"><?php echo implode(PHP_EOL, $hooks_config['email-modification-urls']); ?></textarea>
 							<p class="description">
 								Une URL par ligne.<br>
 								Ex : http://example.org/changeusermail/{user_id}/{old_email}/to/{new_email}<br>
-								Les paramètres {user_id}, {old_email} et {new_email} sont remplacés par les valeurs utilisateur lors de l'appel
+								Les paramètres {user_id}, {old_email} et {new_email} sont remplacés par les valeurs utilisateur lors de l'appel<br>
+								Les lignes commençant par # seront ignorées
 							</p>
 						</td>
 					<tr>
 					</tr>
 						<th scope="row">
-							<label>Destinataires des emails d'erreurs des hooks</label>
+							<label for="user-creation-urls">URLs à appeler en cas de création d'un utilisateur</label>
 						</th>
 						<td>
-							<textarea name="error-recipients-emails" rows="3" cols="80" class="regular-text"><?php echo implode(PHP_EOL, $hooks_config['error-recipients-emails']); ?></textarea>
-							<p class="description">Une adresse par ligne</p>
+							<textarea id="user-creation-urls" name="user-creation-urls" rows="3" cols="80" class="regular-text"><?php echo implode(PHP_EOL, $hooks_config['user-creation-urls']); ?></textarea>
+							<p class="description">
+								Une URL par ligne.<br>
+								Ex : http://example.org/createuser/{user_id}/{new_email}<br>
+								Les paramètres {user_id} et {new_email} sont remplacés par les valeurs utilisateur lors de l'appel<br>
+								Les lignes commençant par # seront ignorées
+							</p>
+						</td>
+					<tr>
+					</tr>
+						<th scope="row">
+							<label for="error-recipients-emails">Destinataires des emails d'erreurs des hooks</label>
+						</th>
+						<td>
+							<textarea id="error-recipients-emails" name="error-recipients-emails" rows="3" cols="80" class="regular-text"><?php echo implode(PHP_EOL, $hooks_config['error-recipients-emails']); ?></textarea>
+							<p class="description">
+								Une adresse par ligne<br>
+								Les lignes commençant par # seront ignorées
+							</p>
 						</td>
 					<tr>
 				</tbody>
