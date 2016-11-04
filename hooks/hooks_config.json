@@ -3,6 +3,9 @@
 	"email-modification-urls": [
 		"http://example.org/changeusermail/{user_id}/{old_email}/to/{new_email}"
 	],
+	"user-creation-urls": [
+		"http://example.org/createuser/{user_id}/{new_email}"
+	],
 	"error-recipients-emails": [
 		"dev-log@tela-botanica.org"
 	]
