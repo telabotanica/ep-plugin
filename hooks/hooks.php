@@ -45,7 +45,7 @@ class Hooks {
 		;
 
 		foreach ($this->getConfig()['error-recipients-emails'] as $error_recipient) {
-			if ('' != $error_recipient) {
+			if ($error_recipient && '#' !== substr($error_recipient, 0, 1)) {
 				error_log($message, 1, $error_recipient, $headers);
 				error_log($message);
 			}
@@ -53,8 +53,8 @@ class Hooks {
 	}
 
 	private function callCaptainHooks($hooks_name, $user_id, $new_email, $old_email = '') {
-		foreach ($this->chargerHooksConfig()[$hooks_name] as $hook_service_pattern) {
-			if ('' != $hook_service_pattern) {
+		foreach ($this->getConfig()[$hooks_name] as $hook_service_pattern) {
+			if ($hook_service_pattern && '#' !== substr($hook_service_pattern, 0, 1)) {
 				$count = 0;
 
 				$hook_service_url = preg_replace(

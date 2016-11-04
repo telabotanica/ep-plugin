@@ -127,7 +127,8 @@ function tb_menu_hooks() {
 							<p class="description">
 								Une URL par ligne.<br>
 								Ex : http://example.org/changeusermail/{user_id}/{old_email}/to/{new_email}<br>
-								Les paramètres {user_id}, {old_email} et {new_email} sont remplacés par les valeurs utilisateur lors de l'appel
+								Les paramètres {user_id}, {old_email} et {new_email} sont remplacés par les valeurs utilisateur lors de l'appel<br>
+								Les lignes commençant par # seront ignorées
 							</p>
 						</td>
 					<tr>
@@ -140,7 +141,8 @@ function tb_menu_hooks() {
 							<p class="description">
 								Une URL par ligne.<br>
 								Ex : http://example.org/createuser/{user_id}/{new_email}<br>
-								Les paramètres {user_id} et {new_email} sont remplacés par les valeurs utilisateur lors de l'appel
+								Les paramètres {user_id} et {new_email} sont remplacés par les valeurs utilisateur lors de l'appel<br>
+								Les lignes commençant par # seront ignorées
 							</p>
 						</td>
 					<tr>
@@ -150,7 +152,10 @@ function tb_menu_hooks() {
 						</th>
 						<td>
 							<textarea id="error-recipients-emails" name="error-recipients-emails" rows="3" cols="80" class="regular-text"><?php echo implode(PHP_EOL, $hooks_config['error-recipients-emails']); ?></textarea>
-							<p class="description">Une adresse par ligne</p>
+							<p class="description">
+								Une adresse par ligne<br>
+								Les lignes commençant par # seront ignorées
+							</p>
 						</td>
 					<tr>
 				</tbody>
