@@ -14,13 +14,17 @@ class Hooks {
 	 *
 	 * @return     array
 	 */
-	private function chargerHooksConfig() {
+	static function getConfig() {
 		// chargement de la config depuis la BdD
 		$hooks_config = json_decode(get_option(self::STORAGE_OPTION_NAME), true);
+		// chargement de la config par défaut
+		$hooks_config_defaut = json_decode(file_get_contents(__DIR__ . '/hooks_config.json'), true);
 
-		// si elle est vide on charge celle par défaut
-		if (empty($hooks_config)) {
-			$hooks_config = json_decode(file_get_contents(__DIR__ . '/hooks_config.json'), true);
+		// si un champ est vide on utilise celui par défaut
+		foreach (array_keys($hooks_config_defaut) as $hook_name) {
+			if (!isset($hooks_config[$hook_name])) {
+				$hooks_config[$hook_name] = $hooks_config_defaut[$hook_name];
+			}
 		}
 
 		return $hooks_config;
@@ -40,7 +44,7 @@ class Hooks {
 			. 'X-Mailer: PHP/' . phpversion()
 		;
 
-		foreach ($this->chargerHooksConfig()['error-recipients-emails'] as $error_recipient) {
+		foreach ($this->getConfig()['error-recipients-emails'] as $error_recipient) {
 			if ('' != $error_recipient) {
 				error_log($message, 1, $error_recipient, $headers);
 				error_log($message);

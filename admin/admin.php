@@ -88,17 +88,8 @@ function tb_menu_hooks() {
 
 			$hidden_field_name = 'tb_submit_hidden';
 
-			// chargement de la config depuis la BdD
-			$hooks_config = json_decode(get_option(Hooks::STORAGE_OPTION_NAME), true);
-			// chargement de la config par défaut
-			$hooks_config_defaut = json_decode(file_get_contents(__DIR__ . '/../hooks/hooks_config.json'), true);
+			$hooks_config = Hooks::getConfig();
 
-			// si un champ est vide on utilise celui par défaut
-			foreach (array_keys($hooks_config_defaut) as $hook_name) {
-				if (empty($hooks_config[$hook_name])) {
-					$hooks_config[$hook_name] = $hooks_config_defaut[$hook_name];
-				}
-			}
 			// enregistre les changements de config en BdD
 			if (isset($_POST[$hidden_field_name]) && $_POST[$hidden_field_name] == 'Y') {
 				$hooks_config['email-modification-urls'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['email-modification-urls']));
