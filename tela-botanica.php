@@ -49,7 +49,20 @@ add_action( 'bp_include', 'categorie' );
 
 // Charge les hooks de synchronisation des données de wordpress vers les autres outils
 require( dirname( __FILE__ ) . '/hooks/hooks.php' );
-new Hooks;
+new Hooks();
+
+// Charge les rôles propres au SSO (nécessite le plugin "Multiple Roles")
+require( dirname( __FILE__ ) . '/roles/roles_sso.php' );
+// le hook d'activation doit obligatoirement se trouver dans ce fichier...
+function ajout_roles_sso() {
+	RolesSSO::ajout_roles();
+}
+// idem pour le hool de désactivation
+function suppression_roles_sso() {
+	RolesSSO::ajout_roles(true);
+}
+register_activation_hook(__FILE__, 'ajout_roles_sso');
+register_deactivation_hook(__FILE__, 'suppression_roles_sso');
 
 class TelaBotanica
 {

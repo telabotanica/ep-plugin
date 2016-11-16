@@ -1,0 +1,24 @@
+{
+	"cel": {
+		"admin": "tous les pouvoirs"
+	},
+	"del": {
+		"validateur": "peut valider les propositions de n'importe quelle observation",
+		"admin": "tous les pouvoirs"
+	},
+	"coel": {
+		"admin": "tous les pouvoirs"
+	},
+	"smartflore": {
+		"admin": "tous les pouvoirs"
+	},
+	"ezmlm-php": {
+		"admin": "tous les pouvoirs"
+	},
+	"cumulus": {
+		"admin": "tous les pouvoirs"
+	},
+	"referentiels": {
+		"admin": "tous les pouvoirs"
+	}
+}
