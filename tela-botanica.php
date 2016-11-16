@@ -1,10 +1,23 @@
 <?php
-/*
- * Plugin Name: Tela Botanica
- * Description: Plugin permettant d'ajouter les outils de Tela Botanica à l'espace projets
- * Version: 1.0 BETA
- * Author: Tela Botanica
-*/
+
+/**
+ * @link              https://github.com/telabotanica/ep-plugin
+ * @since             1.0.0
+ * @package           Tela_Botanica_Plugin
+ *
+ * @wordpress-plugin
+ * Plugin Name:       Tela Botanica Plugin
+ * Plugin URI:        https://github.com/telabotanica/ep-plugin
+ * GitHub Plugin URI: https://github.com/telabotanica/ep-plugin
+ * Description:       All Tela Botanica stuffs
+ * Version:           1.0.0 dev
+ * Author:            Tela Botanica
+ * Author URI:        https://github.com/telabotanica
+ * License:           GPL-2.0+
+ * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ * Text Domain:       tela-botanica-plugin
+ * Domain Path:       /languages
+ */
 
 /*
  * Chargement de la configuration depuis config.json
