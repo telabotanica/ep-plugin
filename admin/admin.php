@@ -196,8 +196,14 @@ function tb_menu_securite() {
 		$configActuelleGeneral['adminToken'] = $adminToken;
 		// mise à jour de la BDD
 		update_option($opt_name_general, json_encode($configActuelleGeneral));
-	}
-	?>
+		?>
+		<!-- Confirmation de l'enregistrement -->
+		<div class="updated">
+			<p>
+				<strong>Options mises à jour</strong>
+			</p>
+		</div>
+	<?php } ?>
 
 	<div class="wrap">
 
@@ -219,13 +225,6 @@ function tb_menu_securite() {
 		</div>
 
 		<?php settings_errors(); ?>
-
-		<!-- Confirmation de l'enregistrement -->
-		<div class="updated">
-			<p>
-				<strong>Options mises à jour</strong>
-			</p>
-		</div>
 
 		<form method="post" action="">
 			<input type="hidden" name="<?php echo $hidden_field_name_general; ?>" value="Y">
