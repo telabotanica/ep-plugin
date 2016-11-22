@@ -1,0 +1,4 @@
+{
+	"_comments": "configuration par défaut, pour modifier ces valeurs il faut passer par l'interface d'admin Wordpress et trouver le sous-menu Tela-botanica -> Newsletter",
+	"newsletter_recipient": "newsletter@example.com"
+}
