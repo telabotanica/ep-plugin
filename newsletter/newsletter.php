@@ -161,6 +161,7 @@ function get_newsletter($multipart_boundary = null) {
 
 	$twig = new Twig_Environment($loader, array());
 	$twig->addExtension(new Twig_Extensions_Extension_Intl());
+	$twig->addExtension(new Twig_Extensions_Extension_Text());
 	$twig->getExtension('Twig_Extension_Core')->setTimezone('Europe/Paris');
 
 	if (have_rows('tb_newsletter_sections', 'option')) {
@@ -190,10 +191,9 @@ function get_newsletter($multipart_boundary = null) {
 
 					$posts[$category->term_id][$subcategory->term_id][] = [
 						'post' 		=> $post,
-						'author' 	=> get_author_name($post->post_author),
+						'author' 	=> get_the_author_meta('display_name', $post->post_author),
 						'link' 		=> get_post_permalink($post->ID),
 						'thumbnail'	=> wp_get_attachment_url(get_post_thumbnail_id($post->ID)),
-						'content' 	=> mb_strimwidth(strip_tags($post->post_content), 0, 200, '&hellip;'),
 						'date'		=> get_post_date($post->post_date),
 						'date_alt'	=> $event_date,
 						'place'		=> $event_place,
