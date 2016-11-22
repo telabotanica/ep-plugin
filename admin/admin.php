@@ -11,8 +11,8 @@ add_action('admin_menu', 'tb_ajout_pages');
 // Actions du hook
 function tb_ajout_pages() {
 
-    // Ajoute un menu 'Tela Botanica' au tableau de bord Wordpress
-    add_menu_page(
+	// Ajoute un menu 'Tela Botanica' au tableau de bord Wordpress
+	add_menu_page(
 		'Tela Botanica',
 		'Tela Botanica',
 		'manage_options',
@@ -21,34 +21,34 @@ function tb_ajout_pages() {
 		'dashicons-carrot'
 	);
 
-    // Ajoute un sous-menu 'Présentation' dans 'Tela Botanica'
-    add_submenu_page(
-    	'telabotanica',
-    	'Présentation',
-    	'Présentation',
-    	'manage_options',
-    	'telabotanica', // On donne le même 'menu_slug' que celui du menu pour écraser le sous-menu automatique
-    	'tb_menu_home'
-    );
+	// Ajoute un sous-menu 'Présentation' dans 'Tela Botanica'
+	add_submenu_page(
+		'telabotanica',
+		'Présentation',
+		'Présentation',
+		'manage_options',
+		'telabotanica', // On donne le même 'menu_slug' que celui du menu pour écraser le sous-menu automatique
+		'tb_menu_home'
+	);
 
-    // Ajoute un sous-menu 'Espace projets' dans 'Tela Botanica'
-    add_submenu_page(
-    	'telabotanica',
-    	'Espace projets',
-    	'Espace projets',
-    	'manage_options',
-    	'espace_projets',
-    	'tb_menu_espace_projets'
-    );
+	// Ajoute un sous-menu 'Espace projets' dans 'Tela Botanica'
+	add_submenu_page(
+		'telabotanica',
+		'Espace projets',
+		'Espace projets',
+		'manage_options',
+		'espace_projets',
+		'tb_menu_espace_projets'
+	);
 
-    add_submenu_page(
-    	'telabotanica',
-    	'Hooks',
-    	'Hooks',
-    	'manage_options',
-    	'hooks',
-    	'tb_menu_hooks'
-    );
+	add_submenu_page(
+		'telabotanica',
+		'Hooks',
+		'Hooks',
+		'manage_options',
+		'hooks',
+		'tb_menu_hooks'
+	);
 }
 
 /**
@@ -118,7 +118,7 @@ function tb_menu_hooks() {
 			<input type="hidden" name="<?php echo $hidden_field_name; ?>" value="Y">
 			<table class="form-table">
 				<tbody>
-					</tr>
+					<tr>
 						<th scope="row">
 							<label for="email-modification-urls">URLs à appeler en cas de modification de l'adresse mail d'un utilisateur</label>
 						</th>
@@ -131,8 +131,8 @@ function tb_menu_hooks() {
 								Les lignes commençant par # seront ignorées
 							</p>
 						</td>
-					<tr>
 					</tr>
+					<tr>
 						<th scope="row">
 							<label for="user-creation-urls">URLs à appeler en cas de création d'un utilisateur</label>
 						</th>
@@ -145,8 +145,8 @@ function tb_menu_hooks() {
 								Les lignes commençant par # seront ignorées
 							</p>
 						</td>
-					<tr>
 					</tr>
+					<tr>
 						<th scope="row">
 							<label for="error-recipients-emails">Destinataires des emails d'erreurs des hooks</label>
 						</th>
@@ -157,7 +157,7 @@ function tb_menu_hooks() {
 								Les lignes commençant par # seront ignorées
 							</p>
 						</td>
-					<tr>
+					</tr>
 				</tbody>
 			</table>
 			<hr/>
