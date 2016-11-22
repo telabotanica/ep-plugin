@@ -6,7 +6,7 @@
 	"defaultPage": "view-list",
 	"displayListTitle": true,
 	"ezmlm-php": {
-		"rootUri": "http://vpopmail.tela-botanica.org/ezmlm-php-ng",
+		"rootUri": "https://vpopmail.tela-botanica.org/ezmlm-php-ng",
 		"list": ""
 	},
 	"authAdapter": "AuthAdapterTB",

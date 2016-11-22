@@ -471,10 +471,10 @@ function gtags_make_tags_for_group() {
 
 // create a nice new widget class
 class GTags_Widget extends WP_Widget {
-	function GTags_Widget() {
+	function __construct() {
 		$widget_ops = array( 'classname' => 'gtags', 'description' => 'Show a tag cloud for Group Tags' );
 		$control_ops = array( 'id_base' => 'gtags-widget' );
-		$this->WP_Widget( 'gtags-widget', 'Group Tags', $widget_ops, $control_ops );
+		parent::__construct( 'gtags-widget', 'Group Tags', $widget_ops, $control_ops );
 	}
 
 	function widget( $args, $instance ) {
@@ -731,10 +731,10 @@ add_filter( 'gtags_action', 'gtags_action_clean' );
 
 // create a nice new widget class
 class GTags_Activity_Widget extends WP_Widget {
-	function GTags_Activity_Widget() {
+	function __construct() {
 		$widget_ops = array( 'classname' => 'gtags_activity', 'description' => 'Show a activity for all groups matching a tag.' );
 		$control_ops = array( 'id_base' => 'gtags-activity-widget' );
-		$this->WP_Widget( 'gtags-activity-widget', 'Group Tags Activity', $widget_ops, $control_ops );
+		parent::__construct( 'gtags-activity-widget', 'Group Tags Activity', $widget_ops, $control_ops );
 	}
 	
 	function widget( $args, $instance ) {

@@ -17,15 +17,14 @@ class Hooks {
 	static function getConfig() {
 		// chargement de la config depuis la BdD
 		$hooks_config = json_decode(get_option(self::STORAGE_OPTION_NAME), true);
+		if (! $hooks_config) {
+			$hooks_config = array();
+		}
 		// chargement de la config par défaut
 		$hooks_config_defaut = json_decode(file_get_contents(__DIR__ . '/hooks_config.json'), true);
 
 		// si un champ est vide on utilise celui par défaut
-		foreach (array_keys($hooks_config_defaut) as $hook_name) {
-			if (!isset($hooks_config[$hook_name])) {
-				$hooks_config[$hook_name] = $hooks_config_defaut[$hook_name];
-			}
-		}
+		$hooks_config = array_merge($hooks_config_defaut, $hooks_config);
 
 		return $hooks_config;
 	}

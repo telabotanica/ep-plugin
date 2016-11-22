@@ -1,10 +1,23 @@
 <?php
-/*
- * Plugin Name: Tela Botanica
- * Description: Plugin permettant d'ajouter les outils de Tela Botanica à l'espace projets
- * Version: 1.0 BETA
- * Author: Tela Botanica
-*/
+
+/**
+ * @link              https://github.com/telabotanica/ep-plugin
+ * @since             1.0.0
+ * @package           Tela_Botanica_Plugin
+ *
+ * @wordpress-plugin
+ * Plugin Name:       Tela Botanica Plugin
+ * Plugin URI:        https://github.com/telabotanica/ep-plugin
+ * GitHub Plugin URI: https://github.com/telabotanica/ep-plugin
+ * Description:       All Tela Botanica stuffs
+ * Version:           1.0.0 dev
+ * Author:            Tela Botanica
+ * Author URI:        https://github.com/telabotanica
+ * License:           GPL-2.0+
+ * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ * Text Domain:       tela-botanica-plugin
+ * Domain Path:       /languages
+ */
 
 /*
  * Chargement de la configuration depuis config.json
@@ -50,7 +63,20 @@ add_action( 'bp_include', 'categorie' );
 
 // Charge les hooks de synchronisation des données de wordpress vers les autres outils
 require( dirname( __FILE__ ) . '/hooks/hooks.php' );
-new Hooks;
+new Hooks();
+
+// Charge les rôles propres au SSO (nécessite le plugin "Multiple Roles")
+require( dirname( __FILE__ ) . '/roles/roles_sso.php' );
+// le hook d'activation doit obligatoirement se trouver dans ce fichier...
+function ajout_roles_sso() {
+	RolesSSO::ajout_roles();
+}
+// idem pour le hool de désactivation
+function suppression_roles_sso() {
+	RolesSSO::ajout_roles(true);
+}
+register_activation_hook(__FILE__, 'ajout_roles_sso');
+register_deactivation_hook(__FILE__, 'suppression_roles_sso');
 
 class TelaBotanica
 {

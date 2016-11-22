@@ -49,6 +49,15 @@ function tb_ajout_pages() {
 		'hooks',
 		'tb_menu_hooks'
 	);
+
+	add_submenu_page(
+		'telabotanica',
+		'Sécurité',
+		'Sécurité',
+		'manage_options',
+		'securite',
+		'tb_menu_securite'
+	);
 }
 
 /**
@@ -170,6 +179,87 @@ function tb_menu_hooks() {
 }
 
 /**
+ * Réglages de sécurité : jeton administrateur notamment
+ */
+function tb_menu_securite() {
+	$opt_name_general = 'tb_general_config';
+	$hidden_field_name_general = 'tb_submit_hidden';
+
+	// chargement de la config actuelle
+	$configActuelleGeneral = json_decode(get_option($opt_name_general), true);
+
+	// si le formulaire est validé
+	if( isset($_POST[$hidden_field_name_general]) && $_POST[$hidden_field_name_general] == 'Y' ) {
+		// récupération des valeurs du formulaire
+		$adminToken = $_POST['adminToken'];
+		// injection des valeurs du formulaire
+		$configActuelleGeneral['adminToken'] = $adminToken;
+		// mise à jour de la BDD
+		update_option($opt_name_general, json_encode($configActuelleGeneral));
+		?>
+		<!-- Confirmation de l'enregistrement -->
+		<div class="updated">
+			<p>
+				<strong>Options mises à jour</strong>
+			</p>
+		</div>
+	<?php } ?>
+
+	<div class="wrap">
+
+		<?php
+		if (!current_user_can('manage_options'))
+		{
+			wp_die( __('Vous n\'avez pas les droits suffisants pour accéder à cette page.') );
+		}
+		?>
+
+		<?php screen_icon(); ?>
+
+		<!-- Titre -->
+		<h2>Réglages de sécurité</h2>
+
+		<!-- Description -->
+		<div class="description">
+			Cette section affecte les autres sections du plugin Tela Botanica.
+		</div>
+
+		<?php settings_errors(); ?>
+
+		<form method="post" action="">
+			<input type="hidden" name="<?php echo $hidden_field_name_general; ?>" value="Y">
+			<table class="form-table">
+				<tbody>
+					<tr>
+						<th scope="row">
+							<label>Jeton SSO administrateur</label>
+						</th>
+						<td>
+							<textarea id="adminToken" name="adminToken" rows="10" cols="80" class="regular-text"><?php echo $configActuelleGeneral['adminToken']; ?></textarea>
+							<p class="description">
+								Placer ici un jeton SSO administrateur longue durée.
+								<br>
+								(utilisé par la désinscription à la newsletter, l'espace projets...)
+								<br>
+								Ce jeton peut être forgé à l'aide du script "admin.php forger_jeton" de l'annuaire.
+								<br>
+								Il doit rester ABSOLUMENT CONFIDENTIEL.
+							</p>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<hr/>
+			<!-- Enregistrer les modifications -->
+			<p class="submit">
+				<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
+			</p>
+		</form>
+	</div>
+	<?php
+}
+
+/**
  * Affiche le sous-menu 'Espace projets'; lit et enregistre les réglages dans
  * la table "options" de WP (standard)
  */
@@ -179,10 +269,9 @@ function tb_menu_espace_projets() {
 	if( isset( $_GET[ 'onglet' ] ) ) {
 		$onglet_actif = $_GET[ 'onglet' ];
 	} else {
-		// on glet par défaut
+		// onglet par défaut
 		$onglet_actif = 'porte-documents';
 	}
-
 ?>
 	<!-- Vue du sous-menu 'espace_projets' -->
 	<div class="wrap">
@@ -217,8 +306,7 @@ function tb_menu_espace_projets() {
 		</h2>
 
 		<!-- Onglet Porte-documents -->
-		<?php
-	    if( $onglet_actif == 'porte-documents' ) {
+		<?php if( $onglet_actif == 'porte-documents' ) {
 	       	$opt_name_pd = 'tb_porte-documents_config';
 			$hidden_field_name_pd = 'tb_submit_hidden';
 
