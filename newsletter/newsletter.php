@@ -163,19 +163,19 @@ function get_newsletter($multipart_boundary = null) {
 	$twig->addExtension(new Twig_Extensions_Extension_Intl());
 	$twig->getExtension('Twig_Extension_Core')->setTimezone('Europe/Paris');
 
-	if (have_rows('sections', 'option')) {
+	if (have_rows('tb_newsletter_sections', 'option')) {
 		$categories = [];
 		$subcategories = [];
 		$posts = [];
 
-		while (have_rows('sections', 'option')) {
+		while (have_rows('tb_newsletter_sections', 'option')) {
 			the_row();
 
-			foreach (get_sub_field('items') as $post) {
+			foreach (get_sub_field('tb_newsletter_sections_items') as $post) {
 				$category = get_post_top_category($post->ID);
 
 				if ($category) {
-					$subcategory = get_sub_field('title');
+					$subcategory = get_sub_field('tb_newsletter_sections_title');
 
 					$categories[$category->term_id] = [
 						'slug'	=> $category->slug,
@@ -205,11 +205,11 @@ function get_newsletter($multipart_boundary = null) {
 	}
 
 	$params = [
-		'intro' 	=> get_field('introduction', 'option'),
+		'intro' 	=> get_field('tb_newsletter_introduction', 'option'),
 		'categories' => $categories,
 		'subcategories' => $subcategories,
 		'posts' 	=> $posts,
-		'outro' 	=> get_field('footer', 'option')
+		'outro' 	=> get_field('tb_newsletter_footer', 'option')
 	];
 
 	if ($multipart_boundary) {
