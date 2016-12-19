@@ -75,7 +75,7 @@ function get_top_category($category_id) {
 }
 
 /**
- * Gets the post date.
+ * Format the post date.
  *
  * Transform it from 2016-11-21 13:37:42 format to timestamp
  *
@@ -83,7 +83,7 @@ function get_top_category($category_id) {
  *
  * @return     int  The event date timestamp
  */
-function get_post_date($post_date) {
+function format_post_date($post_date) {
 	// keep only date part
 	$date = explode(' ', $post_date);
 	$date = explode('-', $date[0]);
@@ -103,22 +103,19 @@ function get_post_date($post_date) {
  * @return     int  The event date timestamp
  */
 function get_event_date($post_id) {
-	$is_single_date = get_field('is_single_date', $post_id);
+	$dates = [];
+	foreach (['date', 'date_end'] as $label) {
+		$date = get_field($label, $post_id);
 
-	if (is_null($is_single_date)) {
-		$date = false;
-	} else {
-		if ($is_single_date) {
-			$date = get_field('date', $post_id);
-		} else {
-			$date = get_field('date_from', $post_id);
+		if ($date) {
+			$date = explode('/', $date);
+			$date = mktime(0, 0, 0, $date[1], $date[0], $date[2]);
+
+			$dates[$label] = $date;
 		}
-
-		$date = explode('/', $date);
-		$date = mktime(0, 0, 0, $date[1], $date[0], $date[2]);
 	}
 
-	return $date;
+	return $dates;
 }
 
 /**
@@ -137,7 +134,7 @@ function get_event_date($post_id) {
 function get_event_place($post_id) {
 	$details = get_field('place', $post_id);
 
-	if ($details) {
+	if (is_array($details)) {
 		$place = $details['address'];
 
 		if (preg_match('/^.*, (.*), France$/i', $details['address'], $matches)) {
@@ -150,9 +147,56 @@ function get_event_place($post_id) {
 		}
 
 		return $place;
+	} elseif (is_object($details)) {
+		switch ($type) {
+			case 'address':
+				if ($details->city) {
+					$place = $details->city;
+					if ($details->countryCode === 'fr') {
+						$place = $place . ' (' . substr($details->postcode, 0, 2) . ')';
+					} else {
+						$place = $place . ' ' . $details->country;
+					}
+				} else {
+					$place = $details->name;
+				}
+
+				break;
+			case 'city':
+				$place = $details->city;
+				if ($details->countryCode !== 'fr') {
+					$place = $place . ' ' . $details->country;
+				}
+
+				break;
+			case 'country':
+			default:
+				$place = $details->name;
+
+				break;
+		}
+
+		return $place;
 	} else {
 		return false;
 	}
+}
+
+/**
+ * Gets the newsletter subject.
+ *
+ * Tries to change locale to french to insert month name in subject
+ *
+ * @return     string  The subject.
+ */
+function get_subject() {
+	$oldLocale = setlocale(LC_TIME, 'fr_FR.utf8', 'fr_FR', 'fr_FR@euro', 'fr');
+
+	$subject = 'Lettre d\'information de Tela Botanica du ' . strftime('%e %B %Y');
+
+	setlocale(LC_TIME, $oldLocale);
+
+	return $subject;
 }
 
 function get_newsletter($multipart_boundary = null) {
@@ -186,18 +230,14 @@ function get_newsletter($multipart_boundary = null) {
 
 					$subcategories[$category->term_id][$subcategory->term_id] = $subcategory->name;
 
-					$event_date = get_event_date($post->ID);
-					$event_place = get_event_place($post->ID);
-
 					$posts[$category->term_id][$subcategory->term_id][] = [
 						'post' 		=> $post,
 						'author' 	=> get_the_author_meta('display_name', $post->post_author),
 						'link' 		=> get_post_permalink($post->ID),
 						'thumbnail'	=> wp_get_attachment_url(get_post_thumbnail_id($post->ID)),
-						'date'		=> get_post_date($post->post_date),
-						'date_alt'	=> $event_date,
-						'place'		=> $event_place,
-						'is_event'	=> ($event_date ||$event_place)
+						'date_post'	=> format_post_date($post->post_date),
+						'event'		=> get_event_date($post->ID),
+						'place'		=> get_event_place($post->ID)
 					];
 				}
 			}
@@ -224,26 +264,27 @@ function get_newsletter($multipart_boundary = null) {
 
 function send_newsletter() {
 	$boundary = uniqid('tela');
-	$headers = 'Content-Type: multipart/alternative;boundary=' . $boundary . '; charset="utf-8"' . "\r\n"
-		. 'Content-Transfer-Encoding: 8bit' . "\r\n"
-		. 'From: accueil@tela-botanica.org' . "\r\n"
-		. 'Reply-To: accueil@tela-botanica.org' . "\r\n"
-		. 'MIME-Version: 1.0' . "\r\n"
-		. 'X-Mailer: PHP/' . phpversion()
-	;
 
-	$newsletter_config = get_config();
+	$headers[] = 'Content-Type: multipart/alternative;boundary=' . $boundary . '; charset=UTF-8';
+	$headers[] = 'Content-Transfer-Encoding: 8bit';
+	$headers[] = 'From: Tela Botanica <accueil@tela-botanica.org>';
+	$headers[] = 'Reply-To: accueil@tela-botanica.org';
+	$headers[] = 'MIME-Version: 1.0';
+	$headers[] = 'X-Mailer: PHP/' . phpversion();
 
-	$oldLocale = setlocale(LC_TIME, 'fr_FR.utf8', 'fr_FR', 'fr_FR@euro', 'fr');
+	add_action( 'phpmailer_init', 'mailer_config', 10, 1);
+	function mailer_config(PHPMailer $mailer){
+		// $mailer->IsSMTP();
+		// $mailer->SMTPDebug = 2; // write 0 if you don't want to see client/server communication in page
+		$mailer->CharSet  = "utf-8";
+	}
 
 	wp_mail(
-		$newsletter_config['newsletter_recipient'],
-		'Lettre d\'information de Tela Botanica du ' . utf8_encode(strftime('%e %B %Y')),
+		get_config()['newsletter_recipient'],
+		get_subject(),
 		get_newsletter($boundary),
 		$headers
 	);
-
-	setlocale(LC_TIME, $oldLocale);
 }
 
 function tb_newsletter_send() {
