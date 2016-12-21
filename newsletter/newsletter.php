@@ -26,6 +26,15 @@ function tb_newsletter_menu() {
 		'tb_newsletter_send'
 	);
 
+	add_submenu_page(
+		'newsletter',
+		'Réglages',
+		'Réglages',
+		'manage_options',
+		'newsletter_config',
+		'tb_newsletter_config'
+	);
+
 	remove_submenu_page('newsletter', 'newsletter');
 }
 
@@ -33,10 +42,11 @@ function get_config() {
 	// chargement de la config depuis la BdD
 	$newsletter_config = json_decode(get_option('tb_newsletter_config'), true);
 
-	if (empty($newsletter_config)) {
-		// chargement de la config par défaut
-		$newsletter_config = json_decode(file_get_contents(__DIR__ . '/newsletter_config.json'), true);
-	}
+	// chargement de la config par défaut
+	$newsletter_config_defaut = json_decode(file_get_contents(__DIR__ . '/newsletter_config.json'), true);
+
+	// fusion avec priorité aux données de la BDD
+	$newsletter_config = array_merge($newsletter_config_defaut, $newsletter_config);
 
 	return $newsletter_config;
 }
@@ -306,7 +316,7 @@ function tb_newsletter_send() {
 
 		<!-- Description -->
 		<div class="description">
-			<p>Envoi le contenu défini pour la newsletter à l'adresse renseignée</p>
+			<p>Envoie le contenu défini pour la newsletter à l'adresse renseignée.</p>
 		</div>
 
 		<?php settings_errors(); ?>
@@ -354,7 +364,7 @@ function tb_newsletter_send() {
 							<label for="newsletter_recipient">Adresse destinataire</label>
 						</th>
 						<td>
-							<input type="text" name="newsletter_recipient" id="newsletter_recipient" value="<?php echo $newsletter_config['newsletter_recipient']; ?>" size="40">
+							<input type="text" name="newsletter_recipient" id="newsletter_recipient" value="<?php echo $newsletter_config['newsletter_recipient']; ?>" class="regular-text">
 						</td>
 						<td>
 							<input type="submit" name="Submit" class="button-primary" value="Enregistrer l'adresse" />
@@ -380,6 +390,93 @@ function tb_newsletter_send() {
 			</p>
 		</form>
 
+	</div>
+<?php
+}
+
+
+function tb_newsletter_config() {
+
+?>
+	<div class="wrap">
+
+		<?php
+		if (!current_user_can('manage_options'))
+		{
+			wp_die( __('Vous n\'avez pas les droits suffisants pour accéder à cette page.') );
+		}
+		?>
+
+		<?php screen_icon(); ?>
+
+		<!-- Titre -->
+		<h2>Réglages de la newsletter</h2>
+
+		<!-- Description -->
+		<div class="description">
+			<p>Cette configuration est utilisée notamment par le template <tt>[newsletter-desinscription]</tt> du thème Tela Botanica.</p>
+		</div>
+
+		<?php settings_errors(); ?>
+
+		<?php
+		$hidden_update_address_field_name = 'tb_submit_hidden_update_addres';
+		// Chargement de la config actuelle
+		$newsletter_config = get_config();
+
+		// enregistre les changements de config en BdD
+		if (isset($_POST[$hidden_update_address_field_name]) && $_POST[$hidden_update_address_field_name] == 'Y'):
+			// préparation des valeurs envoyées
+			$newsletter_config['ezmlm_php_url'] = $_POST['ezmlm_php_url'];
+			$newsletter_config['ezmlm_php_header'] = $_POST['ezmlm_php_header'];
+			// enregistrement
+			update_option('tb_newsletter_config', json_encode($newsletter_config));
+		?>
+			<!-- Confirmation de l'enregistrement -->
+			<div class="updated">
+				<p>
+					<strong>Options mises à jour</strong>
+				</p>
+			</div>
+		<?php endif; ?>
+
+		<form method="post" action="">
+			<input type="hidden" name="<?php echo $hidden_update_address_field_name; ?>" value="Y">
+			<table class="form-table">
+				<tbody>
+					<tr>
+						<th scope="row">
+							<label for="newsletter_recipient">URL racine du service ezmlm-php</label>
+						</th>
+						<td>
+							<input type="text" name="ezmlm_php_url" id="ezmlm_php_url" value="<?php echo $newsletter_config['ezmlm_php_url']; ?>" class="regular-text">
+							<p class="description">Ne pas mettre de "/" (slash) à la fin.</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="newsletter_recipient">Entête attendu par le service</label>
+						</th>
+						<td>
+							<input type="text" name="ezmlm_php_header" id="ezmlm_php_header" value="<?php echo $newsletter_config['ezmlm_php_header']; ?>" class="regular-text">
+							<p class="description">
+								Entête attendu par ezmlm-php pour y lire le jeton SSO.
+								<br/>
+								Par défaut "Authorization".
+								<br/>
+								Certains serveurs n'acceptant pas la valeur par défault,
+								elle peut être remplacée, par exemple par "Auth".
+							</p>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<hr/>
+			<!-- Enregistrer les modifications -->
+			<p class="submit">
+				<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
+			</p>
+		</form>
 	</div>
 <?php
 }
