@@ -1,6 +1,7 @@
 {
 	"_comments": "configuration par défaut, pour modifier ces valeurs il faut passer par l'interface d'admin Wordpress et trouver le sous-menu Tela-botanica -> Newsletter",
 	"newsletter_recipient": "newsletter@example.com",
+	"newsletter_test_recipient": "accueil@example.com",
 	"ezmlm_php_url": "https://example.com/ezmlm-php",
 	"ezmlm_php_header": "Authorization"
 }

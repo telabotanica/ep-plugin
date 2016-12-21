@@ -272,7 +272,14 @@ function get_newsletter($multipart_boundary = null) {
 
 }
 
-function send_newsletter() {
+/**
+ * Sends a newsletter.
+ *
+ * Sends it to test recipient if provided, else to configured recipient
+ *
+ * @param      boolean|string  $test_recipient  The test recipient
+ */
+function send_newsletter($test_recipient = false) {
 	$boundary = uniqid('tela');
 
 	$headers[] = 'Content-Type: multipart/alternative;boundary=' . $boundary . '; charset=UTF-8';
@@ -290,7 +297,7 @@ function send_newsletter() {
 	}
 
 	wp_mail(
-		get_config()['newsletter_recipient'],
+		$test_recipient ?: get_config()['newsletter_recipient'],
 		get_subject(),
 		get_newsletter($boundary),
 		$headers
@@ -316,7 +323,7 @@ function tb_newsletter_send() {
 
 		<!-- Description -->
 		<div class="description">
-			<p>Envoie le contenu défini pour la newsletter à l'adresse renseignée.</p>
+			<p>Page de prévisualisation et d'envoi de la newsletter</p>
 		</div>
 
 		<?php settings_errors(); ?>
@@ -330,14 +337,16 @@ function tb_newsletter_send() {
 
 			// enregistre les changements de config en BdD
 			if (isset($_POST[$hidden_update_address_field_name]) && $_POST[$hidden_update_address_field_name] == 'Y'):
-				$newsletter_config['newsletter_recipient'] = $_POST['newsletter_recipient'];
+				$newsletter_config['newsletter_test_recipient'] = $_POST['newsletter_test_recipient'];
 
 				update_option('tb_newsletter_config', json_encode($newsletter_config));
+
+				send_newsletter($newsletter_config['newsletter_test_recipient']);
 		?>
 
 				<!-- Confirmation de l'enregistrement -->
 				<div class="updated">
-					<p><strong>Mise à jour effectuée</strong></p>
+					<p><strong>Newsletter de TEST envoyée</strong></p>
 				</div>
 
 		<?php
@@ -361,13 +370,17 @@ function tb_newsletter_send() {
 				<tbody>
 					<tr>
 						<th scope="row">
-							<label for="newsletter_recipient">Adresse destinataire</label>
+							<label for="newsletter_test_recipient">Adresse de test</label>
 						</th>
 						<td>
-							<input type="text" name="newsletter_recipient" id="newsletter_recipient" value="<?php echo $newsletter_config['newsletter_recipient']; ?>" class="regular-text">
+							<input type="text" name="newsletter_test_recipient" id="newsletter_test_recipient" value="<?php echo $newsletter_config['newsletter_test_recipient']; ?>" class="regular-text">
+							<p class="description">
+								Un exemplaire de la newsletter sera envoyé à cette adresse.<br>
+								Pour tester le rendu.
+							</p>
 						</td>
 						<td>
-							<input type="submit" name="Submit" class="button-primary" value="Enregistrer l'adresse" />
+							<input type="submit" name="Submit" class="button-primary" value="Tester la newsletter" />
 						</td>
 					</tr>
 				</tbody>
@@ -376,20 +389,60 @@ function tb_newsletter_send() {
 
 		<hr>
 
-		<div class="card">
+		<div id="poststuff">
 
-			<?php echo get_newsletter() ?>
+			<div id="post-body" class="metabox-holder columns-2">
+
+				<div id="postbox-container-1" class="postbox-container">
+
+					<div id="side-sortables" class="meta-box-sortables ui-sortable">
+						<div id="submitdiv" class="postbox ">
+
+							<h2 class="hndle ui-sortable-handle">
+								<span>Envoyer</span>
+							</h2>
+
+							<div class="inside">
+								<div id="major-publishing-actions">
+
+									<div id="publishing-action">
+										<span class="spinner"></span>
+
+										<form method="post" action="">
+											<input type="hidden" name="<?php echo $hidden_send_newsletter_field_name; ?>" value="Y">
+
+											<p class="submit">
+												<input type="submit" name="Submit" class="button-primary" value="Envoyer la newsletter" />
+											</p>
+											<p class="howto">Après vérification évidemment</p>
+
+										</form>
+									</div>
+
+									<div class="clear"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div id="postbox-container-2" class="postbox-container">
+
+					<h2>Prévisualisation avant envoi</h2>
+
+					<div id="post-body-content" style="position: relative;">
+						<div class="card">
+
+							<?php echo get_newsletter() ?>
+
+						</div>
+					</div>
+
+				</div>
+
+			</div>
 
 		</div>
-
-		<form method="post" action="">
-			<input type="hidden" name="<?php echo $hidden_send_newsletter_field_name; ?>" value="Y">
-
-			<p class="submit">
-				<input type="submit" name="Submit" class="button-primary" value="Envoyer la newsletter" />
-			</p>
-		</form>
-
 	</div>
 <?php
 }
@@ -446,7 +499,16 @@ function tb_newsletter_config() {
 				<tbody>
 					<tr>
 						<th scope="row">
-							<label for="newsletter_recipient">URL racine du service ezmlm-php</label>
+							<label for="newsletter_recipient">Adresse de la liste</label>
+						</th>
+						<td>
+							<input type="text" name="newsletter_recipient" id="newsletter_recipient" value="<?php echo $newsletter_config['newsletter_recipient']; ?>" class="regular-text">
+							<p class="description">Liste de diffusion pour la newsletter</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="ezmlm_php_url">URL racine du service ezmlm-php</label>
 						</th>
 						<td>
 							<input type="text" name="ezmlm_php_url" id="ezmlm_php_url" value="<?php echo $newsletter_config['ezmlm_php_url']; ?>" class="regular-text">
@@ -455,7 +517,7 @@ function tb_newsletter_config() {
 					</tr>
 					<tr>
 						<th scope="row">
-							<label for="newsletter_recipient">Entête attendu par le service</label>
+							<label for="ezmlm_php_header">Entête attendu par le service</label>
 						</th>
 						<td>
 							<input type="text" name="ezmlm_php_header" id="ezmlm_php_header" value="<?php echo $newsletter_config['ezmlm_php_header']; ?>" class="regular-text">
