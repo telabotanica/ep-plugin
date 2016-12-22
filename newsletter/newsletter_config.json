@@ -3,5 +3,8 @@
 	"newsletter_recipient": "newsletter@example.com",
 	"newsletter_test_recipient": "accueil@example.com",
 	"ezmlm_php_url": "https://example.com/ezmlm-php",
-	"ezmlm_php_header": "Authorization"
+	"ezmlm_php_header": "Authorization",
+	"error_recipients_emails": [
+		"dev-log@tela-botanica.org"
+	]
 }

@@ -482,6 +482,8 @@ function tb_newsletter_config() {
 			// préparation des valeurs envoyées
 			$newsletter_config['ezmlm_php_url'] = $_POST['ezmlm_php_url'];
 			$newsletter_config['ezmlm_php_header'] = $_POST['ezmlm_php_header'];
+			$newsletter_config['error_recipients_emails'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['error_recipients_emails']));
+			$newsletter_config['error_recipients_emails'] = array_filter($newsletter_config['error_recipients_emails']);
 			// enregistrement
 			update_option('tb_newsletter_config', json_encode($newsletter_config));
 		?>
@@ -528,6 +530,18 @@ function tb_newsletter_config() {
 								<br/>
 								Certains serveurs n'acceptant pas la valeur par défault,
 								elle peut être remplacée, par exemple par "Auth".
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="error_recipients_emails">Destinataires des emails d'erreurs</label>
+						</th>
+						<td>
+							<textarea id="error_recipients_emails" name="error_recipients_emails" rows="3" cols="80" class="regular-text"><?php echo implode(PHP_EOL, $newsletter_config['error_recipients_emails']); ?></textarea>
+							<p class="description">
+								Une adresse par ligne<br>
+								Les lignes commençant par # seront ignorées
 							</p>
 						</td>
 					</tr>
