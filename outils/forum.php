@@ -76,7 +76,7 @@ class Forum extends TB_Outil {
 
 	public function scriptsEtStylesApres()
 	{
-		wp_enqueue_script('jquery-noconflict-compat', $this->urlOutil . 'js/jquery-noconflict-compat.js');
+		//wp_enqueue_script('jquery-noconflict-compat', $this->urlOutil . 'js/jquery-noconflict-compat.js');
 		wp_enqueue_script('moment', $this->urlOutil . 'bower_components/moment/min/moment.min.js');
 		wp_enqueue_script('moment-fr', $this->urlOutil . 'bower_components/moment/locale/fr.js');
 		wp_enqueue_script('mustache', $this->urlOutil . 'bower_components/mustache.js/mustache.min.js');
@@ -116,6 +116,9 @@ class Forum extends TB_Outil {
 		// portée des styles
 		echo '<div class="wp-bootstrap">';
 		echo '<div id="ezmlm-forum-main">';
+
+		// réutilisation propre du jQuery de Wordpress
+		echo '<script type="text/javascript">$jq = jQuery.noConflict();</script>';
 
 		// amorcer l'outil
 		chdir(dirname(__FILE__) . "/forum/");
