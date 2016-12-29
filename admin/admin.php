@@ -176,10 +176,10 @@ function tb_menu_hooks() {
 					</tr>
 					<tr>
 						<th scope="row">
-							<label>Entête (header) dans lequel envoyer le jeton SSO</label>
+							<label for="header-name">Entête (header) dans lequel envoyer le jeton SSO</label>
 						</th>
 						<td>
-							<input type="text" name="header-name" value="<?php echo $hooks_config['header-name']; ?>" />
+							<input type="text" id="header-name" name="header-name" value="<?php echo $hooks_config['header-name']; ?>" />
 							<p class="description">"Authorization" (par défaut) est refusé / traité incorrectement par certains serveurs.</p>
 						</td>
 					</tr>
@@ -250,7 +250,7 @@ function tb_menu_securite() {
 				<tbody>
 					<tr>
 						<th scope="row">
-							<label>Jeton SSO administrateur</label>
+							<label for="adminToken">Jeton SSO administrateur</label>
 						</th>
 						<td>
 							<textarea id="adminToken" name="adminToken" rows="10" cols="80"><?php echo isset($configActuelleGeneral['adminToken']) ? $configActuelleGeneral['adminToken'] : ''; ?></textarea>
@@ -267,10 +267,10 @@ function tb_menu_securite() {
 					</tr>
 					<tr>
 						<th scope="row">
-							<label>Domaine du jeton</label>
+							<label for="adminTokenDomain">Domaine du jeton</label>
 						</th>
 						<td>
-							<input type="text" name="adminTokenDomain" value="<?php echo isset($configActuelleGeneral['adminTokenDomain']) ? $configActuelleGeneral['adminTokenDomain'] : ''; ?>" />
+							<input type="text" id="adminTokenDomain" name="adminTokenDomain" value="<?php echo isset($configActuelleGeneral['adminTokenDomain']) ? $configActuelleGeneral['adminTokenDomain'] : ''; ?>" />
 							<p class="description">Ce jeton ne sera envoyé qu'à des services hébergés sur ce domaine et ses sous-domaines.</p>
 						</td>
 					</tr>
