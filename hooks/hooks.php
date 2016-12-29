@@ -29,11 +29,39 @@ class Hooks {
 		return $hooks_config;
 	}
 
+	/**
+	 * Retourne un tableau de config correspondant aux champs de la page
+	 * "Sécurité" : jeton SSO admin, domaine du jeton
+	 * 
+	 * @TODO réorganiser ça (statique dans une classe "Securite" par exemple) et
+	 * renommer l'option
+	 * 
+	 * @return array
+	 */
+	protected function getConfigSecurite() {
+		// chargement de la config depuis la BdD
+		$securite_config = json_decode(get_option('tb_general_config'), true);
+
+		// protection contre valeurs inexistantes
+		if (! array_key_exists('adminToken', $securite_config)) {
+			$securite_config['adminToken'] = null;
+		}
+		if (! array_key_exists('adminTokenDomain', $securite_config)) {
+			$securite_config['adminTokenDomain'] = null;
+		}
+
+		return $securite_config;
+	}
+
 	private function handleErrors($ch) {
+
 		$message = 'Uhoh, we\'ve got a problemouz ! ' . "\r\n"
 			. "\r\n"
 			. 'URL du hook appelé : ' . curl_getinfo($ch, CURLINFO_EFFECTIVE_URL) . "\r\n"
-			. 'et son code d\'erreur : ' . curl_getinfo($ch, CURLINFO_HTTP_CODE) . ' (' . curl_error($ch) . ')'
+			. 'et son code d\'erreur : ' . curl_getinfo($ch, CURLINFO_HTTP_CODE) . ' (' . curl_error($ch) . ')' . "\r\n"
+			. 'Jeton fourni : ' . $this->getConfigSecurite()['adminToken'] . "\r\n"
+			. '(domaine : ' . $this->getConfigSecurite()['adminTokenDomain'] . ")\r\n"
+			. 'dans l\'entête : ' . $this->getConfig()['header-name']
 		;
 
 		$headers = 'Content-Type: text/plain; charset="utf-8"' . "\r\n"
@@ -52,6 +80,11 @@ class Hooks {
 	}
 
 	private function callCaptainHooks($hooks_name, $user_id, $new_email, $old_email = '') {
+		// jeton SSO admin
+		$url_pattern_for_token_domain = '`^https?://(.+\.)?' . $this->getConfigSecurite()['adminTokenDomain'] . '.*$`i';
+		$admin_token = $this->getConfigSecurite()['adminToken'];
+		$admin_token_header = $this->getConfig()['header-name'];
+
 		foreach ($this->getConfig()[$hooks_name] as $hook_service_pattern) {
 			if ($hook_service_pattern && '#' !== substr($hook_service_pattern, 0, 1)) {
 				$count = 0;
@@ -69,6 +102,13 @@ class Hooks {
 						CURLOPT_FAILONERROR => 1,
 						CURLOPT_URL => $hook_service_url
 					));
+
+					// jeton dans l'entête choisi, si le domaine correspond
+					if ($admin_token && $admin_token_header && preg_match($url_pattern_for_token_domain, $hook_service_url)) {
+						curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+							$admin_token_header . ': ' . $admin_token
+						));
+					}
 
 					curl_exec($ch);
 
