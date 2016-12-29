@@ -8,5 +8,6 @@
 	],
 	"error-recipients-emails": [
 		"dev-log@tela-botanica.org"
-	]
+	],
+	"header-name": "Authorization"
 }

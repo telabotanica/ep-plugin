@@ -86,7 +86,13 @@ function tb_menu_hooks() {
 
 		<!-- Description -->
 		<div class="description">
-			<p>Permet de modifier les URLs à appeler pour synchroniser des modifications de données entre les différents outils Tela.<br>Par exemple, lorsqu'un utilisateur change son adresse email dans le profil.</p>
+			<p>
+				Permet de modifier les URLs à appeler pour synchroniser des modifications de données entre les différents outils Tela.
+				<br>
+				Par exemple, lorsqu'un utilisateur change son adresse email dans le profil.
+				<br>
+				Le jeton SSO défini dans "Sécurité" sera transmis aux services de son domaine et de ses sous-domaines, dans l'entête choisi ci-dessous.
+			</p>
 		</div>
 
 		<?php settings_errors(); ?>
@@ -104,6 +110,7 @@ function tb_menu_hooks() {
 				$hooks_config['email-modification-urls'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['email-modification-urls']));
 				$hooks_config['user-creation-urls'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['user-creation-urls']));
 				$hooks_config['error-recipients-emails'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['error-recipients-emails']));
+				$hooks_config['header-name'] = $_POST['header-name'];
 				// suppression des lignes vides
 				$hooks_config['email-modification-urls'] = array_filter($hooks_config['email-modification-urls']);
 				$hooks_config['user-creation-urls'] = array_filter($hooks_config['user-creation-urls']);
@@ -132,7 +139,7 @@ function tb_menu_hooks() {
 							<label for="email-modification-urls">URLs à appeler en cas de modification de l'adresse mail d'un utilisateur</label>
 						</th>
 						<td>
-							<textarea id="email-modification-urls" name="email-modification-urls" rows="5" cols="80" class="regular-text"><?php echo implode(PHP_EOL, $hooks_config['email-modification-urls']); ?></textarea>
+							<textarea id="email-modification-urls" name="email-modification-urls" rows="5" cols="80"><?php echo implode(PHP_EOL, $hooks_config['email-modification-urls']); ?></textarea>
 							<p class="description">
 								Une URL par ligne.<br>
 								Ex : http://example.org/changeusermail/{user_id}/{old_email}/to/{new_email}<br>
@@ -146,7 +153,7 @@ function tb_menu_hooks() {
 							<label for="user-creation-urls">URLs à appeler en cas de création d'un utilisateur</label>
 						</th>
 						<td>
-							<textarea id="user-creation-urls" name="user-creation-urls" rows="3" cols="80" class="regular-text"><?php echo implode(PHP_EOL, $hooks_config['user-creation-urls']); ?></textarea>
+							<textarea id="user-creation-urls" name="user-creation-urls" rows="3" cols="80"><?php echo implode(PHP_EOL, $hooks_config['user-creation-urls']); ?></textarea>
 							<p class="description">
 								Une URL par ligne.<br>
 								Ex : http://example.org/createuser/{user_id}/{new_email}<br>
@@ -160,11 +167,20 @@ function tb_menu_hooks() {
 							<label for="error-recipients-emails">Destinataires des emails d'erreurs des hooks</label>
 						</th>
 						<td>
-							<textarea id="error-recipients-emails" name="error-recipients-emails" rows="3" cols="80" class="regular-text"><?php echo implode(PHP_EOL, $hooks_config['error-recipients-emails']); ?></textarea>
+							<textarea id="error-recipients-emails" name="error-recipients-emails" rows="3" cols="80"><?php echo implode(PHP_EOL, $hooks_config['error-recipients-emails']); ?></textarea>
 							<p class="description">
 								Une adresse par ligne<br>
 								Les lignes commençant par # seront ignorées
 							</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="header-name">Entête (header) dans lequel envoyer le jeton SSO</label>
+						</th>
+						<td>
+							<input type="text" id="header-name" name="header-name" value="<?php echo $hooks_config['header-name']; ?>" />
+							<p class="description">"Authorization" (par défaut) est refusé / traité incorrectement par certains serveurs.</p>
 						</td>
 					</tr>
 				</tbody>
@@ -192,8 +208,10 @@ function tb_menu_securite() {
 	if( isset($_POST[$hidden_field_name_general]) && $_POST[$hidden_field_name_general] == 'Y' ) {
 		// récupération des valeurs du formulaire
 		$adminToken = $_POST['adminToken'];
+		$adminTokenDomain = $_POST['adminTokenDomain'];
 		// injection des valeurs du formulaire
 		$configActuelleGeneral['adminToken'] = $adminToken;
+		$configActuelleGeneral['adminTokenDomain'] = $adminTokenDomain;
 		// mise à jour de la BDD
 		update_option($opt_name_general, json_encode($configActuelleGeneral));
 		?>
@@ -232,10 +250,10 @@ function tb_menu_securite() {
 				<tbody>
 					<tr>
 						<th scope="row">
-							<label>Jeton SSO administrateur</label>
+							<label for="adminToken">Jeton SSO administrateur</label>
 						</th>
 						<td>
-							<textarea id="adminToken" name="adminToken" rows="10" cols="80" class="regular-text"><?php echo $configActuelleGeneral['adminToken']; ?></textarea>
+							<textarea id="adminToken" name="adminToken" rows="10" cols="80"><?php echo isset($configActuelleGeneral['adminToken']) ? $configActuelleGeneral['adminToken'] : ''; ?></textarea>
 							<p class="description">
 								Placer ici un jeton SSO administrateur longue durée.
 								<br>
@@ -245,6 +263,15 @@ function tb_menu_securite() {
 								<br>
 								Il doit rester ABSOLUMENT CONFIDENTIEL.
 							</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="adminTokenDomain">Domaine du jeton</label>
+						</th>
+						<td>
+							<input type="text" id="adminTokenDomain" name="adminTokenDomain" value="<?php echo isset($configActuelleGeneral['adminTokenDomain']) ? $configActuelleGeneral['adminTokenDomain'] : ''; ?>" />
+							<p class="description">Ce jeton ne sera envoyé qu'à des services hébergés sur ce domaine et ses sous-domaines.</p>
 						</td>
 					</tr>
 				</tbody>
@@ -502,7 +529,7 @@ function tb_menu_espace_projets() {
 						</tr>
 						<tr>
 							<th scope="row">
-								<label>Header à envoyer au service d'authentification</label>
+								<label>Entête (header) à envoyer au service d'authentification</label>
 							</th>
 							<td>
 								<input type="text" name="headerName" value="<?php echo $configActuelleForum['adapters']['AuthAdapterTB']['headerName']; ?>" />
