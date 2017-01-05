@@ -53,7 +53,7 @@ function initialisation_bp()
 		}
 	}
 
-	require( dirname( __FILE__ ) . '/formulaires/etiquettes/etiquettes.php' );	
+	//require( dirname( __FILE__ ) . '/formulaires/etiquettes/etiquettes.php' );	
 }
 
 // amorçage du plugin lors de l'amorçage de BuddyPress
