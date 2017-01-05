@@ -22,7 +22,7 @@ function tb_ajout_categories_projets()
 			'name' => __( 'Échanges', 'telabotanica' ),
 			'singular_name' => __( 'Échanges', 'telabotanica' )
 		),
-		'has_directory' => 'Échanges',
+		'has_directory' => 'echanges',
 		'show_in_create_screen' => true,
 		'show_in_list' => true,
 		'description' => __( 'Discussion', 'telabotanica' ),
