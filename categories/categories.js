@@ -7,15 +7,13 @@
 jQuery(document).ready( function() {
 	var jq = jQuery;
 	// toutes les catégories
-	console.log("ça charge à mort");
 	var categories = jq('.group-create-types .checkbox input[name="group-types[]"]');
 	// lorsqu'on clique sur une catégorie
 	categories.click(function() {
 		var coche = jq(this).prop("checked");
-		//console.log('État au moment du clic: ' + coche);
-		if (coche) {// si on coche
+		if (coche) { // si on coche
 			// décocher toutes les autres catégories
-			jq(this).parent().parent().siblings('.checkbox').each(function() {
+			jq(this).closest('.checkbox').siblings('.checkbox').each(function() {
 				var categ = jq(this).find('input[name="group-types[]"]');
 				categ.prop("checked", false);
 			});
