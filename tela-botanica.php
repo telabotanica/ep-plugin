@@ -40,7 +40,6 @@ function initialisation_bp()
 	require( dirname( __FILE__ ) . '/admin/admin.php' );
 	require( dirname( __FILE__ ) . '/newsletter/newsletter.php' );
 	require( dirname( __FILE__ ) . '/outils/TB_Outil.php' );
-	require( dirname( __FILE__ ) . '/formulaires/categorie/categorie.php' );
 	require( dirname( __FILE__ ) . '/formulaires/description/description-complete.php' );
 
 	$config = chargerConfig();
