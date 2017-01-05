@@ -19,73 +19,73 @@ function tb_ajout_categories_projets()
 {
 	bp_groups_register_group_type('echanges', array(
 		'labels' => array(
-			'name' => 'Échanges',
-			'singular_name' => 'Échanges'
+			'name' => __( 'Échanges', 'telabotanica' ),
+			'singular_name' => __( 'Échanges', 'telabotanica' )
 		),
 		'has_directory' => 'Échanges',
 		'show_in_create_screen' => true,
 		'show_in_list' => true,
-		'description' => "Discussion",
+		'description' => __( 'Discussion', 'telabotanica' ),
 		'create_screen_checked' => true
 	));
 
 	bp_groups_register_group_type('botanique-locale', array(
 		'labels' => array(
-			'name' => 'Botanique locale',
-			'singular_name' => 'Botanique locale'
+			'name' => __( 'Botanique', 'telabotanica' ),
+			'singular_name' => __( 'Botanique', 'telabotanica' )
 		),
 		'has_directory' => 'botanique-locale',
 		'show_in_create_screen' => true,
 		'show_in_list' => true,
-		'description' => "Botanique en territoire : rencontres, sorties de terrain...",
+		'description' => __( 'Botanique en territoire : rencontres, sorties de terrain...', 'telabotanica' ),
 		'create_screen_checked' => false
 	));
 
 	bp_groups_register_group_type('outils-informatiques', array(
 		'labels' => array(
-			'name' => 'Outils informatiques',
-			'singular_name' => 'Outils informatiques'
+			'name' => __( 'Outils informatiques', 'telabotanica' ),
+			'singular_name' => __( 'Outils informatiques', 'telabotanica' )
 		),
-		'has_directory' => 'Outils informatiques',
+		'has_directory' => 'outils-informatiques',
 		'show_in_create_screen' => true,
 		'show_in_list' => true,
-		'description' => "Projets présentant les outils et recevant les remarques (gné?)",
+		'description' => __( 'Projets présentant les outils et recevant les remarques (gné?)', 'telabotanica' ),
 		'create_screen_checked' => false
 	));
 
 	bp_groups_register_group_type('organisation', array(
 		'labels' => array(
-			'name' => 'Organisation',
-			'singular_name' => 'Organisation'
+			'name' => __( 'Organisation', 'telabotanica' ),
+			'singular_name' => __( 'Organisation', 'telabotanica' )
 		),
 		'has_directory' => 'organisation',
 		'show_in_create_screen' => true,
 		'show_in_list' => true,
-		'description' => "Co-organisation de programmes, comités de pilotage...",
+		'description' => __( 'Co-organisation de programmes, comités de pilotage...', 'telabotanica' ),
 		'create_screen_checked' => false
 	));
 
 	bp_groups_register_group_type('contribution', array(
 		'labels' => array(
-			'name' => 'Contribution',
-			'singular_name' => 'Contribution'
+			'name' => __( 'Contribution', 'telabotanica' ),
+			'singular_name' => __( 'Contribution', 'telabotanica' )
 		),
 		'has_directory' => 'contribution',
 		'show_in_create_screen' => true,
 		'show_in_list' => true,
-		'description' => "Saisie d'observations botaniques",
+		'description' => __( "Saisie d'observations botaniques", 'telabotanica' ),
 		'create_screen_checked' => false
 	));
 
 	bp_groups_register_group_type('construction', array(
 		'labels' => array(
-			'name' => 'Construction',
-			'singular_name' => 'Construction'
+			'name' => __( 'Construction', 'telabotanica' ),
+			'singular_name' => __( 'Construction', 'telabotanica' )
 		),
 		'has_directory' => 'construction',
 		'show_in_create_screen' => true,
 		'show_in_list' => true,
-		'description' => "Création de banque de données",
+		'description' => __( 'Création de banque de données', 'telabotanica' ),
 		'create_screen_checked' => false
 	));
 
@@ -99,7 +99,7 @@ function tb_ajout_categories_projets()
 		'has_directory' => 'tela-botanica',
 		'show_in_create_screen' => false,
 		'show_in_list' => true,
-		'description' => "Projets officiels de Tela Botanica"
+		'description' => __( 'Projets officiels de Tela Botanica', 'telabotanica' )
 	));
 }
 
