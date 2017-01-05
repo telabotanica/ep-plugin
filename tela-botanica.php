@@ -40,7 +40,6 @@ function initialisation_bp()
 	require( dirname( __FILE__ ) . '/admin/admin.php' );
 	require( dirname( __FILE__ ) . '/newsletter/newsletter.php' );
 	require( dirname( __FILE__ ) . '/outils/TB_Outil.php' );
-	require( dirname( __FILE__ ) . '/formulaires/categorie/categorie.php' );
 	require( dirname( __FILE__ ) . '/formulaires/description/description-complete.php' );
 
 	$config = chargerConfig();
@@ -53,13 +52,18 @@ function initialisation_bp()
 		}
 	}
 
-	require( dirname( __FILE__ ) . '/formulaires/etiquettes/etiquettes.php' );	
+	//require( dirname( __FILE__ ) . '/formulaires/etiquettes/etiquettes.php' );	
 }
 
 // amorçage du plugin lors de l'amorçage de BuddyPress
 add_action( 'bp_include', 'initialisation_bp' );
 add_action( 'bp_include', 'description_complete' );
-add_action( 'bp_include', 'categorie' );
+//add_action( 'bp_include', 'categorie' );
+
+
+// Charge les hooks de synchronisation des données de wordpress vers les autres outils
+require( dirname( __FILE__ ) . '/categories/categories.php' );
+
 
 // Charge les hooks de synchronisation des données de wordpress vers les autres outils
 require( dirname( __FILE__ ) . '/hooks/hooks.php' );
@@ -71,7 +75,7 @@ require( dirname( __FILE__ ) . '/roles/roles_sso.php' );
 function ajout_roles_sso() {
 	RolesSSO::ajout_roles();
 }
-// idem pour le hool de désactivation
+// idem pour le hook de désactivation
 function suppression_roles_sso() {
 	RolesSSO::ajout_roles(true);
 }
@@ -83,8 +87,9 @@ class TelaBotanica
 
 	/**
 	 * Constructeur de la classe TelaBotanica
-	 * Déclare les "hooks" d'installation / désintallation et d'activation /
-	 * désactivation des fonctionnalités apportées par le plugin
+	 * 
+	 * Déclare les "hooks" d'activation / désactivation / désintallation  des
+	 * fonctionnalités apportées par le plugin
 	 */
 	public function __construct()
 	{
@@ -96,12 +101,9 @@ class TelaBotanica
 			trigger_error("Vous devez installer et activer Buddypress pour utiliser ce plugin", E_USER_WARNING);
 		}
 
-		// MODE TEST (évite de désintaller / réinstaller pour tester les hooks)
-		//register_activation_hook(__FILE__,array('TelaBotanica','installation'));
-		//register_deactivation_hook(__FILE__,array('TelaBotanica','desinstallation'));
-		//register_deactivation_hook(__FILE__,array('TelaBotanica','desactivation'));
-
 		// MODE PROD
+		// il n'existe pas de "install_hook", c'est "activation_hook" qui doit
+		// se charger de créer les tables et insérer les données par défaut
 		register_activation_hook(__FILE__,array('TelaBotanica','installation'));
 		register_uninstall_hook(__FILE__,array('TelaBotanica','desinstallation'));
 		register_deactivation_hook(__FILE__,array('TelaBotanica','desactivation'));
@@ -113,7 +115,6 @@ class TelaBotanica
 	static function installation()
 	{
 		self::installation_outils();
-		self::installation_categories();
 	}
 
 	/**
@@ -129,7 +130,6 @@ class TelaBotanica
 	static function desinstallation()
 	{
 		self::desinstallation_outils();
-		self::desinstallation_categories();
 	}
 
 	/*
@@ -158,21 +158,15 @@ class TelaBotanica
 				`create_step_position` tinyint(3) NOT NULL,
 				`nav_item_position` tinyint(3) NOT NULL,
 				`enable_nav_item` tinyint(1) NOT NULL,
-				`config` text NOT NULL
-			) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-		";
-		$pk_outils_reglages = "
-			ALTER TABLE `{$wpdb->prefix}tb_outils_reglages`
-			ADD PRIMARY KEY (`id_projet`,`id_outil`),
-			ADD KEY `id_projet` (`id_projet`);
-		";
-		$fk_outils_reglages = "
-			ALTER TABLE `{$wpdb->prefix}tb_outils_reglages`
-			ADD CONSTRAINT `fk_id-projet_id-group` FOREIGN KEY (`id_projet`) REFERENCES `{$wpdb->prefix}bp_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-		";
+				`config` text NOT NULL,
+				PRIMARY KEY (`id_projet`,`id_outil`),
+				KEY (`id_projet`),
+				CONSTRAINT `fk_id-projet_id-group` FOREIGN KEY (`id_projet`) REFERENCES `{$wpdb->prefix}bp_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+			)
+			ENGINE=InnoDB DEFAULT CHARSET=utf8;"
+		;
+
 		$wpdb->query($create_outils_reglages);
-		$wpdb->query($pk_outils_reglages);
-		$wpdb->query($fk_outils_reglages);
 
 		/* déclenchement des routines d'installation des outils depuis la config
 		 * @WARNING Astuce pourrite : les fichiers des classes outils ne sont
@@ -188,7 +182,6 @@ class TelaBotanica
 				// de mauvaise config
 				include_once( dirname( __FILE__ ) . '/outils/' . $outil . '.php' );
 				$classeOutil = TelaBotanica::nomFichierVersClasseOutil($outil);
-				//echo "CO: [$classeOutil] ";
 				call_user_func(array($classeOutil, 'installation'));
 			}
 		}
@@ -214,51 +207,6 @@ class TelaBotanica
 
 		// On vérifie que les tables existent puis on les supprime
 		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}tb_outils_reglages;");
-	}
-
-	/*
-	 * Crée la table "{$wpdb->prefix}tb_categories_projets"
-	 */
-	static function installation_categories()
-	{
-		global $wpdb;
-		$create_categories = "
-			CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}tb_categories_projets` (
-				`id_categorie` int(11) NOT NULL,
-				`nom_categorie` varchar(30) NOT NULL
-			) ENGINE=InnoDB DEFAULT CHARSET=UTF8;
-		";
-		$insert_categories = "
-			INSERT INTO `{$wpdb->prefix}tb_categories_projets` (`id_categorie`, `nom_categorie`) VALUES
-				(0, 'Aucune catégorie'),
-				(1, 'Botanique locale'),
-				(2, 'Echanges'),
-				(3, 'Outils informatiques'),
-				(4, 'Organisation'),
-				(5, 'Contribution'),
-				(6, 'Construction')
-			;
-		";
-
-		$pk_categories = "
-			ALTER TABLE `{$wpdb->prefix}tb_categories_projets`
- 			ADD PRIMARY KEY (`id_categorie`);
-		";
-
-		$wpdb->query($create_categories);
-		$wpdb->query($insert_categories);
-		$wpdb->query($pk_categories);
-	}
-
-	/*
-	 * Supprime la table "{$wpdb->prefix}tb_categories_projets"
-	 */
-	static function desinstallation_categories()
-	{
-		global $wpdb;
-	
-		// On vérifie que la table existe puis on la supprime
-		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}tb_categories_projets;");
 	}
 
 	/*

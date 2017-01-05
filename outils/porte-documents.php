@@ -11,7 +11,7 @@ class Porte_Documents extends TB_Outil {
 		$this->initialisation();
 	}
 
-	protected function getConfigDefautOutil()
+	protected static function getConfigDefautOutil()
 	{
 		$cheminConfig = __DIR__ . "/porte-documents_config-defaut.json";
 		$configDefaut = json_decode(file_get_contents($cheminConfig), true);

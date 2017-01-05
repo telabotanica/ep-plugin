@@ -86,7 +86,7 @@ class TB_Outil extends BP_Group_Extension {
 	 * l'onglet BP (position, nom, etc.) mais les réglages de l'outil, par exemple
 	 * pour le forum : URL racine de la lib ezmlm-php, etc.
 	 */
-	protected function getConfigDefautOutil()
+	protected static function getConfigDefautOutil()
 	{
 		return array();
 	}
@@ -112,7 +112,7 @@ class TB_Outil extends BP_Group_Extension {
 		$this->create_step_position = 100;
 		$this->nav_item_position = 100;
 		$this->enable_nav_item = 1;
-		$this->config = $this->getConfigDefautOutil();
+		$this->config = static::getConfigDefautOutil();
 
 		/* 1) Lecture de la table "options" (config pour tous les projets) */
 		$options_name = 'tb_' . $this->slug . '_config';
@@ -140,9 +140,7 @@ class TB_Outil extends BP_Group_Extension {
 			$this->nav_item_position = $config_locale->nav_item_position;
 			$this->enable_nav_item = $config_locale->enable_nav_item;
 			$configLocale = json_decode($config_locale->config, true);
-		/*if ($this->slug == 'flora-data') {
-			var_dump($this->config); exit;
-		}*/
+
 			if (is_array($configLocale)) {
 				$this->config = array_replace_recursive($this->config, $configLocale); // priorité à la config locale
 			}
