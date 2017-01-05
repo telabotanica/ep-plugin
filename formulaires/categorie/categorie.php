@@ -1,31 +1,24 @@
 <?php
 
 function categorie() {
-	
+
 	// Retourne l'id du projet courant et la valeur meta_key de ce projet
 	function get_valeur($meta_key='') {
 		return groups_get_groupmeta(bp_get_group_id(), $meta_key);
 	}
-	
+
 	// Formulaire pour la catégorie du projet
 	function categorie_formulaire() {
-	
+
 		global $bp, $wpdb;
-		
-		/* Lecture de la table "wp_tb_categories_projets" */
-		$requete = "
-			SELECT * 
-			FROM {$wpdb->prefix}tb_categories_projets C, {$wpdb->prefix}bp_groups P
-			GROUP BY C.id_categorie
-		";
-		$res = $wpdb->get_results($requete) ;
-		
+
+		/* Lecture des catégories de projets (BP group type) */
 		?>
 		<p class="editfield">
 			<label for="categorie">Catégorie</label>
 			<select id="categorie" name="categorie">
 		<?php
-	
+
 		/* Construction de l'objet */
 		foreach ($res as $meta) {	
 			if ( $meta->nom_categorie == get_valeur('categorie') ) {
@@ -70,7 +63,3 @@ function categorie() {
 	}
 	add_filter('bp_get_group_avatar' , 'affichage_categorie');
 }
-
-
-
-?>

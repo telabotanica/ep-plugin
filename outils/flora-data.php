@@ -1,9 +1,10 @@
 <?php
 
 /**
- * Pseudo-outil : intégration d'un flora-data existant (FloraDatani) dans un <iframe>
+ * Pseudo-outil : intégration d'une suite d'outils flora-data existants dans
+ * des <iframe>
  */
-class FloraData extends TB_Outil {
+class Flora_Data extends TB_Outil {
 
 	public function __construct()
 	{
@@ -46,7 +47,7 @@ class FloraData extends TB_Outil {
 	 */
 	public function installation()
 	{
-		$configDefaut = FloraData::getConfigDefautOutil();
+		$configDefaut = Flora_Data::getConfigDefautOutil();
 		// l'id outil "flora-data" n'est pas tiré de $this->slug car la méthode d'install
 		// est appelée en contexte non-objet => mettre le slug dans un attribut statique ?
 		add_option('tb_flora-data_config',json_encode($configDefaut));
@@ -219,7 +220,7 @@ class FloraData extends TB_Outil {
 		check_admin_referer( 'groups_edit_save_' . $this->slug );
 
 		// mise à jour de la config
-		$configModifiee = FloraData::getConfigDefautOutil();
+		$configModifiee = Flora_Data::getConfigDefautOutil();
 		$configModifiee = $this->preparer_config_locale($configModifiee);
 		$configModifiee['projet'] = $_POST['mot-cle-projet'];
 
@@ -255,4 +256,4 @@ class FloraData extends TB_Outil {
 	}
 }
 
-bp_register_group_extension( 'FloraData' );
+bp_register_group_extension( 'Flora_Data' );
