@@ -696,7 +696,7 @@ function tb_menu_espace_projets() {
 							</th>
 							<td>
 								<input type="text" name="rootUrl" value="<?php echo $configActuelleFloraData['rootUrl']; ?>" class="regular-text" />
-								<p class="description">Ne pas mettre de ":" (slash) à la fin (ex: ".../widget:cel").</p>
+								<p class="description">Ne pas mettre de ":" (deux points) à la fin (ex: ".../widget:cel").</p>
 							</td>
 						</tr>
 					</tbody>
