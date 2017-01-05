@@ -16,7 +16,7 @@ class Flora_Data extends TB_Outil {
 		$this->initialisation();
 	}
 
-	public function getConfigDefautOutil()
+	public static function getConfigDefautOutil()
 	{
 		$cheminConfig = __DIR__ . "/flora-data_config-defaut.json";
 		$configDefaut = json_decode(file_get_contents($cheminConfig), true);
