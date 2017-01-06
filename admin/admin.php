@@ -468,12 +468,14 @@ function tb_menu_espace_projets() {
 				$ezmlmPhpRootUri = $_POST['ezmlmPhpRootUri'];
 				$annuaireUrl = $_POST['annuaireUrl'];
 				$headerName = $_POST['headerName'];
+				$avatarService = $_POST['avatarService'];
 				$active = ($_POST['active'] == 'true');
 				$displayListTitle = ($_POST['displayListTitle'] == 'true');
 				// injection des valeurs du formulaire
 				$configActuelleForum['ezmlm-php']['rootUri'] = $ezmlmPhpRootUri;
 				$configActuelleForum['adapters']['AuthAdapterTB']['annuaireURL'] = $annuaireUrl;
 				$configActuelleForum['adapters']['AuthAdapterTB']['headerName'] = $headerName;
+				$configActuelleForum['avatarService'] = $avatarService;
 				$configActuelleForum['displayListTitle'] = $displayListTitle;
 				$configActuelleForum['active'] = $active;
 				// mise à jour de la BDD
@@ -545,6 +547,19 @@ function tb_menu_espace_projets() {
 									<option value="true" <?php echo ($configActuelleForum['displayListTitle'] ? 'selected' : '') ?>>Oui</option>
 									<option value="false" <?php echo ($configActuelleForum['displayListTitle'] ? '' : 'selected') ?>>Non</option>
 								</select>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">
+								<label>URL du service de récupération des avatars</label>
+							</th>
+							<td>
+								<input type="text" name="avatarService" value="<?php echo $configActuelleForum['avatarService']; ?>" class="regular-text" />
+								<p class="description">
+									La chaîne "{email}" sera remplacée par l'adresse email de l'utilisateur.
+									<br>
+									Si laissé vide, les avatars ne seront pas gérés.
+								</p>
 							</td>
 						</tr>
 					</tbody>
