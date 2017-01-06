@@ -66,12 +66,12 @@ class Forum extends TB_Outil {
 
 	public function scriptsEtStylesAvant()
 	{
-		wp_enqueue_script('bootstrap-js', $this->urlOutil . 'bower_components/bootstrap/dist/js/bootstrap.min.js');
+		wp_enqueue_script('bootstrap-js', $this->urlOutil . 'bower_components/bootstrap/dist/js/bootstrap.min.js', array('jquery'));
 		// @WTF le style n'est pas écrasé par le BS du thème, malgré son ID
 		// identique et sa priorité faible, c'est lui qui écrase l'autre :-/
 		// @TODO trouver une solution, car si on utilise le plugin sans le thème,
 		// y aura pas de BS et ça marchera pas :'(
-		// wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bower_components/bootstrap/dist/css/bootstrap.min.css');
+		wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bower_components/bootstrap/dist/css/bootstrap.min.css');
 	}
 
 	public function scriptsEtStylesApres()
