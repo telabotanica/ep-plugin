@@ -15,5 +15,6 @@
 			"annuaireURL": "https://www.tela-botanica.org/service:annuaire:auth",
 			"headerName": "Auth"
 		}
-	}
+	},
+	"avatarService": "https://www.tela-botanica.org/service:annuaire:utilisateur/avatar-par-courriel/{email}"
 }

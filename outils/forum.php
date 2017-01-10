@@ -2,6 +2,15 @@
 
 class Forum extends TB_Outil {
 
+	/** nom de la liste sur laquelle est branchée le forum */
+	protected $nomListe;
+
+	/** adresse email de l'utilisateur en cours */
+	protected $emailUtilisateur = null;
+
+	/** true si l'utilisateur en cours est abonné à la liste en cours, false sinon */
+	protected $statutAbonnement = false;
+
 	public function __construct()
 	{
 		// identifiant de l'outil et nom par défaut
@@ -66,12 +75,12 @@ class Forum extends TB_Outil {
 
 	public function scriptsEtStylesAvant()
 	{
-		wp_enqueue_script('bootstrap-js', $this->urlOutil . 'bower_components/bootstrap/dist/js/bootstrap.min.js');
+		wp_enqueue_script('bootstrap-js', $this->urlOutil . 'bower_components/bootstrap/dist/js/bootstrap.min.js', array('jquery'));
 		// @WTF le style n'est pas écrasé par le BS du thème, malgré son ID
 		// identique et sa priorité faible, c'est lui qui écrase l'autre :-/
 		// @TODO trouver une solution, car si on utilise le plugin sans le thème,
 		// y aura pas de BS et ça marchera pas :'(
-		// wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bower_components/bootstrap/dist/css/bootstrap.min.css');
+		wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bower_components/bootstrap/dist/css/bootstrap.min.css');
 	}
 
 	public function scriptsEtStylesApres()
@@ -92,6 +101,152 @@ class Forum extends TB_Outil {
 		wp_enqueue_script('ViewList', $this->urlOutil . 'js/ViewList.js');
 	}
 
+	/**
+	 * Détecte si une commande d'abonnement / désabonnement a été envoyée par le
+	 * petit formulaire en haut de l'onglet, et la traite à l'aide du service
+	 * ezmlm
+	 */
+	protected function traiterCommandeAbonnement()
+	{
+		if (isset($_REQUEST['tb-forum-action-inscription'])) {
+			$commandeAbonnement = $_REQUEST['tb-forum-action-inscription'];
+			if ($commandeAbonnement === '0') {
+				$this->modifierAbonnement(false);
+			} elseif ($commandeAbonnement === '1') {
+				$this->modifierAbonnement(true);
+			} // else moi pas comprendre
+		}
+	}
+
+	/**
+	 * Lit l'adresse email de l'utilisateur en cours, le nom de la liste en
+	 * cours, et le statut abonné ou non; place tout cela dans les attributs de
+	 * la classe - n'est pas appelé dans le constructeur, car celui-ci est
+	 * exécuté même si l'onglet forum n'est pas actif; n'ayant pas besoin de ces
+	 * infos dans les autres onglets, on évite des appels au service ezmlm pour
+	 * rien
+	 */
+	protected function lireStatutUtilisateurEtListe()
+	{
+		// nom de la liste, répercuté dans la config de l'outil
+		if (empty($this->config['ezmlm-php']['list'])) {
+			$this->config['ezmlm-php']['list'] = bp_get_current_group_slug();
+		}
+		$this->nomListe = $this->config['ezmlm-php']['list'];
+
+		// adresse email de l'utilisateur en cours
+		$wpUser = new WP_User($this->userId);
+		if ($wpUser) {
+			$this->emailUtilisateur = $wpUser->user_email;
+		}
+
+		// l'utilisateur en cours est-il inscrit au forum ?
+		$this->statutAbonnement();
+	}
+
+	/**
+	 * Retourne true si l'utilisateur en cours est abonné à la liste en cours,
+	 * false sinon (ou si aucun utilisateur n'est identifié)
+	 */
+	protected function statutAbonnement()
+	{
+		$this->statutAbonnement = false;
+		if (! $this->emailUtilisateur) {
+			return false;
+		}
+		// appel à ezmlm
+		$urlRacineEzmlmPhp = $this->config['ezmlm-php']['rootUri'];
+		$url = $urlRacineEzmlmPhp . '/users/' . $this->emailUtilisateur . '/subscriber-of/' . $this->nomListe;
+
+		// jeton SSO admin
+		$securiteConfig = json_decode(get_option('tb_general_config'), true);
+		// @TODO jeter une exception ? afficher un message discret ?
+		if (! array_key_exists('adminToken', $securiteConfig)) {
+			return false;
+		}
+		// @TODO paramétrer - n'est pas le même que l'entête pour l'adapter Auth
+		$enteteEzmlmPhp = 'Auth';
+
+		$ch = curl_init();
+		curl_setopt_array($ch, array(
+			CURLOPT_RETURNTRANSFER => 1,
+			CURLOPT_FAILONERROR => 1,
+			CURLOPT_URL => $url
+		));
+		// jeton dans l'entête choisi (on ne s'occupe pas du domaine ici)
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			$enteteEzmlmPhp . ': ' . $securiteConfig['adminToken']
+		));
+
+		$resultat = curl_exec($ch);
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_close($ch);
+
+		if ($http_code != 200) {
+			return false;
+		} else {
+			$this->statutAbonnement = ($resultat === 'true'); // pas la peine de json_decode()r pour ça
+		}
+	}
+
+	/**
+	 * Si $nouvelEtatAbonnement est true, inscrit l'utilisateur en cours à la
+	 * liste en cours en utilisant le service ezmlm; si $nouvelEtatAbonnement
+	 * est false, le désinscrit
+	 */
+	protected function modifierAbonnement($nouvelEtatAbonnement) {
+		if (! $this->emailUtilisateur) {
+			return false;
+		}
+
+		// jeton SSO admin
+		$securiteConfig = json_decode(get_option('tb_general_config'), true);
+		// @TODO jeter une exception ? afficher un message discret ?
+		if (! array_key_exists('adminToken', $securiteConfig)) {
+			return false;
+		}
+		// @TODO paramétrer - n'est pas le même que l'entête pour l'adapter Auth
+		$enteteEzmlmPhp = 'Auth';
+
+		// appel à ezmlm
+		$urlRacineEzmlmPhp = $this->config['ezmlm-php']['rootUri'];
+		$url = $urlRacineEzmlmPhp . '/lists/' . $this->nomListe . '/subscribers';
+
+		$ch = curl_init();
+		$headers = array();
+		if ($nouvelEtatAbonnement === true) {
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array("address" => $this->emailUtilisateur)));
+			$headers[] = 'Content-Type:application/json';
+		} else {
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+			$url .= '/' . $this->emailUtilisateur;
+		}
+
+		// jeton dans l'entête choisi (on ne s'occupe pas du domaine ici)
+		$headers[] = $enteteEzmlmPhp . ': ' . $securiteConfig['adminToken'];;
+
+		curl_setopt_array($ch, array(
+			CURLOPT_RETURNTRANSFER => 1,
+			CURLOPT_FAILONERROR => 1,
+			CURLOPT_URL => $url,
+			CURLOPT_HTTPHEADER => $headers
+		));
+
+		curl_exec($ch);
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_close($ch);
+
+		// répercussion du statut d'abonnement
+		$this->statutAbonnement = $nouvelEtatAbonnement;
+		// @TODO gérer les erreurs, vérifier que la commande a bien fonctionné
+		if ($http_code != 200) {
+			return false;
+		}
+
+		return true;
+	}
+
 	/*
 	 * Vue onglet principal - affichage du forum dans la page
 	 */
@@ -106,20 +261,39 @@ class Forum extends TB_Outil {
 		$this->config['baseUri'] = $this->getBaseUri();
 		// - URI de base pour les données (/wp-content/*)
 		$this->config['dataBaseUri'] = $this->getDataBaseUri();
-		// - nom de la liste
-		if (empty($this->config['ezmlm-php']['list'])) {
-			$this->config['ezmlm-php']['list'] = bp_get_current_group_slug();
-		}
 
-		//var_dump($this->config);
+		// lire le statut de l'utilisateur et de la liste
+		$this->lireStatutUtilisateurEtListe();
+		// traitement de la commande d'abonnement ou désabonnement
+		// potentiellement envoyée par le formulaire ci-dessous
+		$this->traiterCommandeAbonnement();
+		?>
 
-		// portée des styles
-		echo '<div class="wp-bootstrap">';
-		echo '<div id="ezmlm-forum-main">';
+		<?php if ($this->userId != 0): ?>
+		<div id="tb-forum-commande-inscription" class="tab-project-meta">
+			<!-- état de l'inscription -->
+			<div id="tb-forum-etat-inscription" class="tab-meta-info">
+				<?php echo $this->statutAbonnement ? __("Vous êtes abonné", 'telabotanica') : __("Vous n'êtes pas abonné", 'telabotanica') ?>
+			</div>
+			<!-- mini-formulaire d'inscription / désinscription -->
+			<div class="tab-meta-info">
+				<form id="tb-forum-inscription" action="" method="GET">
+					<input type="hidden" name="tb-forum-action-inscription" value="<?php echo $this->statutAbonnement ? '0' : '1' ?>">
+					<input class="button outline" type="submit"
+						value="<?php echo $this->statutAbonnement ? __("Se désabonner", 'telabotanica') : __("S'abonner", 'telabotanica') ?>">
+				</form>
+			</div>
+		</div>
+		<?php endif; ?>
 
-		// réutilisation propre du jQuery de Wordpress
-		echo '<script type="text/javascript">$jq = jQuery.noConflict();</script>';
+		<!-- portée des styles -->
+		<div class="wp-bootstrap">
+		<div id="ezmlm-forum-main">
 
+		<!-- réutilisation propre du jQuery de Wordpress -->
+		<script type="text/javascript">$jq = jQuery.noConflict();</script>
+
+		<?php
 		// amorcer l'outil
 		chdir(dirname(__FILE__) . "/forum/");
 		require "ezmlm-forum.php";
@@ -129,8 +303,10 @@ class Forum extends TB_Outil {
 
 		// - inclure le corps de page
 		$fc->renderPage();
-		echo "</div>";
-		echo "</div>";
+		?>
+		</div>
+		</div>
+		<?php
 	}
 
 	/* Vue onglet admin */
@@ -196,7 +372,6 @@ class Forum extends TB_Outil {
 
 		/* Mise à jour de la ligne dans la base de données */
 		$table = "{$wpdb->prefix}tb_outils_reglages";
-		//var_dump($_POST); exit;
 		$data = array( 												
 			'enable_nav_item' => ($_POST['activation-outil'] == 'true'),
 			'name' => $_POST['nom-outil'],
