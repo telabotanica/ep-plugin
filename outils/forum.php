@@ -110,12 +110,9 @@ class Forum extends TB_Outil {
 	{
 		if (isset($_REQUEST['tb-forum-action-inscription'])) {
 			$commandeAbonnement = $_REQUEST['tb-forum-action-inscription'];
-			//var_dump($commandeAbonnement);
 			if ($commandeAbonnement === '0') {
-				//var_dump("On désinscrit le gonzier");
 				$this->modifierAbonnement(false);
 			} elseif ($commandeAbonnement === '1') {
-				//var_dump("On inscrit le gadjo");
 				$this->modifierAbonnement(true);
 			} // else moi pas comprendre
 		}
@@ -136,19 +133,15 @@ class Forum extends TB_Outil {
 			$this->config['ezmlm-php']['list'] = bp_get_current_group_slug();
 		}
 		$this->nomListe = $this->config['ezmlm-php']['list'];
-		//echo "NomListe: "; var_dump($this->nomListe); echo "<br/>";
 
 		// adresse email de l'utilisateur en cours
-		//echo "UserID: "; var_dump($this->userId); echo "<br/>";
 		$wpUser = new WP_User($this->userId);
 		if ($wpUser) {
 			$this->emailUtilisateur = $wpUser->user_email;
 		}
-		//echo "UserEmail: "; var_dump($this->emailUtilisateur); echo "<br/>";
 
 		// l'utilisateur en cours est-il inscrit au forum ?
-		$this->statutAbonnement = $this->statutAbonnement();
-		//echo "StatutAB: "; var_dump($this->statutAbonnement); echo "<br/>";
+		$this->statutAbonnement();
 	}
 
 	/**
@@ -157,13 +150,13 @@ class Forum extends TB_Outil {
 	 */
 	protected function statutAbonnement()
 	{
+		$this->statutAbonnement = false;
 		if (! $this->emailUtilisateur) {
 			return false;
 		}
 		// appel à ezmlm
 		$urlRacineEzmlmPhp = $this->config['ezmlm-php']['rootUri'];
 		$url = $urlRacineEzmlmPhp . '/users/' . $this->emailUtilisateur . '/subscriber-of/' . $this->nomListe;
-		//var_dump($url);
 
 		// jeton SSO admin
 		$securiteConfig = json_decode(get_option('tb_general_config'), true);
@@ -171,7 +164,6 @@ class Forum extends TB_Outil {
 		if (! array_key_exists('adminToken', $securiteConfig)) {
 			return false;
 		}
-		$jetonAdmin = $securiteConfig['adminToken'];
 		// @TODO paramétrer - n'est pas le même que l'entête pour l'adapter Auth
 		$enteteEzmlmPhp = 'Auth';
 
@@ -183,46 +175,29 @@ class Forum extends TB_Outil {
 		));
 		// jeton dans l'entête choisi (on ne s'occupe pas du domaine ici)
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-			$enteteEzmlmPhp . ': ' . $jetonAdmin
+			$enteteEzmlmPhp . ': ' . $securiteConfig['adminToken']
 		));
 
 		$resultat = curl_exec($ch);
 		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		//var_dump($resultat);
-		//var_dump($http_code);
+		curl_close($ch);
 
 		if ($http_code != 200) {
 			return false;
-			//var_dump(curl_error($ch));
 		} else {
-			return ($resultat === 'true'); // pas la peine de json_decode()r pour ça
+			$this->statutAbonnement = ($resultat === 'true'); // pas la peine de json_decode()r pour ça
 		}
-		curl_close($ch);
 	}
 
 	/**
-	 * Si $inscrire est true, inscrit l'utilisateur en cours à la liste en cours
-	 * en utilisant le service ezmlm; si $inscrire est false, le désinscrit
+	 * Si $nouvelEtatAbonnement est true, inscrit l'utilisateur en cours à la
+	 * liste en cours en utilisant le service ezmlm; si $nouvelEtatAbonnement
+	 * est false, le désinscrit
 	 */
-	protected function modifierAbonnement($inscrire) {
+	protected function modifierAbonnement($nouvelEtatAbonnement) {
 		if (! $this->emailUtilisateur) {
 			return false;
 		}
-		// appel à ezmlm
-		$urlRacineEzmlmPhp = $this->config['ezmlm-php']['rootUri'];
-		$url = $urlRacineEzmlmPhp . '/lists/' . $this->nomListe . '/subscribers';
-
-		$ch = curl_init();
-		$headers = array();
-		if ($inscrire === true) {
-			curl_setopt($ch, CURLOPT_POST, 1);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array("address" => $this->emailUtilisateur)));
-			$headers[] = 'Content-Type:application/json';
-		} else {
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
-			$url .= '/' . $this->emailUtilisateur;
-		}
-		//var_dump($url);
 
 		// jeton SSO admin
 		$securiteConfig = json_decode(get_option('tb_general_config'), true);
@@ -230,34 +205,44 @@ class Forum extends TB_Outil {
 		if (! array_key_exists('adminToken', $securiteConfig)) {
 			return false;
 		}
-		$jetonAdmin = $securiteConfig['adminToken'];
 		// @TODO paramétrer - n'est pas le même que l'entête pour l'adapter Auth
 		$enteteEzmlmPhp = 'Auth';
+
+		// appel à ezmlm
+		$urlRacineEzmlmPhp = $this->config['ezmlm-php']['rootUri'];
+		$url = $urlRacineEzmlmPhp . '/lists/' . $this->nomListe . '/subscribers';
+
+		$ch = curl_init();
+		$headers = array();
+		if ($nouvelEtatAbonnement === true) {
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array("address" => $this->emailUtilisateur)));
+			$headers[] = 'Content-Type:application/json';
+		} else {
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+			$url .= '/' . $this->emailUtilisateur;
+		}
+
+		// jeton dans l'entête choisi (on ne s'occupe pas du domaine ici)
+		$headers[] = $enteteEzmlmPhp . ': ' . $securiteConfig['adminToken'];;
 
 		curl_setopt_array($ch, array(
 			CURLOPT_RETURNTRANSFER => 1,
 			CURLOPT_FAILONERROR => 1,
-			CURLOPT_URL => $url
+			CURLOPT_URL => $url,
+			CURLOPT_HTTPHEADER => $headers
 		));
-		// jeton dans l'entête choisi (on ne s'occupe pas du domaine ici)
-		$headers[] = $enteteEzmlmPhp . ': ' . $jetonAdmin;
 
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-		$resultat = curl_exec($ch);
+		curl_exec($ch);
 		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		//var_dump($resultat);
-		//var_dump($http_code);
+		curl_close($ch);
 
 		// répercussion du statut d'abonnement
-		$this->statutAbonnement = $inscrire;
+		$this->statutAbonnement = $nouvelEtatAbonnement;
 		// @TODO gérer les erreurs, vérifier que la commande a bien fonctionné
 		if ($http_code != 200) {
 			return false;
-			//var_dump(curl_error($ch));
 		}
-		curl_close($ch);
-
 
 		return true;
 	}
@@ -276,8 +261,6 @@ class Forum extends TB_Outil {
 		$this->config['baseUri'] = $this->getBaseUri();
 		// - URI de base pour les données (/wp-content/*)
 		$this->config['dataBaseUri'] = $this->getDataBaseUri();
-
-		//var_dump($this->config);
 
 		// lire le statut de l'utilisateur et de la liste
 		$this->lireStatutUtilisateurEtListe();
@@ -389,7 +372,6 @@ class Forum extends TB_Outil {
 
 		/* Mise à jour de la ligne dans la base de données */
 		$table = "{$wpdb->prefix}tb_outils_reglages";
-		//var_dump($_POST); exit;
 		$data = array( 												
 			'enable_nav_item' => ($_POST['activation-outil'] == 'true'),
 			'name' => $_POST['nom-outil'],
