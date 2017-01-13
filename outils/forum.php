@@ -19,6 +19,12 @@ class Forum extends TB_Outil {
 
 		// init du parent
 		$this->initialisation();
+
+		// nom de la liste, répercuté dans la config de l'outil
+		if (empty($this->config['ezmlm-php']['list'])) {
+			$this->config['ezmlm-php']['list'] = bp_get_current_group_slug();
+		}
+		$this->nomListe = $this->config['ezmlm-php']['list'];
 	}
 
 	public static function getConfigDefautOutil()
@@ -119,8 +125,22 @@ class Forum extends TB_Outil {
 	}
 
 	/**
-	 * Lit l'adresse email de l'utilisateur en cours, le nom de la liste en
-	 * cours, et le statut abonné ou non; place tout cela dans les attributs de
+	 * Détecte si une commande de création de liste a été envoyée par le petit
+	 * formulaire en haut de l'onglet, et la traite à l'aide du service ezmlm
+	 */
+	protected function traiterCommandeCreationListe()
+	{
+		if (isset($_REQUEST['tb-forum-action-creation-liste'])) {
+			$commandeCreationListe = $_REQUEST['tb-forum-action-creation-liste'];
+			if ($commandeCreationListe === '1') {
+				$this->creerListe();
+			}
+		}
+	}
+
+	/**
+	 * Lit l'adresse email de l'utilisateur en cours et le statut abonné ou non
+	 * à la liste en cours; place tout cela dans les attributs de
 	 * la classe - n'est pas appelé dans le constructeur, car celui-ci est
 	 * exécuté même si l'onglet forum n'est pas actif; n'ayant pas besoin de ces
 	 * infos dans les autres onglets, on évite des appels au service ezmlm pour
@@ -128,12 +148,6 @@ class Forum extends TB_Outil {
 	 */
 	protected function lireStatutUtilisateurEtListe()
 	{
-		// nom de la liste, répercuté dans la config de l'outil
-		if (empty($this->config['ezmlm-php']['list'])) {
-			$this->config['ezmlm-php']['list'] = bp_get_current_group_slug();
-		}
-		$this->nomListe = $this->config['ezmlm-php']['list'];
-
 		// adresse email de l'utilisateur en cours
 		$wpUser = new WP_User($this->userId);
 		if ($wpUser) {
@@ -142,6 +156,109 @@ class Forum extends TB_Outil {
 
 		// l'utilisateur en cours est-il inscrit au forum ?
 		$this->statutAbonnement();
+	}
+
+	/**
+	 * Interroge le service ezmlm pour savoir si la liste en cours existe
+	 */
+	protected function existenceListe()
+	{
+		$existenceListe = false;
+		if (! $this->nomListe) {
+			return false;
+		}
+		// appel à ezmlm
+		$urlRacineEzmlmPhp = $this->config['ezmlm-php']['rootUri'];
+		$url = $urlRacineEzmlmPhp . '/lists/' . $this->nomListe;
+
+		// jeton SSO admin
+		$securiteConfig = json_decode(get_option('tb_general_config'), true);
+		// @TODO jeter une exception ? afficher un message discret ?
+		if (! array_key_exists('adminToken', $securiteConfig)) {
+			return false;
+		}
+		// @TODO paramétrer - n'est pas le même que l'entête pour l'adapter Auth
+		$enteteEzmlmPhp = 'Auth';
+
+		$ch = curl_init();
+		curl_setopt_array($ch, array(
+			CURLOPT_RETURNTRANSFER => 1,
+			CURLOPT_FAILONERROR => 1,
+			CURLOPT_URL => $url
+		));
+		// jeton dans l'entête choisi (on ne s'occupe pas du domaine ici)
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			$enteteEzmlmPhp . ': ' . $securiteConfig['adminToken']
+		));
+
+		curl_exec($ch);
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_close($ch);
+
+		if ($http_code == 200) {
+			$existenceListe = true;
+		}
+
+		return $existenceListe;
+	}
+
+	/**
+	 * Demande au service ezmlm de créer la liste configurée; pour les
+	 * administrateurs seulement
+	 */
+	protected function creerListe()
+	{
+		$listeCreee = false;
+		if (! is_super_admin()) {
+			return false;
+		}
+		if (! $this->nomListe) {
+			return false;
+		}
+
+		// jeton SSO admin
+		$securiteConfig = json_decode(get_option('tb_general_config'), true);
+		// @TODO jeter une exception ? afficher un message discret ?
+		if (! array_key_exists('adminToken', $securiteConfig)) {
+			return false;
+		}
+		// @TODO paramétrer - n'est pas le même que l'entête pour l'adapter Auth
+		$enteteEzmlmPhp = 'Auth';
+
+		// appel à ezmlm
+		$urlRacineEzmlmPhp = $this->config['ezmlm-php']['rootUri'];
+		$url = $urlRacineEzmlmPhp . '/lists';
+
+		$ch = curl_init();
+		$headers = array();
+		$headers[] = 'Content-Type:application/json';
+		// jeton dans l'entête choisi (on ne s'occupe pas du domaine ici)
+		$headers[] = $enteteEzmlmPhp . ': ' . $securiteConfig['adminToken'];;
+
+		curl_setopt_array($ch, array(
+			CURLOPT_POST => 1,
+			CURLOPT_POSTFIELDS => json_encode(array(
+				"name" => $this->nomListe
+			)),
+			CURLOPT_RETURNTRANSFER => 1,
+			CURLOPT_FAILONERROR => 1,
+			CURLOPT_URL => $url,
+			CURLOPT_HTTPHEADER => $headers
+		));
+
+		curl_exec($ch);
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+		// un jour on retournera peut-être un 201:created (mieux)
+		if (in_array($http_code, array(200, 201))) {
+			$listeCreee = true;
+		} else {
+			// affichage rudimentaire pour dépanner l'admin
+			echo curl_error($ch);
+		}
+		curl_close($ch);
+
+		return $listeCreee;
 	}
 
 	/**
@@ -312,6 +429,13 @@ class Forum extends TB_Outil {
 	/* Vue onglet admin */
 	function edit_screen($group_id = null) {
 		$this->controleAccesReglages();
+
+		// traitement de la commande de création de liste
+		// potentiellement envoyée par le formulaire ci-dessous
+		$this->traiterCommandeCreationListe();
+
+		// La liste configurée existe-t-elle ?
+		$existenceListe = $this->existenceListe();
 		?>
 		<h4>Paramètres de l'outil <?php echo $this->name ?></h4>
 
@@ -330,10 +454,24 @@ class Forum extends TB_Outil {
 
 		<p class="editfield">
 			<label for="liste-outil">Nom de la liste</label>
-			<input type="text" <?php echo is_super_admin() ? '' : 'disabled="disabled"' ?> id="liste-outil" name="list" placeholder="automatique (nom du projet)" value="<?php echo $this->config['ezmlm-php']['list'] ?>" />
-			<?php if (! is_super_admin()) { ?>
-				<span class="description">Vous ne pouvez pas modifier ce paramètre.</span>
-			<?php } ?>
+			<input type="text" <?php echo is_super_admin() ? '' : 'disabled="disabled"' ?> id="liste-outil" name="list" placeholder="automatique (<?php echo $this->nomListe ?>)" value="<?php echo $this->config['ezmlm-php']['list'] ?>" />
+			<?php if ($existenceListe): ?>
+				<span title="La liste est correctement configurée">
+					<svg aria-hidden="true" role="img" class="icon icon-check-circle"><use xlink:href="#icon-check-circle"></use></svg>
+				</span>
+			<?php else: ?>
+				<span title="La liste n'existe pas">
+					<svg aria-hidden="true" role="img" class="icon icon-error"><use xlink:href="#icon-error"></use></svg>
+				</span>
+				<?php if (is_super_admin()): ?>
+					<a href="?tb-forum-action-creation-liste=1" class="button outline">
+						<?php echo __("Créer la liste", 'telabotanica') ?>
+					</a>
+				<?php endif; ?>
+			<?php endif; ?>
+			<?php if (! is_super_admin()): ?>
+				<br><span class="description">Vous ne pouvez pas modifier ce paramètre.</span>
+			<?php endif; ?>
 		</p>
 
 		<p class="editfield">
