@@ -79,6 +79,7 @@ function ajout_roles_sso() {
 function suppression_roles_sso() {
 	RolesSSO::ajout_roles(true);
 }
+// @TODO déplacer dans TelaBotanica::installation et TelaBotanica::desactivation
 register_activation_hook(__FILE__, 'ajout_roles_sso');
 register_deactivation_hook(__FILE__, 'suppression_roles_sso');
 
