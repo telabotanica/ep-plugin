@@ -233,7 +233,7 @@ class Forum extends TB_Outil {
 		$headers = array();
 		$headers[] = 'Content-Type:application/json';
 		// jeton dans l'entête choisi (on ne s'occupe pas du domaine ici)
-		$headers[] = $enteteEzmlmPhp . ': ' . $securiteConfig['adminToken'];;
+		$headers[] = $enteteEzmlmPhp . ': ' . $securiteConfig['adminToken'];
 
 		curl_setopt_array($ch, array(
 			CURLOPT_POST => 1,
