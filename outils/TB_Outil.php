@@ -42,6 +42,17 @@ class TB_Outil extends BP_Group_Extension {
 		$this->groupId = bp_get_current_group_id();
 		$this->userId = $bp->loggedin_user->id;
 
+		// Utile ?
+		// Lu sur https://codex.buddypress.org/developer/group-extension-api/#examples
+		$args = array(
+			'slug' => $this->slug,
+			'name' => $this->name
+        );
+		if (! empty($this->template_file)) {
+			$args['template_file'] = $this->template_file;
+		}
+		parent::init($args);
+
 		// chargement de la config : défaut < générale < locale
 		$this->chargerConfig();
 
