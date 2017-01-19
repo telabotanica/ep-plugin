@@ -11,9 +11,20 @@ class Flora_Data extends TB_Outil {
 		// identifiant de l'outil et nom par défaut
 		$this->slug = 'flora-data';
 		$this->name = 'FloraData';
+		//$this->template_file = 'groups/single/flora-data';
 
 		// init du parent
 		$this->initialisation();
+
+		/*bp_core_new_subnav_item( array( 
+			'name' => 'My Wall', 
+			'slug' => 'wall', 
+			'parent_url' => 'http://go-david.com/fsc/members/gabriel/activity/',
+			'parent_slug' => 'flora-data',
+			'screen_function' => 'my_profile_page_function_to_show_screen',
+			'position' => 11,
+			'item_css_id' => 'home'
+		));*/
 	}
 
 	public static function getConfigDefautOutil()
@@ -98,17 +109,11 @@ class Flora_Data extends TB_Outil {
 			';
 		}
 		add_action( 'wp_print_styles', 'styleEnLigneEPFloraData' );
-		// @WTF le style n'est pas écrasé par le BS du thème, malgré son ID
-		// identique et sa priorité faible, c'est lui qui écrase l'autre :-/
-		// @TODO trouver une solution, car si on utilise le plugin sans le thème,
-		// y aura pas de BS et ça marchera pas :'(
-		// wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bower_components/bootstrap/dist/css/bootstrap.min.css');
 	}
 
 
 	public function scriptsEtStylesApres()
 	{
-		//wp_enqueue_style('EzmlmForum-CSS', $this->urlOutil . 'css/ezmlm-forum-internal.css');
 	}
 
 	/*
@@ -130,17 +135,31 @@ class Flora_Data extends TB_Outil {
 		);
 
 		if (! empty($urlRacine) && !empty($projet)) {
+			?>
+			<div id="ep-flora-data-tabs">
+			<?php
 			foreach($modules as $nomModule => $actif) {
 				if (! $actif) continue;
-				// titre
-				echo '<h3>' . $titres[$nomModule] . '</h3>';
-				// inclusion d'une iframe
+				// URL iframe
 				$adresseWidget = $urlRacine . ':' . $nomModule . '?projet=' . $projet;
-				echo '<iframe id="flora-data-' . $nomModule . '" src="' . $adresseWidget . '">';
-				echo '</iframe>';
+				?>
+				<div class="ep-flora-data-tab" id="ep-flora-data-tab-<?php echo $nomModule ?>">
+					<div class="component component-title level-2">
+						<h1 id="recherche-collections"><?php echo $titres[$nomModule] ?></h1>
+					</div>
+
+					<iframe id="ep-flora-data-iframe-<?php echo $nomModule ?>" src="<?php echo $adresseWidget ?>">
+					</iframe>
+				</div>
+				<?php
 			}
+			echo '</div>';
 		} else {
-			echo "<p>Mot-clé du projet vide ou URL racine manquante; vérifiez la configuration.</p>";
+			?>
+			<p class="notice notice-warning">
+				<?php echo __("Mot-clé du projet vide ou URL racine manquante; vérifiez la configuration", "telabotanica") ?>
+			</p>
+			<?php
 		}
 	}
 
@@ -257,3 +276,11 @@ class Flora_Data extends TB_Outil {
 }
 
 bp_register_group_extension( 'Flora_Data' );
+
+function bp_tb_outil_floradata_menu_tabs() {
+	?>
+		<li>merde</li>
+		<li>merde 2</li>
+		<li>merde 3</li>
+	<?php
+}

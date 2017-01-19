@@ -16,6 +16,7 @@ class Forum extends TB_Outil {
 		// identifiant de l'outil et nom par défaut
 		$this->slug = 'forum';
 		$this->name = 'Forum';
+		
 
 		// init du parent
 		$this->initialisation();
@@ -396,7 +397,7 @@ class Forum extends TB_Outil {
 			<div class="tab-meta-info">
 				<form id="tb-forum-inscription" action="" method="GET">
 					<input type="hidden" name="tb-forum-action-inscription" value="<?php echo $this->statutAbonnement ? '0' : '1' ?>">
-					<input class="button outline" type="submit"
+					<input class="button <?php echo $this->statutAbonnement ? 'abonne' : 'non-abonne' ?>" type="submit"
 						value="<?php echo $this->statutAbonnement ? __("Se désabonner", 'telabotanica') : __("S'abonner", 'telabotanica') ?>">
 				</form>
 			</div>
