@@ -438,7 +438,9 @@ class Forum extends TB_Outil {
 		// La liste configurée existe-t-elle ?
 		$existenceListe = $this->existenceListe();
 		?>
-		<h4>Paramètres de l'outil <?php echo $this->name ?></h4>
+		<h2 class="bp-screen-reader-text">
+			<?php echo __("Paramètres de l'outil", 'telabotanica') . ' ' . $this->name; ?> 
+		</h2>
 
 		<p class="editfield">
 			<label for="activation-outil">Activation de l'outil</label>
@@ -457,18 +459,18 @@ class Forum extends TB_Outil {
 			<label for="liste-outil">Nom de la liste</label>
 			<input type="text" <?php echo is_super_admin() ? '' : 'disabled="disabled"' ?> id="liste-outil" name="list" placeholder="automatique (<?php echo $this->nomListe ?>)" value="<?php echo $this->config['ezmlm-php']['list'] ?>" />
 			<?php if ($existenceListe): ?>
-				<span title="La liste est correctement configurée">
+				<span class="description" title="La liste est correctement configurée">
 					<svg aria-hidden="true" role="img" class="icon icon-check-circle"><use xlink:href="#icon-check-circle"></use></svg>
 				</span>
 			<?php else: ?>
-				<span title="La liste n'existe pas">
+				<span class="description" title="La liste n'existe pas">
 					<svg aria-hidden="true" role="img" class="icon icon-error"><use xlink:href="#icon-error"></use></svg>
-				</span>
 				<?php if (is_super_admin()): ?>
-					<a href="?tb-forum-action-creation-liste=1" class="button outline">
+					<a id="tb-forum-creer-liste" href="?tb-forum-action-creation-liste=1" class="button outline">
 						<?php echo __("Créer la liste", 'telabotanica') ?>
 					</a>
 				<?php endif; ?>
+				</span>
 			<?php endif; ?>
 			<?php if (! is_super_admin()): ?>
 				<br><span class="description">Vous ne pouvez pas modifier ce paramètre.</span>

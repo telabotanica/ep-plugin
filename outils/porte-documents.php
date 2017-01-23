@@ -104,7 +104,9 @@ class Porte_Documents extends TB_Outil {
 	{
 		$this->controleAccesReglages();
 		?>
-		<h4>Paramètres de l'outil <?php echo $this->name ?></h4>
+		<h2 class="bp-screen-reader-text">
+			<?php echo __("Paramètres de l'outil", 'telabotanica') . ' ' . $this->name; ?> 
+		</h2>
 
 		<p class="editfield">
 			<label for="activation-outil">Activation de l'outil</label>

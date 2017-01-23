@@ -167,7 +167,9 @@ class Flora_Data extends TB_Outil {
 	function edit_screen($group_id = null) {
 		$this->controleAccesReglages();
 		?>
-		<h4>Paramètres de l'outil <?php echo $this->name ?></h4>
+		<h2 class="bp-screen-reader-text">
+			<?php echo __("Paramètres de l'outil", 'telabotanica') . ' ' . $this->name; ?> 
+		</h2>
 
 		<p class="editfield">
 			<label for="activation-outil">Activation de l'outil</label>
@@ -188,27 +190,29 @@ class Flora_Data extends TB_Outil {
 		</p>
 
 		<p class="editfield">
-			<label>Modules</label>
-			<label for="module-cartoPoint">
-				<input id="module-cartoPoint" type="checkbox" name="module-cartoPoint" <?php echo $this->config['modules']['cartoPoint'] ? 'checked' : '' ?> >
-				Carte des observations
-			</label>
-			<label for="module-photo">
-				<input id="module-photo" type="checkbox" name="module-photo" <?php echo $this->config['modules']['photo'] ? 'checked' : '' ?> >
-				Galerie photo
-			</label>
-			<label for="module-observation">
-				<input id="module-observation" type="checkbox" name="module-observation" <?php echo $this->config['modules']['observation'] ? 'checked' : '' ?> >
-				Flux des dernières observations
-			</label>
-			<label for="module-export">
-				<input id="module-export" type="checkbox" name="module-export" <?php echo $this->config['modules']['export'] ? 'checked' : '' ?> >
-				Export des observations
-			</label>
-			<label for="module-saisie">
-				<input id="module-saisie" type="checkbox" name="module-saisie" <?php echo $this->config['modules']['saisie'] ? 'checked' : '' ?> >
-				Saisie d'observations
-			</label>
+			<div class="checkbox-group">
+				<label>Modules</label>
+				<label for="module-cartoPoint">
+					<input id="module-cartoPoint" type="checkbox" name="module-cartoPoint" <?php echo $this->config['modules']['cartoPoint'] ? 'checked' : '' ?> >
+					Carte des observations
+				</label>
+				<label for="module-photo">
+					<input id="module-photo" type="checkbox" name="module-photo" <?php echo $this->config['modules']['photo'] ? 'checked' : '' ?> >
+					Galerie photo
+				</label>
+				<label for="module-observation">
+					<input id="module-observation" type="checkbox" name="module-observation" <?php echo $this->config['modules']['observation'] ? 'checked' : '' ?> >
+					Flux des dernières observations
+				</label>
+				<label for="module-export">
+					<input id="module-export" type="checkbox" name="module-export" <?php echo $this->config['modules']['export'] ? 'checked' : '' ?> >
+					Export des observations
+				</label>
+				<label for="module-saisie">
+					<input id="module-saisie" type="checkbox" name="module-saisie" <?php echo $this->config['modules']['saisie'] ? 'checked' : '' ?> >
+					Saisie d'observations
+				</label>
+			</div>
 		</p>
 
 		<p class="editfield">
