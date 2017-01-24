@@ -26,6 +26,12 @@ class Forum extends TB_Outil {
 			$this->config['ezmlm-php']['list'] = bp_get_current_group_slug();
 		}
 		$this->nomListe = $this->config['ezmlm-php']['list'];
+
+		// lorsqu'un membre quitte le groupe, on le désabonne du forum
+		add_action('groups_leave_group', array($this, 'desabonnerUtilisateurQuittantLeGroupe'), 10, 2);
+
+		// lorsque le groupe est supprimé, on désabonne du forum tous ses mebres
+		add_action('groups_before_group_deleted', array($this, 'desabonnerTousLesMembres'), 10, 1);
 	}
 
 	public static function getConfigDefautOutil()
@@ -312,9 +318,13 @@ class Forum extends TB_Outil {
 	 * liste en cours en utilisant le service ezmlm; si $nouvelEtatAbonnement
 	 * est false, le désinscrit
 	 */
-	protected function modifierAbonnement($nouvelEtatAbonnement) {
-		if (! $this->emailUtilisateur) {
-			return false;
+	protected function modifierAbonnement($nouvelEtatAbonnement, $emailUtilisateur=false) {
+		if (! $emailUtilisateur) {
+			if ($this->emailUtilisateur) {
+				$emailUtilisateur = $this->emailUtilisateur;
+			} else {
+				return false;
+			}
 		}
 
 		// jeton SSO admin
@@ -334,11 +344,11 @@ class Forum extends TB_Outil {
 		$headers = array();
 		if ($nouvelEtatAbonnement === true) {
 			curl_setopt($ch, CURLOPT_POST, 1);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array("address" => $this->emailUtilisateur)));
+			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array("address" => $emailUtilisateur)));
 			$headers[] = 'Content-Type:application/json';
 		} else {
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
-			$url .= '/' . $this->emailUtilisateur;
+			$url .= '/' . $emailUtilisateur;
 		}
 
 		// jeton dans l'entête choisi (on ne s'occupe pas du domaine ici)
@@ -363,6 +373,31 @@ class Forum extends TB_Outil {
 		}
 
 		return true;
+	}
+
+	// appelé lorsqu'un membre quitte le groupe
+	public function desabonnerUtilisateurQuittantLeGroupe($group_id, $user_id)
+	{
+		$utilisateur = new WP_User($user_id);
+		if ($utilisateur) {
+			$this->modifierAbonnement(false, $utilisateur->user_email);
+		}
+	}
+
+	// appelé lors de la suppression du groupe
+	public function desabonnerTousLesMembres($group_id)
+	{
+		$infosMembres = groups_get_group_members(array(
+			'group_id' => $group_id
+		));
+		if (! empty($infosMembres['members'])) {
+			$membres = $infosMembres['members'];
+			foreach ($membres as $utilisateur) {
+				if ($utilisateur) {
+					$this->modifierAbonnement(false, $utilisateur->user_email);
+				}
+			}
+		}
 	}
 
 	/*
