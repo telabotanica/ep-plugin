@@ -157,7 +157,7 @@ class Flora_Data extends TB_Outil {
 		} else {
 			?>
 			<p class="notice notice-warning">
-				<?php echo __("Mot-clé du projet vide ou URL racine manquante; vérifiez la configuration", "telabotanica") ?>
+				<?php _e("Mot-clé du projet vide ou URL racine manquante; vérifiez la configuration", "telabotanica") ?>
 			</p>
 			<?php
 		}

@@ -398,7 +398,8 @@ class Forum extends TB_Outil {
 				<form id="tb-forum-inscription" action="" method="GET">
 					<input type="hidden" name="tb-forum-action-inscription" value="<?php echo $this->statutAbonnement ? '0' : '1' ?>">
 					<input class="button <?php echo $this->statutAbonnement ? 'abonne' : 'non-abonne' ?>" type="submit"
-						value="<?php echo $this->statutAbonnement ? __("Se désabonner", 'telabotanica') : __("S'abonner", 'telabotanica') ?>">
+						value="<?php echo $this->statutAbonnement ? __("Se désabonner", 'telabotanica') : __("S'abonner", 'telabotanica') ?>"
+						title="<?php _e("Confirmer " . ($this->statutAbonnement ? "le dés" : "l'") . "abonnement ?", 'telabotanica') ?>">
 				</form>
 			</div>
 		</div>
@@ -467,7 +468,7 @@ class Forum extends TB_Outil {
 					<svg aria-hidden="true" role="img" class="icon icon-error"><use xlink:href="#icon-error"></use></svg>
 				<?php if (is_super_admin()): ?>
 					<a id="tb-forum-creer-liste" href="?tb-forum-action-creation-liste=1" class="button outline">
-						<?php echo __("Créer la liste", 'telabotanica') ?>
+						<?php _e("Créer la liste", 'telabotanica') ?>
 					</a>
 				<?php endif; ?>
 				</span>
