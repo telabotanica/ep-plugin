@@ -22,7 +22,7 @@
 /*
  * Chargement de la configuration depuis config.json
  */
-function chargerConfig()
+function tbChargerConfigPlugin()
 {
 	$fichierConfig = dirname( __FILE__ ) . "/config.json";
 	if (! file_exists($fichierConfig)) {
@@ -42,7 +42,7 @@ function initialisation_bp()
 	require( dirname( __FILE__ ) . '/outils/TB_Outil.php' );
 	require( dirname( __FILE__ ) . '/formulaires/description/description-complete.php' );
 
-	$config = chargerConfig();
+	$config = tbChargerConfigPlugin();
 	// chargement des outils depuis la configuration
 	if (array_key_exists('outils', $config)) {
 		foreach ($config['outils'] as $outil) {
@@ -61,13 +61,16 @@ add_action( 'bp_include', 'description_complete' );
 //add_action( 'bp_include', 'categorie' );
 
 
-// Charge les hooks de synchronisation des données de wordpress vers les autres outils
+// Charge la gestion des catégories de projets
 require( dirname( __FILE__ ) . '/categories/categories.php' );
-
 
 // Charge les hooks de synchronisation des données de wordpress vers les autres outils
 require( dirname( __FILE__ ) . '/hooks/hooks.php' );
 new Hooks();
+
+// Charge la gestion de la modification du profil étendu (inscription lettre d'actu)
+require( dirname( __FILE__ ) . '/profil-etendu/profil-etendu.php' );
+new TB_GestionProfilEtendu();
 
 // Charge les rôles propres au SSO (nécessite le plugin "Multiple Roles")
 require( dirname( __FILE__ ) . '/roles/roles_sso.php' );
@@ -82,6 +85,7 @@ function suppression_roles_sso() {
 // @TODO déplacer dans TelaBotanica::installation et TelaBotanica::desactivation
 register_activation_hook(__FILE__, 'ajout_roles_sso');
 register_deactivation_hook(__FILE__, 'suppression_roles_sso');
+
 
 class TelaBotanica
 {
@@ -147,7 +151,7 @@ class TelaBotanica
 	static function installation_outils()
 	{
 		global $wpdb;
-		$config = chargerConfig();		
+		$config = tbChargerConfigPlugin();		
 
 		// Réglages d'un outil pour un projet
 		$create_outils_reglages = "
@@ -195,7 +199,7 @@ class TelaBotanica
 	static function desinstallation_outils()
 	{
 		global $wpdb;
-		$config = chargerConfig();
+		$config = tbChargerConfigPlugin();
 
 		// déclenchement des routines de désinstallation des outils depuis la config
 		if (array_key_exists('outils', $config)) {

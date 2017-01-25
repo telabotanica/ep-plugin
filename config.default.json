@@ -6,5 +6,9 @@
 		"forum",
 		"wiki",
 		"flora-data"
-	]
+	],
+	"profil": {
+		"__doc__": "id_case_inscription_lettre_actu doit contenir l'ID du champ de profil (_bp_xprofile_field) correspondant à la case à cocher [voulez-vous recevoir la lettre d'actu ?]",
+		"id_case_inscription_lettre_actu": 3
+	}
 }

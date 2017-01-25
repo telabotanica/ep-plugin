@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname(__FILE__) . '/../lib/liste.php';
+
 class Forum extends TB_Outil {
 
 	/** nom de la liste sur laquelle est branchée le forum */
@@ -11,12 +13,14 @@ class Forum extends TB_Outil {
 	/** true si l'utilisateur en cours est abonné à la liste en cours, false sinon */
 	protected $statutAbonnement = false;
 
+	/** instance du gestionnaire de liste, pour la liste en cours */
+	protected $liste;
+
 	public function __construct()
 	{
 		// identifiant de l'outil et nom par défaut
 		$this->slug = 'forum';
-		$this->name = 'Forum';
-		
+		$this->name = 'Forum';	
 
 		// init du parent
 		$this->initialisation();
@@ -26,6 +30,9 @@ class Forum extends TB_Outil {
 			$this->config['ezmlm-php']['list'] = bp_get_current_group_slug();
 		}
 		$this->nomListe = $this->config['ezmlm-php']['list'];
+
+		// lib de gestion de liste
+		$this->liste = new TB_ListeEzmlm($this->nomListe);
 
 		// lorsqu'un membre quitte le groupe, on le désabonne du forum
 		add_action('groups_leave_group', array($this, 'desabonnerUtilisateurQuittantLeGroupe'), 10, 2);
@@ -170,43 +177,7 @@ class Forum extends TB_Outil {
 	 */
 	protected function existenceListe()
 	{
-		$existenceListe = false;
-		if (! $this->nomListe) {
-			return false;
-		}
-		// appel à ezmlm
-		$urlRacineEzmlmPhp = $this->config['ezmlm-php']['rootUri'];
-		$url = $urlRacineEzmlmPhp . '/lists/' . $this->nomListe;
-
-		// jeton SSO admin
-		$securiteConfig = json_decode(get_option('tb_general_config'), true);
-		// @TODO jeter une exception ? afficher un message discret ?
-		if (! array_key_exists('adminToken', $securiteConfig)) {
-			return false;
-		}
-		// @TODO paramétrer - n'est pas le même que l'entête pour l'adapter Auth
-		$enteteEzmlmPhp = 'Auth';
-
-		$ch = curl_init();
-		curl_setopt_array($ch, array(
-			CURLOPT_RETURNTRANSFER => 1,
-			CURLOPT_FAILONERROR => 1,
-			CURLOPT_URL => $url
-		));
-		// jeton dans l'entête choisi (on ne s'occupe pas du domaine ici)
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-			$enteteEzmlmPhp . ': ' . $securiteConfig['adminToken']
-		));
-
-		curl_exec($ch);
-		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		curl_close($ch);
-
-		if ($http_code == 200) {
-			$existenceListe = true;
-		}
-
-		return $existenceListe;
+		return $this->liste->existe();
 	}
 
 	/**
@@ -215,57 +186,13 @@ class Forum extends TB_Outil {
 	 */
 	protected function creerListe()
 	{
-		$listeCreee = false;
 		if (! is_super_admin()) {
 			return false;
 		}
 		if (! $this->nomListe) {
 			return false;
 		}
-
-		// jeton SSO admin
-		$securiteConfig = json_decode(get_option('tb_general_config'), true);
-		// @TODO jeter une exception ? afficher un message discret ?
-		if (! array_key_exists('adminToken', $securiteConfig)) {
-			return false;
-		}
-		// @TODO paramétrer - n'est pas le même que l'entête pour l'adapter Auth
-		$enteteEzmlmPhp = 'Auth';
-
-		// appel à ezmlm
-		$urlRacineEzmlmPhp = $this->config['ezmlm-php']['rootUri'];
-		$url = $urlRacineEzmlmPhp . '/lists';
-
-		$ch = curl_init();
-		$headers = array();
-		$headers[] = 'Content-Type:application/json';
-		// jeton dans l'entête choisi (on ne s'occupe pas du domaine ici)
-		$headers[] = $enteteEzmlmPhp . ': ' . $securiteConfig['adminToken'];
-
-		curl_setopt_array($ch, array(
-			CURLOPT_POST => 1,
-			CURLOPT_POSTFIELDS => json_encode(array(
-				"name" => $this->nomListe
-			)),
-			CURLOPT_RETURNTRANSFER => 1,
-			CURLOPT_FAILONERROR => 1,
-			CURLOPT_URL => $url,
-			CURLOPT_HTTPHEADER => $headers
-		));
-
-		curl_exec($ch);
-		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-		// un jour on retournera peut-être un 201:created (mieux)
-		if (in_array($http_code, array(200, 201))) {
-			$listeCreee = true;
-		} else {
-			// affichage rudimentaire pour dépanner l'admin
-			echo curl_error($ch);
-		}
-		curl_close($ch);
-
-		return $listeCreee;
+		return $this->liste->creer();
 	}
 
 	/**
@@ -274,43 +201,11 @@ class Forum extends TB_Outil {
 	 */
 	protected function statutAbonnement()
 	{
-		$this->statutAbonnement = false;
 		if (! $this->emailUtilisateur) {
 			return false;
 		}
-		// appel à ezmlm
-		$urlRacineEzmlmPhp = $this->config['ezmlm-php']['rootUri'];
-		$url = $urlRacineEzmlmPhp . '/users/' . $this->emailUtilisateur . '/subscriber-of/' . $this->nomListe;
-
-		// jeton SSO admin
-		$securiteConfig = json_decode(get_option('tb_general_config'), true);
-		// @TODO jeter une exception ? afficher un message discret ?
-		if (! array_key_exists('adminToken', $securiteConfig)) {
-			return false;
-		}
-		// @TODO paramétrer - n'est pas le même que l'entête pour l'adapter Auth
-		$enteteEzmlmPhp = 'Auth';
-
-		$ch = curl_init();
-		curl_setopt_array($ch, array(
-			CURLOPT_RETURNTRANSFER => 1,
-			CURLOPT_FAILONERROR => 1,
-			CURLOPT_URL => $url
-		));
-		// jeton dans l'entête choisi (on ne s'occupe pas du domaine ici)
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-			$enteteEzmlmPhp . ': ' . $securiteConfig['adminToken']
-		));
-
-		$resultat = curl_exec($ch);
-		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		curl_close($ch);
-
-		if ($http_code != 200) {
-			return false;
-		} else {
-			$this->statutAbonnement = ($resultat === 'true'); // pas la peine de json_decode()r pour ça
-		}
+		$this->statutAbonnement = $this->liste->statutAbonnement($this->emailUtilisateur);
+		return $this->statutAbonnement;
 	}
 
 	/**
@@ -326,53 +221,11 @@ class Forum extends TB_Outil {
 				return false;
 			}
 		}
-
-		// jeton SSO admin
-		$securiteConfig = json_decode(get_option('tb_general_config'), true);
-		// @TODO jeter une exception ? afficher un message discret ?
-		if (! array_key_exists('adminToken', $securiteConfig)) {
-			return false;
+		$ok = $this->liste->modifierStatutAbonnement($nouvelEtatAbonnement, $emailUtilisateur);
+		if ($ok) {
+			$this->statutAbonnement = $nouvelEtatAbonnement;
 		}
-		// @TODO paramétrer - n'est pas le même que l'entête pour l'adapter Auth
-		$enteteEzmlmPhp = 'Auth';
-
-		// appel à ezmlm
-		$urlRacineEzmlmPhp = $this->config['ezmlm-php']['rootUri'];
-		$url = $urlRacineEzmlmPhp . '/lists/' . $this->nomListe . '/subscribers';
-
-		$ch = curl_init();
-		$headers = array();
-		if ($nouvelEtatAbonnement === true) {
-			curl_setopt($ch, CURLOPT_POST, 1);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array("address" => $emailUtilisateur)));
-			$headers[] = 'Content-Type:application/json';
-		} else {
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
-			$url .= '/' . $emailUtilisateur;
-		}
-
-		// jeton dans l'entête choisi (on ne s'occupe pas du domaine ici)
-		$headers[] = $enteteEzmlmPhp . ': ' . $securiteConfig['adminToken'];;
-
-		curl_setopt_array($ch, array(
-			CURLOPT_RETURNTRANSFER => 1,
-			CURLOPT_FAILONERROR => 1,
-			CURLOPT_URL => $url,
-			CURLOPT_HTTPHEADER => $headers
-		));
-
-		curl_exec($ch);
-		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		curl_close($ch);
-
-		// répercussion du statut d'abonnement
-		$this->statutAbonnement = $nouvelEtatAbonnement;
-		// @TODO gérer les erreurs, vérifier que la commande a bien fonctionné
-		if ($http_code != 200) {
-			return false;
-		}
-
-		return true;
+		return $this->statutAbonnement;
 	}
 
 	// appelé lorsqu'un membre quitte le groupe
