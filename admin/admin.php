@@ -52,8 +52,8 @@ function tb_ajout_pages() {
 
 	add_submenu_page(
 		'telabotanica',
-		'Sécurité',
-		'Sécurité',
+		'Réglages communs',
+		'Réglages communs',
 		'manage_options',
 		'securite',
 		'tb_menu_securite'
@@ -91,7 +91,7 @@ function tb_menu_hooks() {
 				<br>
 				Par exemple, lorsqu'un utilisateur change son adresse email dans le profil.
 				<br>
-				Le jeton SSO défini dans "Sécurité" sera transmis aux services de son domaine et de ses sous-domaines, dans l'entête choisi ci-dessous.
+				Le jeton SSO défini dans "Réglages communs" sera transmis aux services de son domaine et de ses sous-domaines, dans l'entête choisi ci-dessous.
 			</p>
 		</div>
 
@@ -195,7 +195,7 @@ function tb_menu_hooks() {
 }
 
 /**
- * Réglages de sécurité : jeton administrateur notamment
+ * Réglages communs
  */
 function tb_menu_securite() {
 	$opt_name_general = 'tb_general_config';
@@ -209,9 +209,13 @@ function tb_menu_securite() {
 		// récupération des valeurs du formulaire
 		$adminToken = $_POST['adminToken'];
 		$adminTokenDomain = $_POST['adminTokenDomain'];
+		$ezmlmRootUri = $_POST['ezmlmRootUri'];
+		$ezmlmAuthHeaderName = $_POST['ezmlmAuthHeaderName'];
 		// injection des valeurs du formulaire
 		$configActuelleGeneral['adminToken'] = $adminToken;
 		$configActuelleGeneral['adminTokenDomain'] = $adminTokenDomain;
+		$configActuelleGeneral['ezmlmRootUri'] = $ezmlmRootUri;
+		$configActuelleGeneral['ezmlmAuthHeaderName'] = $ezmlmAuthHeaderName;
 		// mise à jour de la BDD
 		update_option($opt_name_general, json_encode($configActuelleGeneral));
 		?>
@@ -235,7 +239,7 @@ function tb_menu_securite() {
 		<?php screen_icon(); ?>
 
 		<!-- Titre -->
-		<h2>Réglages de sécurité</h2>
+		<h2>Réglages communs</h2>
 
 		<!-- Description -->
 		<div class="description">
@@ -250,14 +254,34 @@ function tb_menu_securite() {
 				<tbody>
 					<tr>
 						<th scope="row">
+							<label for="ezmlmRootUri">URL du service ezmlm-php</label>
+						</th>
+						<td>
+							<input class="regular-text" type="text" id="ezmlmRootUri" name="ezmlmRootUri" value="<?php echo isset($configActuelleGeneral['ezmlmRootUri']) ? $configActuelleGeneral['ezmlmRootUri'] : ''; ?>" />
+							<p class="description">
+								Utilisé par la newsletter, l'espace projets...
+								<br>
+								Ne pas mettre de "/" (slash) à la fin.
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="ezmlmAuthHeaderName">Entête (header) à envoyer à ezmlm-php</label>
+						</th>
+						<td>
+							<input type="text" id="ezmlmAuthHeaderName" name="ezmlmAuthHeaderName" value="<?php echo isset($configActuelleGeneral['ezmlmAuthHeaderName']) ? $configActuelleGeneral['ezmlmAuthHeaderName'] : ''; ?>" />
+							<p class="description">"Authorization" (par défaut) est refusé / traité incorrectement par certains serveurs.</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
 							<label for="adminToken">Jeton SSO administrateur</label>
 						</th>
 						<td>
 							<textarea id="adminToken" name="adminToken" rows="10" cols="80"><?php echo isset($configActuelleGeneral['adminToken']) ? $configActuelleGeneral['adminToken'] : ''; ?></textarea>
 							<p class="description">
-								Placer ici un jeton SSO administrateur longue durée.
-								<br>
-								(utilisé par la désinscription à la newsletter, l'espace projets...)
+								Placer ici un jeton SSO administrateur longue durée (utilisé par la la newsletter, l'espace projets...)
 								<br>
 								Ce jeton peut être forgé à l'aide du script "admin.php forger_jeton" de l'annuaire.
 								<br>
@@ -271,7 +295,7 @@ function tb_menu_securite() {
 						</th>
 						<td>
 							<input type="text" id="adminTokenDomain" name="adminTokenDomain" value="<?php echo isset($configActuelleGeneral['adminTokenDomain']) ? $configActuelleGeneral['adminTokenDomain'] : ''; ?>" />
-							<p class="description">Ce jeton ne sera envoyé qu'à des services hébergés sur ce domaine et ses sous-domaines.</p>
+							<p class="description">Le jeton SSO administrateur ne sera envoyé qu'à des services hébergés sur ce domaine et ses sous-domaines.</p>
 						</td>
 					</tr>
 				</tbody>
