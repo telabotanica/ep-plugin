@@ -259,7 +259,7 @@ function tb_menu_securite() {
 						<td>
 							<input class="regular-text" type="text" id="ezmlmRootUri" name="ezmlmRootUri" value="<?php echo isset($configActuelleGeneral['ezmlmRootUri']) ? $configActuelleGeneral['ezmlmRootUri'] : ''; ?>" />
 							<p class="description">
-								Utilisé par la la newsletter, l'espace projets...
+								Utilisé par la newsletter, l'espace projets...
 								<br>
 								Ne pas mettre de "/" (slash) à la fin.
 							</p>
