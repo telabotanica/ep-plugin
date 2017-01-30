@@ -66,6 +66,7 @@ class Forum extends TB_Outil {
 		unset($config_locale['ezmlm-php']['rootUri']);
 		unset($config_locale['adapters']['AuthAdapterTB']['annuaireURL']);
 		unset($config_locale['adapters']['AuthAdapterTB']['headerName']);
+		unset($config_locale['avatarService']);
 
 		return $config_locale;
 	}
