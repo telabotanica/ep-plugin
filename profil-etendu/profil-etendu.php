@@ -23,13 +23,26 @@ class TB_GestionProfilEtendu {
 	public function __construct() {
 		// lecture fichier config.json
 		$configPlugin = tbChargerConfigPlugin();
-		$this->idChampLettreDActu = $configPlugin['profil']['id_case_inscription_lettre_actu'];
+		if (isset($configPlugin['profil']['id_case_inscription_lettre_actu'])) {
+			$this->idChampLettreDActu = $configPlugin['profil']['id_case_inscription_lettre_actu'];
+			// lorsqu'un utilisateur met à jour son profil
+			add_action('xprofile_updated_profile', array($this, 'gererMiseAJourProfilEtendu'), 10, 5);
+			// lorsqu'un utilisateur s'inscrit (lorsque le compte est activé)
+			add_action('bp_core_activated_user', array($this, 'gererInscriptionProfilEtendu'), 10, 3);
+		} else {
+			add_action('admin_notices', array($this, 'avertirProblemeConfiguration'));
+		}
 
-		// lorsqu'un utilisateur met à jour son profil
-		add_action('xprofile_updated_profile', array($this, 'gererMiseAJourProfilEtendu'), 10, 5);
-		// @TODO lorsqu'un utilisateur s'inscrit
-		add_action('bp_core_activated_user', array($this, 'gererInscriptionProfilEtendu'), 10, 3);
 	}
+
+	public function avertirProblemeConfiguration() { ?>
+		<div class="error notice is-dismissible">
+			<p>
+				<?php _e("La configuration du plugin Tela Botanica est incomplète", 'telabotanica'); ?>.
+				<?php _e("Pour activer la synchronisation du profil et de l'inscription à la lettre d'actualité, renseignez le paramètre \"id_case_inscription_lettre_actu\" dans le fichier config.json", 'telabotanica'); ?>.
+			</p>
+		</div>
+    <?php }
 
 	public function gererInscriptionProfilEtendu($user_id, $key, $user) {
 		// Statut : le champ étant [un groupe d']une case à cocher, si le nombre
@@ -65,7 +78,6 @@ class TB_GestionProfilEtendu {
 		if (is_array($nouveauStatut)) {
 			$nouveauStatut = count($nouveauStatut['value']);
 		}
-
 		// utilisateur en cours
 		$utilisateur = new WP_User($user_id);
 
