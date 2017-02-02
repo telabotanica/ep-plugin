@@ -115,11 +115,15 @@ class TelaBotanica
 	}
 
 	/**
-	 * Méthode d'installation du plugin
+	 * Méthode d'installation / activation du plugin; tout ce qui est déclenché
+	 * ici doit être idempotent car la désactivation ne supprime pas ce qui a
+	 * été installé (seule la suppression le fait) mais la réactivation
+	 * déclenche à nouveau cette méthode
 	 */
 	static function installation()
 	{
 		self::installation_outils();
+		self::installation_champs_profil();
 	}
 
 	/**
@@ -135,6 +139,38 @@ class TelaBotanica
 	static function desinstallation()
 	{
 		self::desinstallation_outils();
+	}
+
+	/**
+	 * Insère dans les tables bp_xprofile_fields et bp_xprofile_groups les
+	 * données des champs de profil étendu, après avoir **vidé** ces tables;
+	 * fonctionne car il n'y a pas de ON DELETE CASCADE dans les tables
+	 * bp_xprofile_*
+	 * @TODO valider cette stratégie
+	 * 
+	 * Lit les fichiers SQL du dossier /profil-etendu, penser à les mettre à
+	 * jour lorsque les champs du profil étendu changent : exporter les tables
+	 * bp_xprofile_fields et bp_xprofile_groups, et dans chaque fichier
+	 * supprimer le préfixe des tables. Ex:
+	 *    "INSERT INTO `test_bp_xprofile_fields`"
+	 * => "INSERT INTO `bp_xprofile_fields`"
+	 */
+	static function installation_champs_profil()
+	{
+		global $wpdb;
+		$tableXPFields = $wpdb->prefix . 'bp_xprofile_fields';
+		$tableXPGroups = $wpdb->prefix . 'bp_xprofile_groups';
+		// vidage
+		$wpdb->query("TRUNCATE TABLE $tableXPFields");
+		$wpdb->query("TRUNCATE TABLE $tableXPGroups");
+
+		$donneesXPFields = file_get_contents(__DIR__ . '/profil-etendu/bp_xprofile_fields.sql');
+		$donneesXPFields = str_replace('bp_xprofile_fields', $tableXPFields, $donneesXPFields);
+		$donneesXPGroups = file_get_contents(__DIR__ . '/profil-etendu/bp_xprofile_groups.sql');
+		$donneesXPGroups = str_replace('bp_xprofile_groups', $tableXPGroups, $donneesXPGroups);
+		// remplissage
+		$wpdb->query($donneesXPFields);
+		$wpdb->query($donneesXPGroups);
 	}
 
 	/*
