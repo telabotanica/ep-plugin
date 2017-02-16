@@ -26,7 +26,7 @@ function tbChargerConfigPlugin()
 {
 	$fichierConfig = dirname( __FILE__ ) . "/config.json";
 	if (! file_exists($fichierConfig)) {
-		throw new Exception("Veuillez placer un fichier de configuration valide dans 'config.json'");
+		throw new Exception(__("Veuillez placer un fichier de configuration valide dans 'config.json'", 'telabotanica'));
 	}
 	$config = file_get_contents($fichierConfig);
 	$config = json_decode($config, true);
@@ -103,7 +103,7 @@ class TelaBotanica
 		$plugins = get_option('active_plugins');
 		$buddypressActif = in_array("buddypress/bp-loader.php", $plugins);
 		if (! $buddypressActif) {
-			trigger_error("Vous devez installer et activer Buddypress pour utiliser ce plugin", E_USER_WARNING);
+			trigger_error(__("Vous devez installer et activer Buddypress pour utiliser ce plugin", 'telabotanica'), E_USER_WARNING);
 		}
 
 		// MODE PROD
@@ -212,7 +212,7 @@ class TelaBotanica
 		/* déclenchement des routines d'installation des outils depuis la config
 		 * @WARNING Astuce pourrite : les fichiers des classes outils ne sont
 		 * normalement pas inclus si l'extension n'est pas activée, donc lors de
-		 * l'activation de l'extention, eh ben ils n'y sont pas encore... donc on
+		 * l'activation de l'extension, eh ben ils n'y sont pas encore... donc on
 		 * les inclut à la main ici, afin d'accéder à leur méthode "install"
 		 * (un peu nul - revoir cette stratégie)
 		 */
@@ -241,7 +241,6 @@ class TelaBotanica
 		if (array_key_exists('outils', $config)) {
 			foreach ($config['outils'] as $outil) {
 				$classeOutil = TelaBotanica::nomFichierVersClasseOutil($outil);
-				//echo "CO: [$classeOutil] ";
 				call_user_func(array($classeOutil, 'desinstallation'));
 			}
 		}

@@ -15,16 +15,6 @@ class Flora_Data extends TB_Outil {
 
 		// init du parent
 		$this->initialisation();
-
-		/*bp_core_new_subnav_item( array( 
-			'name' => 'My Wall', 
-			'slug' => 'wall', 
-			'parent_url' => 'http://go-david.com/fsc/members/gabriel/activity/',
-			'parent_slug' => 'flora-data',
-			'screen_function' => 'my_profile_page_function_to_show_screen',
-			'position' => 11,
-			'item_css_id' => 'home'
-		));*/
 	}
 
 	public static function getConfigDefautOutil()
@@ -111,11 +101,6 @@ class Flora_Data extends TB_Outil {
 		add_action( 'wp_print_styles', 'styleEnLigneEPFloraData' );
 	}
 
-
-	public function scriptsEtStylesApres()
-	{
-	}
-
 	/*
 	 * Vue onglet principal - affichage du flora-data dans la page
 	 */
@@ -127,11 +112,11 @@ class Flora_Data extends TB_Outil {
 
 		// @TODO mettre dans une config qqpart
 		$titres = array(
-			"cartoPoint" => "Carte des observations",
-			"photo" => "Galerie photo",
-			"observation" => "Flux des dernières observations",
-			"saisie" => "Saisie de nouvelles observations",
-			"export" => "Export des observations"
+			"cartoPoint" => __("Carte des observations", 'telabotanica'),
+			"photo" => __("Galerie photo", 'telabotanica'),
+			"observation" => __("Flux des dernières observations", 'telabotanica'),
+			"saisie" => __("Saisie de nouvelles observations", 'telabotanica'),
+			"export" => __("Export des observations", 'telabotanica')
 		);
 
 		if (! empty($urlRacine) && !empty($projet)) {
@@ -172,26 +157,32 @@ class Flora_Data extends TB_Outil {
 		</h2>
 
 		<p class="editfield">
-			<label for="activation-outil">Activation de l'outil</label>
+			<label for="activation-outil"><?php _e("Activation de l'outil", 'telabotanica') ?></label>
 			<select name="activation-outil">
-				<option value="true" <?php echo ($this->enable_nav_item ? 'selected' : '') ?>>Activé</option>
-				<option value="false" <?php echo ($this->enable_nav_item ? '' : 'selected') ?>>Désactivé</option>
+				<option value="true" <?php echo ($this->enable_nav_item ? 'selected' : '') ?>>
+					<?php _e("Activé", 'telabotanica') ?>
+				</option>
+				<option value="false" <?php echo ($this->enable_nav_item ? '' : 'selected') ?>>
+					<?php _e("Désactivé", 'telabotanica') ?>
+				</option>
 			</select>
 		</p>
 
 		<p class="editfield">
-			<label for="nom-outil">Nom de l'outil</label>
+			<label for="nom-outil"><?php _e("Nom de l'outil", 'telabotanica') ?></label>
 			<input type="text" id="nom-outil" name="nom-outil" value="<?php echo $this->name ?>" />
 		</p>
 
 		<p class="editfield">
-			<label for="mot-cle-projet">Mot-clé du projet flora-data</label>
+			<label for="mot-cle-projet"><?php _e("Mot-clé du projet flora-data", 'telabotanica') ?></label>
 			<input type="text" name="mot-cle-projet" value="<?php echo $this->config['projet'] ?>" />
 		</p>
 
 		<p class="editfield">
 			<div class="checkbox-group">
-				<label>Modules</label>
+				<label>
+					<?php _e("Modules", 'telabotanica') ?>
+				</label>
 				<label for="module-cartoPoint">
 					<input id="module-cartoPoint" type="checkbox" name="module-cartoPoint" <?php echo $this->config['modules']['cartoPoint'] ? 'checked' : '' ?> >
 					Carte des observations
@@ -216,13 +207,21 @@ class Flora_Data extends TB_Outil {
 		</p>
 
 		<p class="editfield">
-			<label for="confidentialite-outil">Visibilité</label>
+			<label for="confidentialite-outil">
+				<?php _e("Visibilité", 'telabotanica') ?>
+			</label>
 			<select name="confidentialite-outil">
-				<option value="false" <?php echo ($this->prive ? '' : 'selected') ?>>Public</option>
-				<option value="true" <?php echo ($this->prive ? 'selected' : '') ?>>Privé</option>
+				<option value="false" <?php echo ($this->prive ? '' : 'selected') ?>>
+					<?php _e("Public", 'telabotanica') ?>
+				</option>
+				<option value="true" <?php echo ($this->prive ? 'selected' : '') ?>>
+					<?php _e("Privé", 'telabotanica') ?>
+				</option>
 			</select>
 			<br/>
-			<span class="description">Si "privé", seuls les membres pourront y accéder (ne s'applique qu'aux groupes publics)</span>
+			<span class="description">
+				<?php _e("Si \"privé\", seuls les membres pourront y accéder (ne s'applique qu'aux groupes publics)", 'telabotanica') ?>
+			</span>
 		</p>
 
 		<!--<p class="editfield">
@@ -280,11 +279,3 @@ class Flora_Data extends TB_Outil {
 }
 
 bp_register_group_extension( 'Flora_Data' );
-
-function bp_tb_outil_floradata_menu_tabs() {
-	?>
-		<li>merde</li>
-		<li>merde 2</li>
-		<li>merde 3</li>
-	<?php
-}

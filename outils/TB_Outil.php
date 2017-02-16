@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Classe intermédiaire entre  BP_Group_Extension et chaque classe outil
+ * Classe intermédiaire entre BP_Group_Extension et chaque classe outil
  */
 class TB_Outil extends BP_Group_Extension {
 
@@ -301,7 +301,11 @@ class TB_Outil extends BP_Group_Extension {
 			(! bp_is_group_admin_screen($this->slug)) ||
 			($this->desactive_globalement)
 		) {
-			echo "<p>L'outil " . $this->name . " a été désactivé par l'administrateur du site.</p>";
+			?>
+			<p>
+				<?php echo sprintf(__("L'outil %s a été désactivé par l'administrateur du site", 'telabotanica'), $this->name) ?>
+			</p>
+			<?php
 			exit;
 		}
 	}
@@ -315,7 +319,11 @@ class TB_Outil extends BP_Group_Extension {
 		if ($this->prive) {
 			$estMembre = groups_is_user_member($this->userId, $this->groupId);
 			if (! $estMembre && ! is_super_admin()) {
-				echo "<p>L'outil " . $this->name . " est réservé aux membres du projet</p>";
+				?>
+				<p>
+					<?php echo sprintf(__("L'outil %s est réservé aux membres du projet", 'telabotanica'), $this->name) ?>
+				</p>
+				<?php
 				exit;
 			}
 		}

@@ -9,8 +9,8 @@ add_action('admin_menu', 'tb_newsletter_menu');
 function tb_newsletter_menu() {
 
 	add_menu_page(
-		'Newsletter',
-		'Newsletter',
+		__('Newsletter', 'telabotanica'),
+		__('Newsletter', 'telabotanica'),
 		'manage_options',
 		'newsletter',
 		'',
@@ -19,8 +19,8 @@ function tb_newsletter_menu() {
 
 	add_submenu_page(
 		'newsletter',
-		'Envoyer',
-		'Envoyer la newsletter',
+		__('Envoyer', 'telabotanica'),
+		__('Envoyer la newsletter', 'telabotanica'),
 		'manage_options',
 		'newsletter_send',
 		'tb_newsletter_send'
@@ -28,8 +28,8 @@ function tb_newsletter_menu() {
 
 	add_submenu_page(
 		'newsletter',
-		'Réglages',
-		'Réglages',
+		__('Réglages', 'telabotanica'),
+		__('Réglages', 'telabotanica'),
 		'manage_options',
 		'newsletter_config',
 		'tb_newsletter_config'
@@ -312,7 +312,7 @@ function tb_newsletter_send() {
 		<?php
 		if (!current_user_can('manage_options'))
 		{
-			wp_die( __('Vous n\'avez pas les droits suffisants pour accéder à cette page.') );
+			wp_die( __('Vous n\'avez pas les droits suffisants pour accéder à cette page.', 'telabotanica') );
 		}
 		?>
 
@@ -456,7 +456,7 @@ function tb_newsletter_config() {
 		<?php
 		if (!current_user_can('manage_options'))
 		{
-			wp_die( __('Vous n\'avez pas les droits suffisants pour accéder à cette page.') );
+			wp_die( __('Vous n\'avez pas les droits suffisants pour accéder à cette page.', 'telabotanica') );
 		}
 		?>
 

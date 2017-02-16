@@ -105,7 +105,11 @@ class Wiki extends TB_Outil {
 			</iframe>
 			<?php
 		} else {
-			echo "<p>Aucun wiki défini ou URL racine manquante; vérifiez la configuration.</p>";
+			?>
+			<p>
+				<?php _e("Aucun wiki défini ou URL racine manquante; vérifiez la configuration", 'telabotanica') ?>
+			</p>
+			<?php
 		}
 	}
 
@@ -118,34 +122,52 @@ class Wiki extends TB_Outil {
 		</h2>
 
 		<p class="editfield">
-			<label for="activation-outil">Activation de l'outil</label>
+			<label for="activation-outil"><?php _e("Activation de l'outil", 'telabotanica') ?></label>
 			<select name="activation-outil">
-				<option value="true" <?php echo ($this->enable_nav_item ? 'selected' : '') ?>>Activé</option>
-				<option value="false" <?php echo ($this->enable_nav_item ? '' : 'selected') ?>>Désactivé</option>
+				<option value="true" <?php echo ($this->enable_nav_item ? 'selected' : '') ?>>
+					<?php _e("Activé", 'telabotanica') ?>
+				</option>
+				<option value="false" <?php echo ($this->enable_nav_item ? '' : 'selected') ?>>
+					<?php _e("Désactivé", 'telabotanica') ?>
+				</option>
 			</select>
 		</p>
 
 		<p class="editfield">
-			<label for="nom-outil">Nom de l'outil</label>
+			<label for="nom-outil"><?php _e("Nom de l'outil", 'telabotanica') ?></label>
 			<input type="text" id="nom-outil" name="nom-outil" value="<?php echo $this->name ?>" />
 		</p>
 
 		<p class="editfield">
-			<label for="liste-outil">Nom du wiki</label>
-			<input type="text" <?php echo is_super_admin() ? '' : 'disabled="disabled"' ?> id="nom-wiki" name="wikiName" placeholder="automatique (nom du projet)" value="<?php echo $this->config['wikiName'] ?>" />
+			<label for="liste-outil">
+				<?php _e("Nom du wiki", 'telabotanica') ?>
+			</label>
+			<input type="text" <?php echo is_super_admin() ? '' : 'disabled="disabled"' ?> id="nom-wiki" name="wikiName"
+				   placeholder="<?php _e("automatique", 'telabotanica') ?> (<?php _e("nom du projet", 'telabotanica') ?>)"
+				   value="<?php echo $this->config['wikiName'] ?>" />
 			<?php if (! is_super_admin()) { ?>
-				<span class="description">Vous ne pouvez pas modifier ce paramètre.</span>
+				<span class="description">
+					<?php _e("Vous ne pouvez pas modifier ce paramètre", 'telabotanica') ?>
+				</span>
 			<?php } ?>
 		</p>
 
 		<p class="editfield">
-			<label for="confidentialite-outil">Visibilité</label>
+			<label for="confidentialite-outil">
+				<?php _e("Visibilité", 'telabotanica') ?>
+			</label>
 			<select name="confidentialite-outil">
-				<option value="false" <?php echo ($this->prive ? '' : 'selected') ?>>Public</option>
-				<option value="true" <?php echo ($this->prive ? 'selected' : '') ?>>Privé</option>
+				<option value="false" <?php echo ($this->prive ? '' : 'selected') ?>>
+					<?php _e("Public", 'telabotanica') ?>
+				</option>
+				<option value="true" <?php echo ($this->prive ? 'selected' : '') ?>>
+					<?php _e("Privé", 'telabotanica') ?>
+				</option>
 			</select>
 			<br/>
-			<span class="description">Si "privé", seuls les membres pourront y accéder (ne s'applique qu'aux groupes publics)</span>
+			<span class="description">
+				<?php _e("Si \"privé\", seuls les membres pourront y accéder (ne s'applique qu'aux groupes publics)", 'telabotanica') ?>
+			</span>
 		</p>
 
 		<!--<p class="editfield">

@@ -75,7 +75,7 @@ function tb_menu_hooks() {
 		<?php
 		if (!current_user_can('manage_options'))
 		{
-			wp_die( __('Vous n\'avez pas les droits suffisants pour accéder à cette page.') );
+			wp_die( __('Vous n\'avez pas les droits suffisants pour accéder à cette page.', 'telabotanica') );
 		}
 		?>
 
@@ -232,7 +232,7 @@ function tb_menu_securite() {
 		<?php
 		if (!current_user_can('manage_options'))
 		{
-			wp_die( __('Vous n\'avez pas les droits suffisants pour accéder à cette page.') );
+			wp_die( __('Vous n\'avez pas les droits suffisants pour accéder à cette page.', 'telabotanica') );
 		}
 		?>
 
@@ -330,7 +330,7 @@ function tb_menu_espace_projets() {
 		<?php
 		if (!current_user_can('manage_options'))
 		{
-			wp_die( __('Vous n\'avez pas les droits suffisants pour accéder à cette page.') );
+			wp_die( __('Vous n\'avez pas les droits suffisants pour accéder à cette page.', 'telabotanica') );
 		}
 		?>
 
