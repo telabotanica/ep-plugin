@@ -961,7 +961,22 @@ function migration_wikis($argc, $argv) {
 		echo "-- ECHEC REQUÊTE: [$req2]" . PHP_EOL;
 	}
 	$req3 = "INSERT INTO $tableOutilsReglages "
-		. "SELECT DISTINCT group_id, 'wiki', 'Wiki', 0, 75, 75, 1, '' "
+		. "SELECT DISTINCT group_id, 'wiki', 'Wiki', 0, 75, 75, 1, "
+		. "CONCAT('{\"wikiName\":\"',"
+			. "IF(meta_value LIKE '%wakka.php%',"
+				. "SUBSTRING("
+					. "SUBSTRING_INDEX(meta_value, '/', -2),"
+					. "1,"
+					. "LOCATE("
+						. "'/',"
+						. "SUBSTRING_INDEX(meta_value, '/', -2)"
+					. ")-1"
+				. "),"
+				. "IF(meta_value LIKE '%/',"
+					. "SUBSTRING_INDEX(SUBSTRING(meta_value, 1, LENGTH(meta_value)-1), '/', -1),"
+					. "SUBSTRING_INDEX(meta_value, '/', -1)"
+			. ")),"
+		. "'\"}') "
 		. "FROM $tableGroupesMeta WHERE meta_key = 'wiki-externe' AND meta_value != '';";
 	try {
 		$bdWordpress->exec($req3);
