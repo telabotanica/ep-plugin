@@ -198,8 +198,10 @@ class TB_Outil extends BP_Group_Extension {
 	protected function preparer_config_locale()
 	{
 		// par défaut tous les outils ont au moins un paramètre général "active"
+		// et souvent un commentaire JSON "_comments"
 		$config_locale = $this->config;
 		unset($config_locale['active']);
+		unset($config_locale['_comments']);
 		return $config_locale;
 	}
 

@@ -61,6 +61,7 @@ class Forum extends TB_Outil {
 		}
 
 		unset($config_locale['active']);
+		unset($config_locale['_comments']);
 		unset($config_locale['domainRoot']); // inutile, toujours redéfini
 		unset($config_locale['displayListTitle']);
 		unset($config_locale['ezmlm-php']['rootUri']);

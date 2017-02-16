@@ -26,6 +26,7 @@ class Porte_Documents extends TB_Outil {
 		}
 
 		unset($config_locale['active']);
+		unset($config_locale['_comments']);
 		unset($config_locale['abstractionPath']);
 		unset($config_locale['filesServiceUrl']);
 		unset($config_locale['userInfoByIdUrl']);

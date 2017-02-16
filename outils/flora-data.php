@@ -37,6 +37,7 @@ class Flora_Data extends TB_Outil {
 		}
 
 		unset($config_locale['active']);
+		unset($config_locale['_comments']);
 		unset($config_locale['rootUrl']);
 
 		return $config_locale;
