@@ -1,4 +1,9 @@
 <?php
+/**
+ * Migre les différentes données existantes dans l' "ancien site Tela Botanica"
+ * vers la base de données de Wordpress, et les documents des projets vers
+ * Cumulus
+ */
 
 require_once "config.php";
 
@@ -63,10 +68,10 @@ switch($action) {
 	case "nettoyage":
 		nettoyage($argc, $argv);
 		break;
-	case "tout_sauf_docs":
+	case "tout_sauf_docs": // et sauf "liste-permissions", aussi
 		migration_projets($argc, $argv);
 		migration_utilisateurs($argc, $argv);
-		migration_inscrits($argc, $argv);
+		//migration_inscrits($argc, $argv);
 		migration_listes($argc, $argv);
 		configuration_porte_documents($argc, $argv);
 		migration_wikis($argc, $argv);
@@ -79,6 +84,8 @@ switch($action) {
  * Remet tout comme c'était avant, sauf les documents : vide la table des
  * projets, la table des inscrits, les métadonnées afférentes, et la config des
  * outils Tela Botanica
+ * @WARNING détruit tout violemment !!
+ * @TODO ajouter une confirmation avant de le lancer
  */
 function nettoyage($argc, $argv) {
 	global $bdWordpress;
@@ -135,7 +142,9 @@ function nettoyage($argc, $argv) {
 	} catch(Exception $e) {
 		echo "-- ECHEC REQUÊTE: [$req]" . PHP_EOL;
 	}
-	$req = "DROP VIEW $tableUtilisateurs;";
+	// la vue utilisateurs n'est plus utilisée depuis que les utilisateurs ont
+	// été migrés pour de vrai
+	/*$req = "DROP VIEW $tableUtilisateurs;";
 	try {
 		$bdWordpress->exec($req);
 		echo "Vue utilisateurs supprimée" . PHP_EOL;
@@ -148,7 +157,7 @@ function nettoyage($argc, $argv) {
 		echo "Table utilisateurs d'origine restaurée" . PHP_EOL;
 	} catch(Exception $e) {
 		echo "-- ECHEC REQUÊTE: [$req]" . PHP_EOL;
-	}
+	}*/
 }
 
 /**
@@ -337,6 +346,7 @@ function migration_documents($argc, $argv) {
 /**
  * Convertit les adresses email des propriétaires ("owner") des documents
  * Cumulus importés en numéros d'utilisateurs dans l'annuaire TB
+ * @TODO devrait se trouver dans le script de maintenance de Cumulus et non ici
  */
 function migration_proprietaires_documents($argc, $argv) {
 	global $bdCumulus;
@@ -762,6 +772,8 @@ function configuration_porte_documents($argc, $argv) {
  * de membres des groupes
  */
 function migration_utilisateurs($argc, $argv) {
+	throw new Exception("Cette méthode est obsolète ! Les utilisateurs sont censés avoir été migrés pour de vrai.");
+
 	global $bdWordpress;
 	global $prefixe_tables_wp;
 
