@@ -221,7 +221,7 @@ class Flora_Data extends TB_Outil {
 			</select>
 			<br/>
 			<span class="description">
-				<?php _e("Si \"privé\", seuls les membres pourront y accéder (ne s'applique qu'aux groupes publics)", 'telabotanica') ?>
+				<?php _e("Si \"privé\", seuls les membres pourront y accéder (ne s'applique qu'aux projets publics)", 'telabotanica') ?>
 			</span>
 		</p>
 
