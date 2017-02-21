@@ -89,8 +89,8 @@ function tb_ajout_categories_projets()
 		'create_screen_checked' => false
 	));
 
-	// cette catégorie n'est accessible qu'à l'admin de WP via le TdB; elle est
-	// cumulable avec les autres
+	// ces catégories ne sont accessibles qu'à l'admin de WP via le TdB; elles
+	// sont cumulables avec les autres
 	bp_groups_register_group_type('tela-botanica', array(
 		'labels' => array(
 			'name' => 'Tela Botanica',
@@ -100,6 +100,17 @@ function tb_ajout_categories_projets()
 		'show_in_create_screen' => false,
 		'show_in_list' => true,
 		'description' => __( 'Projets officiels de Tela Botanica', 'telabotanica' )
+	));
+
+	bp_groups_register_group_type('archive', array(
+		'labels' => array(
+			'name' => __('Archivé', 'telabotanica'),
+			'singular_name' => __('Archivé', 'telabotanica'),
+		),
+		'has_directory' => 'archives',
+		'show_in_create_screen' => false,
+		'show_in_list' => true,
+		'description' => __( 'Projets archivés', 'telabotanica' )
 	));
 }
 
