@@ -17,15 +17,15 @@ add_action( 'groups_creation_tabs', 'tb_restriction_choix_categories' );
  */
 function tb_ajout_categories_projets()
 {
-	bp_groups_register_group_type('echanges', array(
+	bp_groups_register_group_type('discussion', array(
 		'labels' => array(
-			'name' => __( 'Échanges', 'telabotanica' ),
-			'singular_name' => __( 'Échanges', 'telabotanica' )
+			'name' => __( 'Discussion', 'telabotanica' ),
+			'singular_name' => __( 'Discussion', 'telabotanica' )
 		),
-		'has_directory' => 'echanges',
+		'has_directory' => 'discussion',
 		'show_in_create_screen' => true,
 		'show_in_list' => true,
-		'description' => __( 'Discussion', 'telabotanica' ),
+		'description' => __( "Échanges d'informations et de points de vue sur un thème", 'telabotanica' ),
 		'create_screen_checked' => true
 	));
 
@@ -37,55 +37,55 @@ function tb_ajout_categories_projets()
 		'has_directory' => 'botanique-locale',
 		'show_in_create_screen' => true,
 		'show_in_list' => true,
-		'description' => __( 'Botanique en territoire : rencontres, sorties de terrain...', 'telabotanica' ),
+		'description' => __( 'Rencontres en territoires, sorties de terrain...', 'telabotanica' ),
 		'create_screen_checked' => false
 	));
 
-	bp_groups_register_group_type('outils-informatiques', array(
+	bp_groups_register_group_type('outils-numeriques', array(
 		'labels' => array(
-			'name' => __( 'Outils informatiques', 'telabotanica' ),
-			'singular_name' => __( 'Outils informatiques', 'telabotanica' )
+			'name' => __( 'Outils numériques', 'telabotanica' ),
+			'singular_name' => __( 'Outils numériques', 'telabotanica' )
 		),
-		'has_directory' => 'outils-informatiques',
+		'has_directory' => 'outils-numeriques',
 		'show_in_create_screen' => true,
 		'show_in_list' => true,
-		'description' => __( 'Projets présentant les outils et recevant les remarques (gné?)', 'telabotanica' ),
+		'description' => __( "Présentation d'outils informatiques et suivi de leur développement", 'telabotanica' ),
 		'create_screen_checked' => false
 	));
 
-	bp_groups_register_group_type('organisation', array(
+	bp_groups_register_group_type('coordination', array(
 		'labels' => array(
-			'name' => __( 'Organisation', 'telabotanica' ),
-			'singular_name' => __( 'Organisation', 'telabotanica' )
+			'name' => __( 'Coordination', 'telabotanica' ),
+			'singular_name' => __( 'Coordination', 'telabotanica' )
 		),
-		'has_directory' => 'organisation',
+		'has_directory' => 'coordination',
 		'show_in_create_screen' => true,
 		'show_in_list' => true,
 		'description' => __( 'Co-organisation de programmes, comités de pilotage...', 'telabotanica' ),
 		'create_screen_checked' => false
 	));
 
-	bp_groups_register_group_type('contribution', array(
+	bp_groups_register_group_type('collaboration-contribution', array(
 		'labels' => array(
-			'name' => __( 'Contribution', 'telabotanica' ),
-			'singular_name' => __( 'Contribution', 'telabotanica' )
+			'name' => __( 'Collaboration - Contribution', 'telabotanica' ),
+			'singular_name' => __( 'Collaboration - Contribution', 'telabotanica' )
 		),
-		'has_directory' => 'contribution',
+		'has_directory' => 'collaboration-contribution',
 		'show_in_create_screen' => true,
 		'show_in_list' => true,
-		'description' => __( "Saisie d'observations botaniques", 'telabotanica' ),
+		'description' => __( "Saisie et partage d'observations botaniques", 'telabotanica' ),
 		'create_screen_checked' => false
 	));
 
-	bp_groups_register_group_type('construction', array(
+	bp_groups_register_group_type('cooperation', array(
 		'labels' => array(
-			'name' => __( 'Construction', 'telabotanica' ),
-			'singular_name' => __( 'Construction', 'telabotanica' )
+			'name' => __( 'Coopération', 'telabotanica' ),
+			'singular_name' => __( 'Coopération', 'telabotanica' )
 		),
-		'has_directory' => 'construction',
+		'has_directory' => 'cooperation',
 		'show_in_create_screen' => true,
 		'show_in_list' => true,
-		'description' => __( 'Création de banque de données', 'telabotanica' ),
+		'description' => __( 'Création et amélioration de banque de données de connaissances botaniques', 'telabotanica' ),
 		'create_screen_checked' => false
 	));
 
