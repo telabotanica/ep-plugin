@@ -480,6 +480,7 @@ function tb_newsletter_config() {
 		// enregistre les changements de config en BdD
 		if (isset($_POST[$hidden_update_address_field_name]) && $_POST[$hidden_update_address_field_name] == 'Y'):
 			// préparation des valeurs envoyées
+			$newsletter_config['newsletter_recipient'] = $_POST['newsletter_recipient'];
 			$newsletter_config['ezmlm_php_url'] = $_POST['ezmlm_php_url'];
 			$newsletter_config['ezmlm_php_header'] = $_POST['ezmlm_php_header'];
 			$newsletter_config['error_recipients_emails'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['error_recipients_emails']));
