@@ -31,8 +31,8 @@ function tb_ajout_categories_projets()
 
 	bp_groups_register_group_type('botanique-locale', array(
 		'labels' => array(
-			'name' => __( 'Botanique', 'telabotanica' ),
-			'singular_name' => __( 'Botanique', 'telabotanica' )
+			'name' => __( 'Botanique locale', 'telabotanica' ),
+			'singular_name' => __( 'Botanique locale', 'telabotanica' )
 		),
 		'has_directory' => 'botanique-locale',
 		'show_in_create_screen' => true,
