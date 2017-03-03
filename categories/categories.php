@@ -99,7 +99,7 @@ function tb_ajout_categories_projets()
 		'has_directory' => 'tela-botanica',
 		'show_in_create_screen' => false,
 		'show_in_list' => true,
-		'description' => __( 'Projets officiels de Tela Botanica', 'telabotanica' )
+		'description' => __( "Projets portés par l'équipe de Tela Botanica", 'telabotanica' )
 	));
 
 	bp_groups_register_group_type('archive', array(
@@ -110,7 +110,18 @@ function tb_ajout_categories_projets()
 		'has_directory' => 'archives',
 		'show_in_create_screen' => false,
 		'show_in_list' => true,
-		'description' => __( 'Projets archivés', 'telabotanica' )
+		'description' => __( 'Projets terminés', 'telabotanica' )
+	));
+
+	bp_groups_register_group_type('sciences-participatives', array(
+		'labels' => array(
+			'name' => __('Sciences participatives', 'telabotanica'),
+			'singular_name' => __('Sciences participatives', 'telabotanica'),
+		),
+		'has_directory' => 'sciences-participatives',
+		'show_in_create_screen' => false,
+		'show_in_list' => true,
+		'description' => __( 'Observatoires citoyens', 'telabotanica' )
 	));
 }
 
