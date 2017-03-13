@@ -124,6 +124,7 @@ class TelaBotanica
 	{
 		self::installation_outils();
 		self::installation_champs_profil();
+		//self::installation_recherche_profil(); // marche pas - @TODO réparer
 	}
 
 	/**
@@ -150,8 +151,8 @@ class TelaBotanica
 	 * 
 	 * Lit les fichiers SQL du dossier /profil-etendu, penser à les mettre à
 	 * jour lorsque les champs du profil étendu changent : exporter les tables
-	 * bp_xprofile_fields et bp_xprofile_groups, et dans chaque fichier
-	 * supprimer le préfixe des tables. Ex:
+	 * bp_xprofile_fields, bp_xprofile_groups, bp_xprofile_meta et dans chaque
+	 * fichier supprimer le préfixe des tables. Ex:
 	 *    "INSERT INTO `test_bp_xprofile_fields`"
 	 * => "INSERT INTO `bp_xprofile_fields`"
 	 */
@@ -160,17 +161,65 @@ class TelaBotanica
 		global $wpdb;
 		$tableXPFields = $wpdb->prefix . 'bp_xprofile_fields';
 		$tableXPGroups = $wpdb->prefix . 'bp_xprofile_groups';
+		$tableXPMeta = $wpdb->prefix . 'bp_xprofile_meta';
 		// vidage
 		$wpdb->query("TRUNCATE TABLE $tableXPFields");
 		$wpdb->query("TRUNCATE TABLE $tableXPGroups");
+		$wpdb->query("TRUNCATE TABLE $tableXPMeta");
 
 		$donneesXPFields = file_get_contents(__DIR__ . '/profil-etendu/bp_xprofile_fields.sql');
 		$donneesXPFields = str_replace('bp_xprofile_fields', $tableXPFields, $donneesXPFields);
 		$donneesXPGroups = file_get_contents(__DIR__ . '/profil-etendu/bp_xprofile_groups.sql');
 		$donneesXPGroups = str_replace('bp_xprofile_groups', $tableXPGroups, $donneesXPGroups);
+		$donneesXPMeta = file_get_contents(__DIR__ . '/profil-etendu/bp_xprofile_meta.sql');
+		$donneesXPMeta = str_replace('bp_xprofile_meta', $tableXPMeta, $donneesXPMeta);
 		// remplissage
 		$wpdb->query($donneesXPFields);
 		$wpdb->query($donneesXPGroups);
+		$wpdb->query($donneesXPMeta);
+	}
+
+	/**
+	 * @WARNING marche pas - le post de type 'bps_form' est inséré mais non
+	 * visible dans l'admin; peut-être une des tables icl ?
+	 * 
+	 * Insère dans les tables posts et postmeta les données du formulaire de
+	 * recherche BP Profile Search
+	 * 
+	 * Lit le fichier profile_search_postmeta.sql du dossier /profil-etendu,
+	 * penser à le mettre à jour lorsque le formulaire est podifié: exporter la
+	 * table postmeta en filtrant sur post_id = l'ID du post ayant pour
+	 * post_type 'bps_form' puis dans le fichier supprimer le préfixe de table :
+	 *    "INSERT INTO `test_postmeta`"
+	 * => "INSERT INTO `postmeta`"
+	 * enfin, remplacer l'ID du post par "__SEARCH_FORM_POST_ID__" :
+	 *    "(DEFAULT, 24, 'bps_options',"
+	 * => "(DEFAULT, __SEARCH_FORM_POST_ID__, 'bps_options',"
+	 */
+	static function installation_recherche_profil()
+	{
+		global $wpdb;
+		$tablePosts = $wpdb->prefix . 'posts';
+		$tablePostMeta = $wpdb->prefix . 'postmeta';
+		// vidage
+		$wpdb->query("DELETE FROM $tablePostMeta WHERE post_id IN (SELECT ID FROM $tablePosts WHERE post_type = 'bps_form')");
+		$wpdb->query("DELETE FROM $tablePosts WHERE post_type = 'bps_form'");
+		// delete from wp_post where post_type = 'bps_form';
+		// remplissage
+		$wpdb->query("INSERT INTO $tablePosts (ID, post_author, post_date, post_date_gmt, post_content, post_title, post_excerpt, post_status, comment_status, ping_status, post_password, post_name, to_ping, pinged, post_modified, post_modified_gmt, post_content_filtered, post_parent, guid, menu_order, post_type, post_mime_type, comment_count)"
+			. " VALUES (DEFAULT, 1, NOW(), NOW(), '', 'Membres', '', 'publish', 'closed', 'closed', '', 'membres', '', '', NOW(), NOW(), '', 0, '', 0, 'bps_form', '', 0)");
+		$lastInsertId = $wpdb->insert_id;
+		$updateQuery = "UPDATE $tablePosts SET guid = 'https://beta.tela-botanica.org/test/?post_type=bps_form&#038;p=$lastInsertId' WHERE ID = $lastInsertId";
+		//var_dump($updateQuery);
+		//error_log('++++ ' . $updateQuery);
+		$wpdb->query($updateQuery);
+		// champs et réglages du formulaire de recherche
+		$donneesPostMeta = file_get_contents(__DIR__ . '/profil-etendu/profile_search_postmeta.sql');
+		$donneesPostMeta = str_replace('postmeta', $tablePostMeta, $donneesPostMeta);
+		$donneesPostMeta = str_replace('__SEARCH_FORM_POST_ID__', $lastInsertId, $donneesPostMeta);
+		//var_dump($donneesPostMeta);
+		//error_log('++++ ' . $donneesPostMeta);
+		$wpdb->query($donneesPostMeta);
 	}
 
 	/*
