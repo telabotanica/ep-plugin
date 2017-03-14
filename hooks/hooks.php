@@ -42,6 +42,11 @@ class Hooks {
 		// chargement de la config depuis la BdD
 		$securite_config = json_decode(get_option('tb_general_config'), true);
 
+		// protection contre les erreurs de décodage
+		if (! $securite_config) {
+			$securite_config = array();
+		}
+
 		// protection contre valeurs inexistantes
 		if (! array_key_exists('adminToken', $securite_config)) {
 			$securite_config['adminToken'] = null;
