@@ -102,7 +102,7 @@ function tb_ajout_categories_projets()
 		'description' => __( "Projets portés par l'équipe de Tela Botanica", 'telabotanica' )
 	));
 
-	bp_groups_register_group_type('archive', array(
+	/*bp_groups_register_group_type('archive', array(
 		'labels' => array(
 			'name' => __('Archivé', 'telabotanica'),
 			'singular_name' => __('Archivé', 'telabotanica'),
@@ -111,7 +111,7 @@ function tb_ajout_categories_projets()
 		'show_in_create_screen' => false,
 		'show_in_list' => true,
 		'description' => __( 'Projets terminés', 'telabotanica' )
-	));
+	));*/
 
 	bp_groups_register_group_type('sciences-participatives', array(
 		'labels' => array(
