@@ -105,7 +105,6 @@ function format_post_date($post_date) {
 /**
  * Gets the event date.
  *
- * Return false if not an event
  * Transform event date from 21/11/2016 format to timestamp
  *
  * @param      int  $post_id  The post identifier
@@ -192,6 +191,24 @@ function get_event_place($post_id) {
 	}
 }
 
+function get_event_details($post_id) {
+	return get_event_date($post_id) + [
+		'place'		=> get_event_place($post_id),
+		'details'	=> get_field('description', $post_id)
+	];
+}
+
+function get_post_details($post) {
+	return [
+		'post' 		=> $post,
+		'author' 	=> get_the_author_meta('display_name', $post->post_author),
+		'link' 		=> get_post_permalink($post->ID),
+		'thumbnail'	=> wp_get_attachment_url(get_post_thumbnail_id($post->ID)),
+		'date_post'	=> format_post_date($post->post_date),
+		'event'		=> get_event_details($post->ID)
+	];
+}
+
 /**
  * Gets the newsletter subject.
  *
@@ -200,7 +217,7 @@ function get_event_place($post_id) {
  * @return     string  The subject.
  */
 function get_subject() {
-	$oldLocale = setlocale(LC_TIME, 'fr_FR.utf8', 'fr_FR', 'fr_FR@euro', 'fr');
+	$oldLocale = setlocale(LC_TIME, ['fr_FR.utf8', 'fr_FR', 'fr_FR@euro', 'fr']);
 
 	$subject = 'Lettre d\'information de Tela Botanica du ' . strftime('%e %B %Y');
 
@@ -222,13 +239,20 @@ function get_newsletter($multipart_boundary = null) {
 		$categories = [];
 		$subcategories = [];
 		$posts = [];
+		$featured_post = [];
 
 		while (have_rows('tb_newsletter_sections', 'option')) {
 			the_row();
 
 			foreach (get_sub_field('tb_newsletter_sections_items') as $post) {
-				$category = get_post_top_category($post->ID);
+				// Featured posts "à la une" have to be handled separatly
+				if (true === get_field('featured', $post->ID)) {
+					$featured_post = get_post_details($post);
 
+					continue;
+				}
+
+				$category = get_post_top_category($post->ID);
 				if ($category) {
 					$subcategory = get_sub_field('tb_newsletter_sections_title');
 
@@ -240,15 +264,7 @@ function get_newsletter($multipart_boundary = null) {
 
 					$subcategories[$category->term_id][$subcategory->term_id] = $subcategory->name;
 
-					$posts[$category->term_id][$subcategory->term_id][] = [
-						'post' 		=> $post,
-						'author' 	=> get_the_author_meta('display_name', $post->post_author),
-						'link' 		=> get_post_permalink($post->ID),
-						'thumbnail'	=> wp_get_attachment_url(get_post_thumbnail_id($post->ID)),
-						'date_post'	=> format_post_date($post->post_date),
-						'event'		=> get_event_date($post->ID),
-						'place'		=> get_event_place($post->ID)
-					];
+					$posts[$category->term_id][$subcategory->term_id][] = get_post_details($post);
 				}
 			}
 		}
@@ -258,6 +274,7 @@ function get_newsletter($multipart_boundary = null) {
 		'intro' 	=> get_field('tb_newsletter_introduction', 'option'),
 		'categories' => $categories,
 		'subcategories' => $subcategories,
+		'featured'	=> $featured_post,
 		'posts' 	=> $posts,
 		'outro' 	=> get_field('tb_newsletter_footer', 'option')
 	];
