@@ -204,7 +204,7 @@ function get_post_details($post) {
 		'author' 	=> get_the_author_meta('display_name', $post->post_author),
 		'link' 		=> get_post_permalink($post->ID),
 		'thumbnail'	=> wp_get_attachment_url(get_post_thumbnail_id($post->ID)),
-		'date_post'	=> format_post_date($post->post_date),
+		'date'		=> format_post_date($post->post_date),
 		'event'		=> get_event_details($post->ID)
 	];
 }
