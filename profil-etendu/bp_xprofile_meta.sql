@@ -27,7 +27,7 @@ INSERT INTO `bp_xprofile_meta` (`id`, `object_id`, `object_type`, `meta_key`, `m
 (23, 54, 'field', 'allow_custom_visibility', 'disabled'),
 (24, 54, 'field', 'do_autolink', 'off'),
 (25, 59, 'field', 'default_visibility', 'public'),
-(26, 59, 'field', 'allow_custom_visibility', 'allowed'),
+(26, 59, 'field', 'allow_custom_visibility', 'disabled'),
 (27, 59, 'field', 'do_autolink', 'off'),
 (28, 61, 'field', 'default_visibility', 'public'),
 (29, 61, 'field', 'allow_custom_visibility', 'allowed'),
