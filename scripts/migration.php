@@ -279,7 +279,11 @@ function migration_documents($argc, $argv) {
 				'projet:' . $f['p_id']
 			),
 			'permissions' => $perms,
-			'keywords' => null,
+			'keywords' => array(
+				// permet de retrouver les documents par leur ancien ID, avec une URL de la forme :
+				// https://api.tela-botanica.org/service:cumulus:doc/api/by-keywords/legacyid:21397/dl
+				'legacyid:' . $f['pd_id']
+			),
 			'license' => 'CC BY SA',
 			// JSON à la main car pb d'unicode avec PHP < 5.3
 			'meta' => '{"description":"' . $description
