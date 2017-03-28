@@ -40,7 +40,8 @@ function initialisation_bp()
 	require( dirname( __FILE__ ) . '/admin/admin.php' );
 	require( dirname( __FILE__ ) . '/newsletter/newsletter.php' );
 	require( dirname( __FILE__ ) . '/outils/TB_Outil.php' );
-	require( dirname( __FILE__ ) . '/formulaires/description/description-complete.php' );
+	require( dirname( __FILE__ ) . '/formulaires/projets/informations-supplementaires.php' );
+	// require( dirname( __FILE__ ) . '/formulaires/projets/url-site.php' );
 
 	$config = tbChargerConfigPlugin();
 	// chargement des outils depuis la configuration
@@ -52,12 +53,13 @@ function initialisation_bp()
 		}
 	}
 
-	//require( dirname( __FILE__ ) . '/formulaires/etiquettes/etiquettes.php' );	
+	//require( dirname( __FILE__ ) . '/formulaires/etiquettes/etiquettes.php' );
 }
 
 // amorçage du plugin lors de l'amorçage de BuddyPress
 add_action( 'bp_include', 'initialisation_bp' );
-add_action( 'bp_include', 'description_complete' );
+// affichage de la saisie des champs complémentaires sur la page de création de projet
+add_action( 'bp_include', 'informations_supplementaires' );
 //add_action( 'bp_include', 'categorie' );
 
 

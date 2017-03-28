@@ -488,8 +488,8 @@ function migration_projets($argc, $argv) {
 			. "($id, 'description-complete', '$description'), "
 			. "($id, 'last_activity', NOW()), "
 			. "($id, 'wiki-externe', '$wikiExterne'), "
-			. "($id, 'espace-internet', '$espaceInternet')";
-		
+			. "($id, 'url-site', '$espaceInternet')";
+
 		//echo $reqMeta . "\n";
 		try {
 			$bdWordpress->exec($req);
