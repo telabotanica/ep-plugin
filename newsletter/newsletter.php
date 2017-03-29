@@ -202,7 +202,7 @@ function get_post_details($post) {
 	return [
 		'post' 		=> $post,
 		'author' 	=> get_the_author_meta('display_name', $post->post_author),
-		'link' 		=> get_post_permalink($post->ID),
+		'link' 		=> get_permalink($post->ID, true),
 		'thumbnail'	=> wp_get_attachment_url(get_post_thumbnail_id($post->ID)),
 		'date'		=> format_post_date($post->post_date),
 		'event'		=> get_event_details($post->ID)
