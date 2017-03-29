@@ -201,6 +201,7 @@ function get_event_details($post_id) {
 function get_post_details($post) {
 	return [
 		'post' 		=> $post,
+		'intro'		=> get_field('intro', $post_id),
 		'author' 	=> get_the_author_meta('display_name', $post->post_author),
 		'link' 		=> get_permalink($post->ID, true),
 		'thumbnail'	=> wp_get_attachment_url(get_post_thumbnail_id($post->ID)),
