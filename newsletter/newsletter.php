@@ -229,11 +229,15 @@ function get_subject() {
 
 function get_newsletter($multipart_boundary = null) {
 	require_once __DIR__ . '/../vendor/autoload.php';
+	require_once __DIR__ . '/unescape_twig_extension.php'; // loads Twig_Extensions_Extension_Unescape
+	require_once __DIR__ . '/linktotext_twig_extension.php'; // loads Twig_Extensions_Extension_LinkToText
 	$loader = new Twig_Loader_Filesystem(get_template_directory() . '/inc/newsletter');
 
 	$twig = new Twig_Environment($loader, array());
 	$twig->addExtension(new Twig_Extensions_Extension_Intl());
 	$twig->addExtension(new Twig_Extensions_Extension_Text());
+	$twig->addExtension(new Twig_Extensions_Extension_Unescape());
+	$twig->addExtension(new Twig_Extensions_Extension_LinkToText());
 	$twig->getExtension('Twig_Extension_Core')->setTimezone('Europe/Paris');
 
 	if (have_rows('tb_newsletter_sections', 'option')) {
