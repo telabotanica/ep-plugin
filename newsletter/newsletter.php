@@ -201,7 +201,7 @@ function get_event_details($post_id) {
 function get_post_details($post) {
 	return [
 		'post' 		=> $post,
-		'intro'		=> get_field('intro', $post_id),
+		'intro'		=> get_field('intro', $post->ID),
 		'author' 	=> get_the_author_meta('display_name', $post->post_author),
 		'link' 		=> get_permalink($post->ID, true),
 		'thumbnail'	=> wp_get_attachment_url(get_post_thumbnail_id($post->ID)),
@@ -229,11 +229,15 @@ function get_subject() {
 
 function get_newsletter($multipart_boundary = null) {
 	require_once __DIR__ . '/../vendor/autoload.php';
+	require_once __DIR__ . '/unescape_twig_extension.php'; // loads Twig_Extensions_Extension_Unescape
+	require_once __DIR__ . '/linktotext_twig_extension.php'; // loads Twig_Extensions_Extension_LinkToText
 	$loader = new Twig_Loader_Filesystem(get_template_directory() . '/inc/newsletter');
 
 	$twig = new Twig_Environment($loader, array());
 	$twig->addExtension(new Twig_Extensions_Extension_Intl());
 	$twig->addExtension(new Twig_Extensions_Extension_Text());
+	$twig->addExtension(new Twig_Extensions_Extension_Unescape());
+	$twig->addExtension(new Twig_Extensions_Extension_LinkToText());
 	$twig->getExtension('Twig_Extension_Core')->setTimezone('Europe/Paris');
 
 	if (have_rows('tb_newsletter_sections', 'option')) {
