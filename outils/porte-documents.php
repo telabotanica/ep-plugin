@@ -103,7 +103,9 @@ class Porte_Documents extends TB_Outil {
 	/* Vue onglet admin */
 	function edit_screen($group_id = null)
 	{
-		$this->controleAccesReglages();
+		if (! $this->controleAccesReglages()) {
+			return false;
+		}
 		?>
 		<h2 class="bp-screen-reader-text">
 			<?php echo __("Paramètres de l'outil", 'telabotanica') . ' ' . $this->name; ?> 

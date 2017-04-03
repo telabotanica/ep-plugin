@@ -295,8 +295,8 @@ class TB_Outil extends BP_Group_Extension {
 	}
 
 	/**
-	 * Si l'outil est désactivé dans la config générale, vide le panneau de
-	 * réglages de l'outil et affiche un message à la place des réglages
+	 * Si l'outil est désactivé dans la config générale, retourne false et
+	 * affiche un message
 	 */
 	protected function controleAccesReglages() {
 		if (
@@ -308,8 +308,14 @@ class TB_Outil extends BP_Group_Extension {
 				<?php echo sprintf(__("L'outil %s a été désactivé par l'administrateur du site", 'telabotanica'), $this->name) ?>
 			</p>
 			<?php
-			exit;
+			// ajout d'un bouton submit désactivé, sans quoi bp-group-extension
+			// en rajoute un :/
+			?>
+			<input type="submit" disabled="disabled" class="button" value="<?php _e('Save Changes', 'buddypress') ?>">
+			<?php
+			return false;
 		}
+		return true;
 	}
 
 	/**

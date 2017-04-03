@@ -320,7 +320,9 @@ class Forum extends TB_Outil {
 
 	/* Vue onglet admin */
 	function edit_screen($group_id = null) {
-		$this->controleAccesReglages();
+		if (! $this->controleAccesReglages()) {
+			return false;
+		}
 
 		// traitement de la commande de création de liste
 		// potentiellement envoyée par le formulaire ci-dessous
