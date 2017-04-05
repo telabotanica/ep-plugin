@@ -38,7 +38,7 @@ function informations_supplementaires() {
 		<div class="editfield">
 			<label for="url-site"><?php _e("Site Web du projet", 'telabotanica') ?></label>
 			<span class="description"><?php _e("Sera affiché sur la page d'accueil du projet", 'telabotanica') ?></span>
-			<input type="text" name="url-site" id="url-site" aria-required="false" placeholder="www.monprojet.org" value="<?php echo get_value('url-site') ?>">
+			<input type="url" name="url-site" id="url-site" aria-required="false" placeholder="http://www.monprojet.org" value="<?php echo get_value('url-site') ?>">
 		</div>
 		<?php
 	}
