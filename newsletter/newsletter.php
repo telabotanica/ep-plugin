@@ -157,7 +157,7 @@ function get_event_place($post_id) {
 
 		return $place;
 	} elseif (is_object($details)) {
-		switch ($type) {
+		switch ($details->type) {
 			case 'address':
 				if ($details->city) {
 					$place = $details->city;
@@ -172,7 +172,7 @@ function get_event_place($post_id) {
 
 				break;
 			case 'city':
-				$place = $details->city;
+				$place = $details->name;
 				if ($details->countryCode !== 'fr') {
 					$place = $place . ' ' . $details->country;
 				}
