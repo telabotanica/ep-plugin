@@ -198,13 +198,17 @@ function get_event_details($post_id) {
 	];
 }
 
-function get_post_details($post) {
+function get_featured_post_details($post) {
+	return get_post_details($post, true);
+}
+
+function get_post_details($post, $featured = false) {
 	return [
 		'post' 		=> $post,
 		'intro'		=> get_field('intro', $post->ID),
 		'author' 	=> get_the_author_meta('display_name', $post->post_author),
 		'link' 		=> get_permalink($post->ID),
-		'thumbnail'	=> wp_get_attachment_url(get_post_thumbnail_id($post->ID)),
+		'thumbnail'	=> get_the_post_thumbnail_url($post->ID, $featured ? 'home-latest-post' : 'thumbnail'),
 		'date'		=> format_post_date($post->post_date),
 		'event'		=> get_event_details($post->ID)
 	];
@@ -250,7 +254,7 @@ function get_newsletter($multipart_boundary = null) {
 			foreach (get_sub_field('tb_newsletter_sections_items') as $post) {
 				// Featured posts "à la une" have to be handled separatly
 				if (true === get_field('featured', $post->ID)) {
-					$featured_post = get_post_details($post);
+					$featured_post = get_featured_post_details($post);
 
 					continue;
 				}
