@@ -278,6 +278,7 @@ function get_newsletter($multipart_boundary = null) {
 	}
 
 	$params = [
+		'logotela'  => get_template_directory_uri() . '/assets/images/logo-horizontal-blanc.png',
 		'intro' 	=> get_field('tb_newsletter_introduction', 'option'),
 		'categories' => $categories,
 		'subcategories' => $subcategories,
