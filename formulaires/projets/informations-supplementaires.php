@@ -24,7 +24,7 @@ function informations_supplementaires() {
 			<?php
 			wp_editor(get_value('description-complete'), 'description-complete', array(
 				'media_buttons' => false,
-				//'teeny' => true,
+				'wpautop' => false,
 				'quicktags' => false
 			));
 			?>
