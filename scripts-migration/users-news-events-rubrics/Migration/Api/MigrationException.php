@@ -6,7 +6,7 @@ use \Exception;
 
 /**
  * Custom exception indicating that a problem occurred during the
- * migration. 
+ * migration.
  */
 class MigrationException extends Exception {
 
@@ -16,22 +16,17 @@ class MigrationException extends Exception {
   /**
    * Returns a new <code>MigrationException</code> instance.
    *
-   * @param $dbConn a connection to the destination DB.
-   * @param $dbTableNamesToBeRestoredArray an array containing the names of the tables
-   *        to be restored.
+   * @param $ex the root exception.
+   * @param $query the SQL query which raised the exception.
+   * @param $func the name of the function which raised the exception.
+   *
    * @return a new <code>MigrationException</code> instance.
    */
   public function __construct($ex, $query, $func) {
-    var_dump($ex);
-    var_dump($ex->getMessage());
-    var_dump($ex->getCode());
     parent::__construct($ex->getMessage(), 0, $ex);
     $this->query = $query;
     $this->func = $func;
   }
-
-
-
 
   /**
    * Returns the SQL query which failed.
@@ -39,7 +34,7 @@ class MigrationException extends Exception {
    * @return the SQL query which failed.
    */
   public function getQuery() {
-    return $query;
+    return $this->query;
   }
 
   /**
@@ -48,7 +43,7 @@ class MigrationException extends Exception {
    * @return the name of the function issuing the query which failed.
    */
   public function getFunc() {
-    return $func;
+    return $this->func;
   }
 
 }

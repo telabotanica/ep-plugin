@@ -17,7 +17,7 @@ class DatasourceManager {
   private static $_instance = null;
 
   /**
-   * Returns a new <ode>DatasourceManager</code> instance.
+   * Returns a new <code>DatasourceManager</code> instance.
    */
   public function __construct($datasourcesConf) {
 
@@ -30,18 +30,14 @@ class DatasourceManager {
   }
 
   /**
-   * Returns a new <ode>DatasourceManager</code> instance.
+   * Closes all connections.
    */
   public function closeAll() {
-
-    foreach($_pdos as $ds_name => $pdo) {
-      $pdo = null;
-    }
-
+    $this->_pdos = null;
   }
 
   /**
-   * Returns the ConfManager instance.
+   * Returns the <code>DatasourceManager</code> instance.
    */
   public static function getInstance() {
 

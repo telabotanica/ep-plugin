@@ -2,8 +2,7 @@
 
 namespace Migration\App;
 
-use Migration\MigrationGroup;
-use Migration\DbNamesEnum;
+use Migration\Api\MigrationGroup;
 use Migration\App\Users\UserMigrationGroup;
 use Migration\App\Rubrics\RubricMigrationGroup;
 use Migration\App\NewsEvents\NewsEventMigrationGroup;
@@ -18,14 +17,7 @@ class AllMigrationGroup extends MigrationGroup {
         new UserMigrationGroup(),
         new NewsEventMigrationGroup(),
         new RubricMigrationGroup()
-      ],
-      null);
-  }
-
-  public function migrate() {
-    foreach($this->migrations as $migration) {
-      $migration->migrate();
-    }
+      ]);
   }
 
 }

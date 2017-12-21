@@ -46,14 +46,14 @@ class NewsCoverMigration extends BaseMigration {
     echo '-- exécution de "wp --info"' . PHP_EOL;
     exec('wp --info', $output, $exit_code);
     if (0 !== $exit_code) {
-      die('Faut lancer la commande depuis le repertoire de wordpress (et avoir wp-cli installé)');
+      throw new Exception('Faut lancer la commande depuis le repertoire de wordpress (et avoir wp-cli installé)');
     } else {
       var_dump($output);
     }
 
     echo '-- recherche du dossier d\'images' . PHP_EOL;
     if (!file_exists($this->wordpress_dir . '/IMG')) {
-      die('Faut rsync les images dans wordpress/IMG avant de commencer');
+      throw new Exception('Faut rsync les images dans wordpress/IMG avant de commencer');
     }
 
     // chdir($old_path); // commenté car inutile de rechanger de répertoire avant la fin du script

@@ -2,3 +2,5 @@ introduce return types
 introduce Models (User, Event, News, Rubric, UserActivity etc...) + DAO
 only use camel cause
 use '_' prefix for private and protected class members/methods
+refactor class name ConfManager -> ConfReader
+make singletons thread safe (useless here but cleaner )

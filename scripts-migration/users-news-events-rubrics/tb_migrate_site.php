@@ -2,7 +2,7 @@
 
 /**
 * Migrates users/news/events/rubrics related data from TB
-* "annuaire"/"bazar-fiches" and SPIP DB to the new WP site DB.
+* "annuaire"/"bazar-fiches" + SPIP DB to the new WP site DB.
 *
 * *****************************************
 * USE:
@@ -33,6 +33,7 @@ use \Migration\Api\DatasourceManager;
 use \Migration\Api\MigrationFactory;
 use \Migration\App\Config\ConfEntryValuesEnum;
 use \Migration\App\Config\DbNamesEnum;
+use \Migration\Api\FailureNotifier;
 
 $context = $argv[1];
 
@@ -63,14 +64,17 @@ try {
   $migration->migrate();
   $bdWordpress->commit();
 } catch(MigrationException $ex) {
-  echo '!!!!!!!!!!!!!!!!!!!!!FAIL!!!!!!!!!!!!!!!!!!!' . PHP_EOL;
-  echo 'MESSAGE -> ' . $ex->getMessage() . PHP_EOL;
-  echo 'CODE    -> ',  $ex->getCode()    . PHP_EOL;
-  echo "QUERY   -> " . $ex->getQuery()   . PHP_EOL;
-  echo "FUNC.   -> " . $ex->getFunc()    . PHP_EOL;
-  echo '!!!!!!!!!!!!!!!!!!!!!FAIL!!!!!!!!!!!!!!!!!!!' . PHP_EOL;
+  $msg  = '!!!!!!!!!!!!!!!!!!!!!FAIL!!!!!!!!!!!!!!!!!!!' . PHP_EOL;
+  $msg .= 'MESSAGE -> ' . $ex->getMessage() . PHP_EOL;
+  $msg .= 'CODE    -> ' .  $ex->getCode()    . PHP_EOL;
+  $msg .= "QUERY   -> " . $ex->getQuery()   . PHP_EOL;
+  $msg .= "FUNC.   -> " . $ex->getFunc()    . PHP_EOL;
+  $msg .= '!!!!!!!!!!!!!!!!!!!!!FAIL!!!!!!!!!!!!!!!!!!!' . PHP_EOL;
+  echo $msg;
+  FailureNotifier::notify($msg);
 } catch(Exception $ex) {
   echo '!!!!!!!!!!!!!!!!!!!!!FAIL!!!!!!!!!!!!!!!!!!! -> ',  $ex->getMessage(), "\n";
+  FailureNotifier::notify($ex->getMessage());
 } finally {
   // useless as the script is ending but kinda cleaner...
   $dsManager->closeAll();

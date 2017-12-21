@@ -12,5 +12,5 @@ abstract class ConfEntryValuesEnum {
 
 const CONF = [
   ConfEntryValuesEnum::WpDir      => "/worpdress/dir",
-  ConfEntryValuesEnum::AdminEmail => "",
+  ConfEntryValuesEnum::AdminEmail => "toto@wanadoo.com",
 ];

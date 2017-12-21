@@ -16,7 +16,7 @@ class MigrationGroup implements Migration {
   // The DbResetter to reset target DB:
   private $dbResetter;
 
-  public function __construct($migrations, $dbResetter) {
+  public function __construct($migrations, $dbResetter = null) {
     $this->migrations = $migrations;
     $this->dbResetter = $dbResetter;
   }

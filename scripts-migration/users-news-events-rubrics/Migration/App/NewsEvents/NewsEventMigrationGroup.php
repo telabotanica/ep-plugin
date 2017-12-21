@@ -8,7 +8,7 @@ use Migration\App\Config\DbNamesEnum;
 
 /**
  * Migrates news-event data (news, news comments, news covers,
- * events, event metas).
+ * events, event metas) .
  */
 class NewsEventMigrationGroup extends MigrationGroup {
 

@@ -24,15 +24,10 @@ abstract class BaseMigration implements Migration {
 
   public function __construct() {
     $dsm = DatasourceManager::getInstance();
-    $spipDbConnection = $dsm->getConnection(DbNamesEnum::Spip);
-    $telaDbConnection =  $dsm->getConnection(DbNamesEnum::Tela);
-    $wpDbConnection =  $dsm->getConnection(DbNamesEnum::Wp);
-    $wpTablePrefix = $dsm->getTablePrefix(DbNamesEnum::Wp);
-
-    $this->wpTablePrefix = $wpTablePrefix;
-    $this->spipDbConnection = $spipDbConnection;
-    $this->telaDbConnection = $telaDbConnection;
-    $this->wpDbConnection = $wpDbConnection;
+    $this->wpTablePrefix    = $dsm->getTablePrefix(DbNamesEnum::Wp);
+    $this->spipDbConnection = $dsm->getConnection(DbNamesEnum::Spip);
+    $this->telaDbConnection = $dsm->getConnection(DbNamesEnum::Tela);
+    $this->wpDbConnection   = $dsm->getConnection(DbNamesEnum::Wp);
   }
 
   /**

@@ -3,7 +3,7 @@
 namespace Migration\App;
 
 /**
-* Maps between the source DB values and corresponding target DB values. 
+* Maps between the source DB values and corresponding target DB values.
  */
 class AnnuaireTelaBpProfileDataMap {
 
@@ -230,41 +230,41 @@ class AnnuaireTelaBpProfileDataMap {
 
 
   public static function getBotanicLevel($annuaireTelaValue) {
-    return AnnuaireTelaBpProfileDataMap::$correspondances_niveau_bota[$annuaireTelaValue];
+    return self::$correspondances_niveau_bota[$annuaireTelaValue];
   }
 
   public static function getNaturalistAssociationMembership($annuaireTelaValue) {
-    return AnnuaireTelaBpProfileDataMap::$correspondances_membre_asso_naturaliste[$annuaireTelaValue];
+    return self::$correspondances_membre_asso_naturaliste[$annuaireTelaValue];
   }
 
   public static function getGeoZone($annuaireTelaValue) {
-    return AnnuaireTelaBpProfileDataMap::$correspondances_zones_geo[$annuaireTelaValue];
+    return self::$correspondances_zones_geo[$annuaireTelaValue];
   }
 
   public static function getCategory($annuaireTelaValue) {
-    return AnnuaireTelaBpProfileDataMap::$correspondance_categories[$annuaireTelaValue];
+    return self::$correspondance_categories[$annuaireTelaValue];
   }
 
   public static function getRubriqueCategory($annuaireTelaValue) {
-    return AnnuaireTelaBpProfileDataMap::$correspondanceCategorieRubriques[$annuaireTelaValue];
+    return self::$correspondanceCategorieRubriques[$annuaireTelaValue];
   }
 
   public static function getRubriqueCategoryArray() {
-    return AnnuaireTelaBpProfileDataMap::$correspondanceCategorieRubriques;
+    return self::$correspondanceCategorieRubriques;
   }
 
   public static function getDepartment($annuaireTelaValue) {
-    return AnnuaireTelaBpProfileDataMap::$departements[$annuaireTelaValue];
+    return self::$departements[$annuaireTelaValue];
   }
 
   public static function getLanguage($annuaireTelaValue) {
-    return AnnuaireTelaBpProfileDataMap::$codes_langues[$annuaireTelaValue];
+    return self::$codes_langues[$annuaireTelaValue];
   }
 
   public static function getSpipRubricsToBeMigrated() {
 
     $rubriquesAMigrer = [];
-    foreach (AnnuaireTelaBpProfileDataMap::$correspondanceCategorieRubriques as $correspondance) {
+    foreach (self::$correspondanceCategorieRubriques as $correspondance) {
       $rubriquesAMigrer[] = implode(',', $correspondance['rubrique-a-migrer']);
     }
 

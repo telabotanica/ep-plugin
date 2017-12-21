@@ -11,7 +11,7 @@ use \DateTime;
 use \DateTimeZone;
 
 /**
- * Migrates news from SPIP DB to WP DB..
+ * Migrates news from SPIP DB to WP DB.
  */
 class NewsMigration extends BaseMigration {
 
