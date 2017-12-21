@@ -5,3 +5,4 @@
 /outils/porte-documents
 config.php
 config.json
+/scripts-migration/users-news-events-rubrics/Migration/App/Config/datasources.php

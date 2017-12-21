@@ -2,20 +2,21 @@
 
 namespace Migration;
 /**
- * Class Autoloader
+ * Autoload classes based on namespaces.
  */
 class Autoloader {
 
     /**
-     * Enregistre notre autoloader
+     * Registers autoloader
      */
     static function register(){
         spl_autoload_register(array(__CLASS__, 'autoload'));
     }
 
     /**
-     * Inclue le fichier correspondant à notre classe
-     * @param $class string Le nom de la classe à charger
+     * Requires the .php files corresponding to a class.
+     *
+     * @param $class string The (namespace prefixed) name of the class. 
      */
     static function autoload($class){
         if (strpos($class, __NAMESPACE__ . '\\') === 0){
