@@ -17,7 +17,6 @@ class NewsEventMigrationGroup extends MigrationGroup {
     Parent::__construct([
       new NewsMigration(),
       new NewsCommentMigration(),
-      new NewsCoverMigration(),
       new EventMigration(),
       new EventMetaMigration()
     ], $newsEventDbResetter);

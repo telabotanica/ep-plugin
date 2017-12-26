@@ -1,0 +1,19 @@
+<?php
+
+namespace Migration\App\Config;
+
+abstract class ConfEntryValuesEnum {
+    const WpDir             = 'wpdir';
+    const AdminEmail        = 'adminemail';
+    const PublicKeyPath     = 'publickeypath';
+    const RsyncSource       = 'rsyncsource';
+    const RsyncDestination  = 'rsyncdestination';
+}
+
+const CONF = [
+  ConfEntryValuesEnum::WpDir            => '/home/user/www/wordpress',
+  ConfEntryValuesEnum::AdminEmail       => 'toto@wanadoo.com',
+  ConfEntryValuesEnum::PublicKeyPath    => '~/.ssh/id_rsa.pub',
+  ConfEntryValuesEnum::RsyncSource      => '/home/user/www/actu/IMG/arton*',
+  ConfEntryValuesEnum::RsyncDestination => 'IMG/',
+];
