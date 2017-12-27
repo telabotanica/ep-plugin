@@ -37,14 +37,15 @@ use \Migration\Api\FailureNotifier;
 
 $context = $argv[1];
 
-$ctxMigrationClassMap = array(
+$contextMigrationClassMap = array(
   'users'        => '\Migration\App\Users\UserMigrationGroup',
   'news-events'  => '\Migration\App\NewsEvents\NewsEventMigrationGroup',
+  'covers'       => '\Migration\App\Covers\CoversMigrationGroup',
   'rubrics'      => '\Migration\App\Rubrics\RubricMigrationGroup',
   'all'          => '\Migration\App\AllMigrationGroup'
 );
 
-$migrationFactory = new MigrationFactory($ctxMigrationClassMap);
+$migrationFactory = new MigrationFactory($contextMigrationClassMap);
 $contexts = $migrationFactory->getContexts();
 // Si l'utilisateur à mélangé ses doigts on affiche les consignes
 if ($argc < 2 || !in_array($argv[1], $contexts)) {
@@ -54,7 +55,6 @@ if ($argc < 2 || !in_array($argv[1], $contexts)) {
   exit;
 }
 
-$confMgr     = ConfManager::getInstance();
 $dsManager   = DatasourceManager::getInstance();
 $bdWordpress = $dsManager->getConnection(DbNamesEnum::Wp);
 $migration   = $migrationFactory->getMigration($context);

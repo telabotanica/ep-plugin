@@ -107,7 +107,7 @@ class AnnuaireTelaBpProfileDataMap {
     // array('titre' => 'Stages et ateliers', 'slug' => 'stages-ateliers'),
     // Offres d'emploi
     array('titre' => 'CDD / CDI', 'slug' => 'cdd-cdi', 'rubrique-a-migrer' => [19]),
-    array('titre' => 'Stage', 'slug' => 'stages', 'rubrique-a-migrer' => [51])
+    array('titre' => 'Stages', 'slug' => 'stages', 'rubrique-a-migrer' => [51])
     // Autres
     // array('titre' => 'Revue de presse', 'slug' => 'revue-de-presse', 'rubrique-a-migrer' => 69) // Poubelle
   );

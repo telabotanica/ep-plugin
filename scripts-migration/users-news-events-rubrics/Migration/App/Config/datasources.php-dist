@@ -2,13 +2,10 @@
 
 namespace Migration\App\Config;
 
-//require_once(dirname(__FILE__) . "/../App/DbNamesEnum.php");
-//use \Migration\App\DbNamesEnum;
-
 abstract class DbNamesEnum {
-    const Tela = "tela";
-    const Wp   = "wp";
-    const Spip = "spip";
+    const Tela = 'tela';
+    const Wp   = 'wp';
+    const Spip = 'spip';
 }
 
 const DATASOURCES = [

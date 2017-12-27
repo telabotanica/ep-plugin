@@ -1,9 +1,8 @@
 <?php
 
-namespace Migration\App\NewsEvents;
+namespace Migration\App\Covers;
 
 use Migration\Api\BaseMigration;
-use Migration\Api\MigrationException;
 use Migration\App\AnnuaireTelaBpProfileDataMap;
 use Migration\Api\ConfManager;
 use Migration\App\Config\ConfEntryValuesEnum;
@@ -12,9 +11,9 @@ use \Exception;
 use \PDO;
 
 /**
- * Migrates news comments.
+ * Migrates covers
  */
-class NewsCoverMigration extends BaseMigration {
+class CoversMigration extends BaseMigration {
 
   private $wordpress_dir;
 
@@ -25,16 +24,8 @@ class NewsCoverMigration extends BaseMigration {
   }
 
   /**
-   * Migrates news comments.
+   * Migrates covers
    */
-  /*
-  * Explication des champs de la table wp_posts : https://deliciousbrains.com/tour-wordpress-database/#wp_posts
-  *
-  * @todo : revoir la méthode d'ajout, là c'est un peu violent, ça écrase les menus, le footer, toussa
-  * (wai les menus c'est stocké dans la table posts, deal with it)
-  * Vérifier l'auto-incrément de la table Posts, 20000 ids sont censés être réservés aux articles importés
-  * Voir : https://wordpress.stackexchange.com/a/78317
-  */
   public function migrate() {
     // On vérifie qu'on peut bosser
     // Faut être au bon endroit, le repertoire de wordpress
@@ -100,9 +91,8 @@ class NewsCoverMigration extends BaseMigration {
         var_dump($wpcli_meta_command_output);
         var_dump($exit_code);
         $compteurEchecs++;
-        // die('Erreur à l\'exécution de la commande');
-        echo('Erreur à l\'exécution de la commande (17)');
-        echo('Faut resynchroniser les actus, merci\n');
+
+        echo('Erreur à l\'exécution de la commande (17) Faut resynchroniser les actus, merci' . PHP_EOL);
       }
 
       // on va pas aller télécharger les images sur le site, on les mets

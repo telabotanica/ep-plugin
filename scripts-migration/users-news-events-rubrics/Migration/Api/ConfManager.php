@@ -2,7 +2,7 @@
 
 namespace Migration\Api;
 
-require_once(dirname(__FILE__) . "/../App/Config/conf.php");
+require_once(dirname(__FILE__) . "/../App/Config/config.php");
 use const \Migration\App\Config\CONF;
 
 /**
