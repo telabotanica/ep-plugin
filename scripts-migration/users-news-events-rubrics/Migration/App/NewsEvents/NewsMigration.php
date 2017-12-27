@@ -5,6 +5,7 @@ namespace Migration\App\NewsEvents;
 use Migration\Api\BaseMigration;
 use Migration\Api\MigrationException;
 use Migration\App\AnnuaireTelaBpProfileDataMap;
+use Migration\App\Utilz\WpmlIclTranslationDAO;
 use \Exception;
 use \PDO;
 use \DateTime;
@@ -28,6 +29,8 @@ class NewsMigration extends BaseMigration {
   */
   public function migrate() {
 
+    $wpmlIclTranlationDao = new WpmlIclTranslationDAO();
+    $trGrId = $wpmlIclTranlationDao->getMaxTranslationGroupId();
     $requete_doc = "SELECT d.`id_document`, `fichier`, `id_article` FROM `spip_documents` d LEFT JOIN spip_documents_articles da ON da.`id_document` = d.`id_document`";
     $documents = $this->spipDbConnection->query($requete_doc)->fetchAll(PDO::FETCH_ASSOC);
 
@@ -69,34 +72,35 @@ class NewsMigration extends BaseMigration {
       $insert_redirection[] = '(' . $article['ID'] . ', ' . $this->wpDbConnection->quote($ancienne_url) . ')';
 
       $i++;
+      $requeteInsert = 'INSERT INTO ' . $this->wpTablePrefix . 'posts (`ID`, `post_author`, `post_date`, `post_date_gmt`, `post_content`, `post_title`, `post_excerpt`, `post_status`, `comment_status`, `ping_status`, `post_password`, `post_name`, `to_ping`, `pinged`, `post_modified`, `post_modified_gmt`, `post_content_filtered`, `post_parent`, `guid`, `menu_order`, `post_type`, `post_mime_type`, `comment_count`) VALUES ' . implode(', ', $insert) . '
+      ON DUPLICATE KEY UPDATE `ID`=VALUES(`ID`), `post_author`=VALUES(`post_author`), `post_date`=VALUES(`post_date`), `post_date_gmt`=VALUES(`post_date_gmt`), `post_content`=VALUES(`post_content`), `post_title`=VALUES(`post_title`), `post_excerpt`=VALUES(`post_excerpt`), `post_status`=VALUES(`post_status`), `comment_status`=VALUES(`comment_status`), `ping_status`=VALUES(`ping_status`), `post_password`=VALUES(`post_password`), `post_name`=VALUES(`post_name`), `to_ping`=VALUES(`to_ping`), `pinged`=VALUES(`pinged`), `post_modified`=VALUES(`post_modified`), `post_modified_gmt`=VALUES(`post_modified_gmt`), `post_content_filtered`=VALUES(`post_content_filtered`), `post_parent`=VALUES(`post_parent`), `guid`=VALUES(`guid`), `menu_order`=VALUES(`menu_order`), `post_type`=VALUES(`post_type`), `post_mime_type`=VALUES(`post_mime_type`), `comment_count`=VALUES(`comment_count`);';
 
-      // Permet de d'insérer par lot de 50 ou bien à la fin
-      if (0 === $i % 50 || $i === $length -1) {
-        $requeteInsert = 'INSERT INTO ' . $this->wpTablePrefix . 'posts (`ID`, `post_author`, `post_date`, `post_date_gmt`, `post_content`, `post_title`, `post_excerpt`, `post_status`, `comment_status`, `ping_status`, `post_password`, `post_name`, `to_ping`, `pinged`, `post_modified`, `post_modified_gmt`, `post_content_filtered`, `post_parent`, `guid`, `menu_order`, `post_type`, `post_mime_type`, `comment_count`) VALUES ' . implode(', ', $insert) . '
-        ON DUPLICATE KEY UPDATE `ID`=VALUES(`ID`), `post_author`=VALUES(`post_author`), `post_date`=VALUES(`post_date`), `post_date_gmt`=VALUES(`post_date_gmt`), `post_content`=VALUES(`post_content`), `post_title`=VALUES(`post_title`), `post_excerpt`=VALUES(`post_excerpt`), `post_status`=VALUES(`post_status`), `comment_status`=VALUES(`comment_status`), `ping_status`=VALUES(`ping_status`), `post_password`=VALUES(`post_password`), `post_name`=VALUES(`post_name`), `to_ping`=VALUES(`to_ping`), `pinged`=VALUES(`pinged`), `post_modified`=VALUES(`post_modified`), `post_modified_gmt`=VALUES(`post_modified_gmt`), `post_content_filtered`=VALUES(`post_content_filtered`), `post_parent`=VALUES(`post_parent`), `guid`=VALUES(`guid`), `menu_order`=VALUES(`menu_order`), `post_type`=VALUES(`post_type`), `post_mime_type`=VALUES(`post_mime_type`), `comment_count`=VALUES(`comment_count`);';
-        try {
-          $this->wpDbConnection->exec($requeteInsert);
-          echo $compteurSucces . PHP_EOL;
-          $compteurSucces += count($insert);
-        } catch(Exception $e) {
-          echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requeteInsert]" . PHP_EOL;
+      try {
+        $this->wpDbConnection->exec($requeteInsert);
+        echo $compteurSucces . PHP_EOL;
+        $compteurSucces += count($insert);
+        $lastInsertId =  $this->wpDbConnection->lastInsertId();
+        $wpmlIclTranlationDao->create("'post_post'", $lastInsertId, $trGrId, "'fr'", 'NULL');
+        $trGrId++;
+      } catch(Exception $e) {
+        echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requeteInsert]" . PHP_EOL;
 
-          throw new MigrationException($e->getMessage(), $e->getCode(), $requeteInsert, __FUNCTION__);
+        throw new MigrationException($e->getMessage(), $e->getCode(), $requeteInsert, __FUNCTION__);
 
-        }
-        $insert = array();
-
-        $query = 'INSERT INTO ' . $this->wpTablePrefix . 'slug_history (`post_id`, `url`)
-        VALUES ' . implode(', ', $insert_redirection) . '
-        ON DUPLICATE KEY UPDATE `post_id`=VALUES(`post_id`), `url`=VALUES(`url`);';
-        try {
-          $this->wpDbConnection->exec($query);
-        } catch(Exception $e) {
-          echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$query]" . PHP_EOL;
-          throw new MigrationException($e, $query, __FUNCTION__);
-        }
-        $insert_redirection = array();
       }
+      $insert = array();
+
+      $query = 'INSERT INTO ' . $this->wpTablePrefix . 'slug_history (`post_id`, `url`)
+      VALUES ' . implode(', ', $insert_redirection) . '
+      ON DUPLICATE KEY UPDATE `post_id`=VALUES(`post_id`), `url`=VALUES(`url`);';
+      try {
+        $this->wpDbConnection->exec($query);
+      } catch(Exception $e) {
+        echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$query]" . PHP_EOL;
+        throw new MigrationException($e, $query, __FUNCTION__);
+      }
+      $insert_redirection = array();
+
     }
 
     echo '-- ' . $compteurSucces . '/' . count($articles) . ' actualités migrées. ' . PHP_EOL;
