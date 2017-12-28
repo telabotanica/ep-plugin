@@ -4,7 +4,7 @@ The migration app
 Goal
 -
 
-This migration app moves tela-botanica data from the old site (based on SPIP + bazar-fiche + tela annuaire) to the new one (based on WP/BP/WPML). Those data include:
+This migration app moves tela-botanica data from the old site (based on SPIP + bazar-fiche + tela annuaire) to the new one (based on WordPress/BuddyPress/WPML plugin). Those data include:
 
 * users/user metas/user profiles/user activities
 * news/news comments
