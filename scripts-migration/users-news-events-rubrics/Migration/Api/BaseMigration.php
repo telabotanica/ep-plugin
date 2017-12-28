@@ -10,6 +10,9 @@ use \Migration\App\Config\DbNamesEnum;
 /**
  * Abstract parent classes implementing the migration process for a given
  * resource.
+ *
+ * @todo: this belongs to the Migration/App namespace as it's App specific.
+ *        Move this!
  */
 abstract class BaseMigration implements Migration {
 

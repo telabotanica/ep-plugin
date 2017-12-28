@@ -42,7 +42,7 @@ class CoversMigration extends BaseMigration {
     if (0 !== $exit_code) {
       var_dump($rsync);
       var_dump($output);
-      throw new Exception('Faut férifier la commande, ça a foiré là.');
+      throw new Exception('Faut vérifier la commande, ça a foiré là.');
     } else {
       var_dump($output);
     }
