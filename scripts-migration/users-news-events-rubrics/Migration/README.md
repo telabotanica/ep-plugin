@@ -20,7 +20,7 @@ The migration app uses a small simple migration API which resides in the /Migrat
 Configuration
 -
 
-By convention, the API expects the following configuration files to be located in the /Migration/App namespaces:
+By convention, the API expects the following configuration files to be located in the /Migration/App/Config namespaces:
 
 * datasources.php
 * config.php
@@ -33,8 +33,8 @@ The former defines data sources which refer to the various (source and target) D
 
 Before running a migration, one must make sure to have those two files created. Two template files - which can be copied, renamed and edited to fit the actual system configuration - can be found at:
 
-* /Migration/App/datasources.php-dist
-* /Migration/App/config.php-dist
+* /Migration/App/Config/datasources.php-dist
+* /Migration/App/Config/config.php-dist
 
 The config files contain enum classes which MUST NOT be edited (as they are used extensively throughout the migration app code). Only the associative arrays defining config constants must be. Ideally those enum classes should be moved outside of the config files to make this clearer. Also, please, don't edit the array names.
 
@@ -43,9 +43,9 @@ Usage
 
 For a given context, the app can be launched by issuing the following command:
 
-python tb_migrate_app <context-name>
+python tb_migrate_site <context-name>
 
-A context is an atomic set of related data. Contexts are data-wise independent one from another. There are currently four of them, namely:
+A context is an atomic set of related data. Contexts are data-wise independent one from another, except "covers" who depends on "news-events" (covers will not be imported without imported news). There are currently four of them, namely:
 
 * "users"
 * "news-events"
