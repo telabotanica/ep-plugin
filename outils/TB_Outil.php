@@ -138,8 +138,10 @@ class TB_Outil extends BP_Group_Extension {
 			$this->prive = $config_locale->prive;
 			$this->create_step_position = $config_locale->create_step_position;
 			$this->nav_item_position = $config_locale->nav_item_position;
-			$this->enable_nav_item = $config_locale->enable_nav_item;
+			$this->enable_nav_item = (bool) $config_locale->enable_nav_item;
 			$configLocale = json_decode($config_locale->config, true);
+			// les paramètres show_tab et access pourraient aussi être utiles
+			// voir : https://codex.buddypress.org/developer/group-extension-api/
 
 			if (is_array($configLocale)) {
 				$this->config = array_replace_recursive($this->config, $configLocale); // priorité à la config locale

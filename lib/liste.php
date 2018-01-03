@@ -51,10 +51,6 @@ class TB_ListeEzmlm {
 			CURLOPT_FAILONERROR => 1,
 			CURLOPT_URL => $url
 		));
-		// jeton dans l'entête choisi (on ne s'occupe pas du domaine ici)
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-			$this->nomEnteteAuth . ': ' . $this->jetonAdmin
-		));
 
 		curl_exec($ch);
 		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);

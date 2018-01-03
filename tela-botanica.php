@@ -89,6 +89,18 @@ register_activation_hook(__FILE__, 'ajout_roles_sso');
 register_deactivation_hook(__FILE__, 'suppression_roles_sso');
 
 
+// Function to change email address
+function wpb_sender_email( $original_email_address ) {
+    return 'no-reply@tela-botanica.org';
+}
+// Function to change sender name
+function wpb_sender_name( $original_email_from ) {
+    return 'Tela Botanica';
+}
+// Hooking up our functions to WordPress filters
+add_filter( 'wp_mail_from', 'wpb_sender_email' );
+add_filter( 'wp_mail_from_name', 'wpb_sender_name' );
+
 class TelaBotanica
 {
 
