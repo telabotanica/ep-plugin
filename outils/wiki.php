@@ -90,20 +90,14 @@ class Wiki extends TB_Outil {
 		$nomWiki = $this->config['wikiName'];
 
 		if (! empty($nomWiki) && ! empty($urlRacine)) {
-			$adresseWiki = $urlRacine . '/' . $nomWiki . '/wakka.php?wiki=PagePrincipale/iframe';
+			$adresseWiki = $urlRacine . '/' . $nomWiki . '/wakka.php?wiki=PagePrincipale';
 			;
 			?>
-			<script type="text/javascript">
-				// ramène l'iframe à l'accueil du Wiki
-				function wikiAccueil() {
-					var iframe = document.getElementById("wiki-integre");
-					var nouvelleUrl = '<?php echo $adresseWiki ?>';
-					iframe.src = nouvelleUrl;
-				}
-			</script>
-			<button onclick="wikiAccueil()">accueil du wiki</button>
-			<iframe id="wiki-integre" src="<?php echo $adresseWiki ?>" style="width: 100%; height: 1000px;">
-			</iframe>
+			<div style="text-align:center">
+				<a class="button" href="<?php echo $adresseWiki ?>" target="_blank">
+					<span class="button-text"><?php _e('accueil du wiki', 'telabotanica') ?></span>
+				</a>
+			</div>
 			<?php
 		} else {
 			?>
