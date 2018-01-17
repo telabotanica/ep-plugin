@@ -482,8 +482,6 @@ ALTER TABLE `bp_xprofile_fields`
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-<<<<<<< HEAD
-
 
 --
 --Requête modification du format d'affichage et d'enregistrement des départements
@@ -496,5 +494,4 @@ ALTER TABLE `bp_xprofile_fields`
 --UPDATE `bp_xprofile_fields` SET `name` = 'J’accepte les conditions d’utilisation' WHERE `bp_xprofile_fields`.`id` = 1010;
 --UPDATE `bp_xprofile_fields` SET `name` = 'Je souhaite recevoir la lettre d’actualité hebdomadaire' WHERE `bp_xprofile_fields`.`id` = 908;
 --
-=======
->>>>>>> 03d4b155956aba344c886dac2fc05889f54f43d2
+
