@@ -29,8 +29,8 @@ class NewsMigration extends BaseMigration {
   */
   public function migrate() {
 
-    $wpmlIclTranlationDao = new WpmlIclTranslationDAO();
-    $trGrId = $wpmlIclTranlationDao->getMaxTranslationGroupId();
+    $wpmlIclTranslationDao = new WpmlIclTranslationDAO();
+    $trGrId = $wpmlIclTranslationDao->getMaxTranslationGroupId();
     $requete_doc = "SELECT d.`id_document`, `fichier`, `id_article` FROM `spip_documents` d LEFT JOIN spip_documents_articles da ON da.`id_document` = d.`id_document`";
     $documents = $this->spipDbConnection->query($requete_doc)->fetchAll(PDO::FETCH_ASSOC);
 
@@ -80,7 +80,7 @@ class NewsMigration extends BaseMigration {
         echo $compteurSucces . PHP_EOL;
         $compteurSucces += count($insert);
         $lastInsertId =  $this->wpDbConnection->lastInsertId();
-        $wpmlIclTranlationDao->create("'post_post'", $lastInsertId, $trGrId, "'fr'", 'NULL');
+        $wpmlIclTranslationDao->create("'post_post'", $lastInsertId, $trGrId, "'fr'", 'NULL');
         $trGrId++;
       } catch(Exception $e) {
         echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requeteInsert]" . PHP_EOL;

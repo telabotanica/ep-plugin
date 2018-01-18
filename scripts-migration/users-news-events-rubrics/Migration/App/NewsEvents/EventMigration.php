@@ -17,8 +17,8 @@ class EventMigration extends BaseMigration {
    */
   public function migrate() {
 
-    $wpmlIclTranlationDao = new WpmlIclTranslationDAO();
-    $trGrId = $wpmlIclTranlationDao->getMaxTranslationGroupId();
+    $wpmlIclTranslationDao = new WpmlIclTranslationDAO();
+    $trGrId = $wpmlIclTranslationDao->getMaxTranslationGroupId();
 
     $requeteEvenements = "SELECT `bf_id_fiche`+10000 AS `ID`, `bf_ce_utilisateur` AS  `post_author`, `bf_date_creation_fiche` AS  `post_date`, `bf_date_creation_fiche` AS  `post_date_gmt`, '' AS  `post_content`, `bf_titre` AS  `post_title`, '' AS  `post_excerpt`, 'publish' AS  `post_status`, 'open' AS  `comment_status`, 'open' AS  `ping_status`, '' AS  `post_password`, `bf_id_fiche`+10000 AS  `post_name`, '' AS  `to_ping`, '' AS  `pinged`, `bf_date_maj_fiche` AS  `post_modified`, `bf_date_maj_fiche` AS  `post_modified_gmt`, '' AS  `post_content_filtered`, 0 AS  `post_parent`, `bf_id_fiche`+10000 AS  `guid`, 0 AS  `menu_order`, 'post' AS  `post_type`, '' AS  `post_mime_type`, 0 AS  `comment_count` FROM `bazar_fiche` WHERE year(`bf_date_debut_validite_fiche`) >= 2017;";
 
@@ -40,7 +40,7 @@ class EventMigration extends BaseMigration {
       try {
         $this->wpDbConnection->exec($requete);
         $lastInsertId =  $this->wpDbConnection->lastInsertId();
-        $wpmlIclTranlationDao->create("'post_post'", $lastInsertId, $trGrId, "'fr'", 'NULL');
+        $wpmlIclTranslationDao->create("'post_post'", $lastInsertId, $trGrId, "'fr'", 'NULL');
         $trGrId++;
         $compteur++;
       } catch(Exception $e) {

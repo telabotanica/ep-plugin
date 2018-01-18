@@ -28,8 +28,8 @@ By convention, the API expects the following configuration files to be located i
 The former defines data sources which refer to the various (source and target) DB connnections used in the migration process. The latter defines various constants used during the migration:
 
 * the WP installation folder path
-* rsync related informations - for covers)
-* the admin's email to send failure reports).
+* rsync related informations - for covers
+* the admin's email to send failure reports
 
 Before running a migration, one must make sure to have those two files created. Two template files - which can be copied, renamed and edited to fit the actual system configuration - can be found at:
 
@@ -43,7 +43,7 @@ Usage
 
 For a given context, the app can be launched by issuing the following command:
 
-python tb_migrate_site <context-name>
+php tb_migrate_site.php <context-name>
 
 A context is an atomic set of related data. Contexts are data-wise independent one from another, except "covers" who depends on "news-events" (covers will not be imported without imported news). There are currently four of them, namely:
 
