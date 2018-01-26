@@ -102,7 +102,8 @@ class Forum extends TB_Outil {
 		// identique et sa priorité faible, c'est lui qui écrase l'autre :-/
 		// @TODO trouver une solution, car si on utilise le plugin sans le thème,
 		// y aura pas de BS et ça marchera pas :'(
-		wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bower_components/bootstrap/dist/css/bootstrap.min.css');
+		//wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bower_components/bootstrap/dist/css/bootstrap.min.css');
+		wp_enqueue_style('bootstrap-css', $this->urlOutil . 'css/bootstrap-iso.css');
 	}
 
 	public function scriptsEtStylesApres()
@@ -296,7 +297,7 @@ class Forum extends TB_Outil {
 		<?php endif; ?>
 
 		<!-- portée des styles -->
-		<div class="wp-bootstrap">
+		<div class="wp-bootstrap bootstrap-iso">
 		<div id="ezmlm-forum-main">
 
 		<!-- réutilisation propre du jQuery de Wordpress -->
