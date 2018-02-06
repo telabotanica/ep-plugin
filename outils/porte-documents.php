@@ -92,12 +92,12 @@ class Porte_Documents extends TB_Outil {
 		wp_enqueue_script('angular-modal-service', $this->urlOutil . 'bower_components/angular-modal-service/dst/angular-modal-service.js', array(), false, true);
 		wp_enqueue_script('angular-sanitize', $this->urlOutil . 'bower_components/angular-sanitize/angular-sanitize.js', array(), false, true);
 		wp_enqueue_script('ngtoast', $this->urlOutil . 'bower_components/ngtoast/dist/ngToast.js', array(), false, true);
-
+		wp_enqueue_script('angular-xeditable-js', $this->urlOutil . 'bower_components/angular-xeditable/dist/js/xeditable.min.js');
 		// wp_enqueue_style('html5-boilerplate-normalize', $this->urlOutil . 'bower_components/html5-boilerplate/dist/css/normalize.css');
-		// wp_enqueue_style('html5-boilerplate', $this->urlOutil . 'bower_components/html5-boilerplate/dist/css/main.css');
-		//wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bower_components/bootstrap/dist/css/bootstrap.css');
-		wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bootstrap-iso.css');
+		wp_enqueue_style('html5-boilerplate', $this->urlOutil . 'bower_components/html5-boilerplate/dist/css/main.css');
+		wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bower_components/bootstrap/dist/css/bootstrap.css');
 		wp_enqueue_style('ngtoast-css', $this->urlOutil . 'bower_components/ngtoast/dist/ngToast.min.css');
+		wp_enqueue_style('angular-xeditable-css', $this->urlOutil . 'bower_components/angular-xeditable/dist/css/xeditable.min.css');
 		wp_enqueue_style('app-css', $this->urlOutil . 'app.css');
 	}
 
@@ -201,7 +201,7 @@ class Porte_Documents extends TB_Outil {
 		$code = file_get_contents('index_pouet.html');
 
 		echo '<i id="cumulus-config-holder" data-config=\''. json_encode($this->config, JSON_HEX_APOS) .'\'></i>'; //caca
-		echo '<div class="wp-bootstrap bootstrap-iso" ng-app="cumulus">';
+		echo '<div class="wp-bootstrap" ng-app="cumulus">';
 		echo $code;
 		echo '</div>';
 	}
