@@ -201,7 +201,7 @@ class Porte_Documents extends TB_Outil {
 		$code = file_get_contents('index_pouet.html');
 
 		echo '<i id="cumulus-config-holder" data-config=\''. json_encode($this->config, JSON_HEX_APOS) .'\'></i>'; //caca
-		echo '<div class="wp-bootstrap" ng-app="cumulus">';
+		echo '<div class="wp-bootstrap bootstrap-iso" ng-app="cumulus">';
 		echo $code;
 		echo '</div>';
 	}
