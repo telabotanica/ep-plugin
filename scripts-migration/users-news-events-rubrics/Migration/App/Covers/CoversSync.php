@@ -12,7 +12,7 @@ use \PDO;
 /**
  * Migrates covers
  */
-class CoversMigration extends BaseMigration {
+class CoversSync extends BaseMigration {
 
   /**
    * Migrates covers

@@ -1,6 +1,6 @@
 <?php
 
-namespace Migration\App\NewsEvents;
+namespace Migration\App\Covers;
 
 use Migration\Api\MigrationGroup;
 use Migration\App\NewsEvents\CoversDbResetter;
