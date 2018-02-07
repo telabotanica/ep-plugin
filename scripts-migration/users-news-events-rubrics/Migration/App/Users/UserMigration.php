@@ -68,7 +68,8 @@ class UserMigration extends BaseMigration {
 
         // If the user has chosen a pseudo, use it as $intitule
         if ($usedPseudo && $pseudo) {
-          var_dump($pseudo);
+          // // Verbose
+          //var_dump($pseudo);
           $intitule = $pseudo;
         }
 

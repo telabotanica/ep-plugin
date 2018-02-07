@@ -44,7 +44,8 @@ class CoversSync extends BaseMigration {
       var_dump($output);
       throw new Exception('Faut férifier la commande, ça a foiré là.');
     } else {
-      var_dump($output);
+      // // Verbose
+      // var_dump($output);
     }
   }
 

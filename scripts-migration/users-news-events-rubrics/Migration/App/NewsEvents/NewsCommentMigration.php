@@ -43,7 +43,8 @@ class NewsCommentMigration extends BaseMigration {
       try {
         $this->wpDbConnection->exec($requete);
         $this->wpDbConnection->exec($updateCompteurCommentaires);
-        echo $compteur . PHP_EOL;
+        // // Verbose
+        // echo $compteur . PHP_EOL;
         $compteur++;
       } catch(Exception $e) {
         echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requete]" . PHP_EOL;

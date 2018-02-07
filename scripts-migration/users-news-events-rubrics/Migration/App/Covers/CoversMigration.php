@@ -39,7 +39,8 @@ class CoversMigration extends BaseMigration {
     if (0 !== $exit_code) {
       throw new Exception('Faut lancer la commande depuis le repertoire de wordpress (et avoir wp-cli installé)');
     } else {
-      var_dump($output);
+      // // Verbose
+      // var_dump($output);
     }
 
     echo '-- recherche du dossier d\'images' . PHP_EOL;
@@ -78,7 +79,8 @@ class CoversMigration extends BaseMigration {
         // on va fouiller les metas, si on trouve une image de couverture (_thumbnail_id), on passe à la suite
         foreach ($metas as $meta) {
           if ($meta['meta_key'] === '_thumbnail_id') {
-            echo 'han!! le post ' . $article['ID'] . ' bah il a déjà une image, trop abusééééééé' . PHP_EOL;
+            // // Verbose
+            // echo 'han!! le post ' . $article['ID'] . ' bah il a déjà une image, trop abusééééééé' . PHP_EOL;
             // echo 'id du post de l\'image ' . $meta['meta_value'] . PHP_EOL;
             $compteurAbusay++;
 
@@ -119,10 +121,11 @@ class CoversMigration extends BaseMigration {
           exec($wpcli_commande, $command_output, $exit_code);
 
           if (0 === $exit_code) {
-            foreach ($command_output as $message) {
-              echo $message;
-            }
-            echo PHP_EOL;
+            // // Verbose
+            // foreach ($command_output as $message) {
+            //   echo $message;
+            // }
+            // echo PHP_EOL;
 
             $compteurSucces++;
 

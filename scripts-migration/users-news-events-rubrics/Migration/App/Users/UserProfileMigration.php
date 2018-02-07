@@ -106,7 +106,8 @@ class UserProfileMigration extends BaseMigration {
 
       try {
         $this->wpDbConnection->exec($requeteInsert);
-        echo $compteur . "num dep=". $numero_departement .  PHP_EOL;
+        // // Verbose
+        // echo $compteur . "num dep=". $numero_departement .  PHP_EOL;
         $compteur++;
       } catch(Exception $e) {
         echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requeteInsert]" . PHP_EOL;

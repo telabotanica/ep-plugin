@@ -77,7 +77,8 @@ class NewsMigration extends BaseMigration {
 
       try {
         $this->wpDbConnection->exec($requeteInsert);
-        echo $compteurSucces . PHP_EOL;
+        // // Verbose
+        // echo $compteurSucces . PHP_EOL;
         $compteurSucces += count($insert);
         $lastInsertId =  $this->wpDbConnection->lastInsertId();
         $wpmlIclTranslationDao->create("'post_post'", $lastInsertId, $trGrId, "'fr'", 'NULL');
