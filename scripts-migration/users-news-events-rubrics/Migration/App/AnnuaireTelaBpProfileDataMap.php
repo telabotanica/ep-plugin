@@ -2,6 +2,11 @@
 
 namespace Migration\App;
 
+use Migration\Api\DatasourceManager;
+use Migration\App\Config\DbNamesEnum;
+
+use \PDO;
+
 /**
 * Maps between the source DB values and corresponding target DB values.
  */
@@ -271,6 +276,21 @@ class AnnuaireTelaBpProfileDataMap {
     return implode(',', $rubriquesAMigrer);
   }
 
+  public static function getWordpressCategoriesId() {
+    $slugsCategories = [];
+    foreach (self::getRubriqueCategoryArray() as $categorie) {
+      $slugsCategories[] = $categorie['slug'];
+    }
 
+    $requeteIdCategories = 'SELECT term_id FROM ' . DatasourceManager::getInstance()->getTablePrefix(DbNamesEnum::Wp) . 'terms WHERE slug IN ("' . implode('", "', $slugsCategories) . '");';
+
+    $idCategories = DatasourceManager::getInstance()
+      ->getConnection(DbNamesEnum::Wp)
+      ->query($requeteIdCategories)
+      ->fetchAll(PDO::FETCH_COLUMN, 0)
+    ;
+
+    return implode("','", $idCategories);
+  }
 
 }
