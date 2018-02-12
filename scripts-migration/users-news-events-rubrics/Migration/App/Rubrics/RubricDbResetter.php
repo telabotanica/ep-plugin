@@ -25,14 +25,7 @@ class RubricDbResetter extends QueryDbResetter {
      */
     public function resetDb() {
 
-        $idCategorie = [];
-        foreach (AnnuaireTelaBpProfileDataMap::getRubriqueCategoryArray() as $rubriques) {
-          foreach ($rubriques['rubrique-a-migrer'] as $rubrique) {
-            $idCategorie[] = $rubrique;
-          }
-        }
-        $idCategorie = implode("','", $idCategorie);
-        $sql = "DELETE FROM term_taxonomy WHERE term_id IN ('$idCategorie')";
+        $sql = 'DELETE FROM term_taxonomy WHERE term_id IN (' . AnnuaireTelaBpProfileDataMap::getWordpressCategoriesId() . ')';
         array_push($this->queries, $sql);
         parent::resetDb();
 
