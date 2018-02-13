@@ -32,10 +32,6 @@ class CoversSync extends BaseMigration {
     // Un peu plus loin on va rsync les images dans un dossier spécifique
     chdir($wordpress_dir);
 
-    if (!file_exists($wordpress_dir . '/' . $rsyncDest)) {
-      throw new Exception('Faut créer le dossier de destination avant, et là bah ' . $wordpress_dir . '/' . $rsyncDest . ' n\'existe pas....');
-    }
-
     echo '-- exécution du "rsync"' . PHP_EOL;
     exec($rsync, $output, $exit_code);
 

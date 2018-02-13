@@ -450,21 +450,25 @@ function migration_projets($argc, $argv) {
 			$nom = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $nom);
 		}
 		$nom = dqq($nom);
+
 		$slug = html_entity_decode($projet['p_titre']);
 		if (! preg_match('//u', $slug)) {
 			$slug = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $slug);
 		}
 		$slug = limacifier($slug);
+
 		$description = html_entity_decode($projet['p_description']);
 		if (! preg_match('//u', $description)) {
 			$description = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $description);
 		}
 		$description = dqq($description);
+
 		$resume = html_entity_decode($projet['p_resume']);
 		if (! preg_match('//u', $resume)) {
 			$resume = iconv("ISO-8859-1", "UTF-8//TRANSLIT", $resume);
 		}
 		$resume = dqq($resume);
+
 		$espaceInternet = $projet['p_espace_internet'];
 		$wikiExterne = $projet['p_wikini']; // en général Wikini
 		/*
