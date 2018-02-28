@@ -63,7 +63,7 @@ class UserMetaMigration extends BaseMigration {
       }
     }
 
-    echo '-- ' . $compteur . '/' . count($utilisateursMeta) . 'metas d\'utilisateur migrées. ' . PHP_EOL;
+    echo '-- ' . $compteur . '/' . count($utilisateursMeta) . ' metas d\'utilisateur migrées. ' . PHP_EOL;
 
   }
 

@@ -259,7 +259,7 @@ class AnnuaireTelaBpProfileDataMap {
   }
 
   public static function getDepartment($annuaireTelaValue) {
-    return self::$departements[$annuaireTelaValue];
+    return isset(self::$departements[$annuaireTelaValue]) ?? '';
   }
 
   public static function getLanguage($annuaireTelaValue) {

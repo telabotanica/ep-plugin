@@ -14,7 +14,7 @@ class UserMigrationGroup extends MigrationGroup {
 
   function __construct() {
     $userDbResetter = new UserDbResetter(DbNamesEnum::Wp);
-    Parent::__construct([
+    parent::__construct([
       new UserMigration(),
       new UserMetaMigration(),
       new UserProfileMigration(),

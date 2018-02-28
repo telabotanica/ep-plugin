@@ -142,10 +142,22 @@ class UserMigration extends BaseMigration {
    */
   private function insertUserIntoWpUserTable($utilisateur) {
 
+    $utilisateur_values = [
+      'ID' => $utilisateur['ID'],
+      'user_login' => $utilisateur['user_login'],
+      'user_pass' => $utilisateur['user_pass'],
+      'user_nicename' => $utilisateur['user_nicename'],
+      'user_email' => $utilisateur['user_email'],
+      'user_url' => $utilisateur['user_url'],
+      'user_registered' => $utilisateur['user_registered'],
+      'user_status' => $utilisateur['user_status'],
+      'display_name' => $utilisateur['display_name'],
+    ];
+
     $req = 'INSERT INTO ' . $this->wpTablePrefix . 'users '
     . '(`ID`, `user_login`, `user_pass`, `user_nicename`, `user_email`, '
     .'`user_url`, `user_registered`, `user_status`, `display_name`) '
-    . 'VALUES(' . implode(', ', array_map(array($this->wpDbConnection, 'quote'), $utilisateur)) . ') '
+    . 'VALUES(' . implode(', ', array_map(array($this->wpDbConnection, 'quote'), $utilisateur_values)) . ') '
     . 'ON DUPLICATE KEY UPDATE `ID`=VALUES(`ID`), `user_login`=VALUES(`user_login`), `user_pass`=VALUES(`user_pass`), `user_nicename`=VALUES(`user_nicename`), `user_email`=VALUES(`user_email`), `user_url`=VALUES(`user_url`), `user_registered`=VALUES(`user_registered`), `user_status`=VALUES(`user_status`), `display_name`=VALUES(`display_name`);'
     ;
 

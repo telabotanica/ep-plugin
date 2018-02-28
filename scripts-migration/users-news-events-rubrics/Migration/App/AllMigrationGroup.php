@@ -13,7 +13,7 @@ use Migration\App\NewsEvents\NewsEventMigrationGroup;
 class AllMigrationGroup extends MigrationGroup {
 
   function __construct() {
-    Parent::__construct([
+    parent::__construct([
         new UserMigrationGroup(),
         new NewsEventMigrationGroup(),
         new RubricMigrationGroup()

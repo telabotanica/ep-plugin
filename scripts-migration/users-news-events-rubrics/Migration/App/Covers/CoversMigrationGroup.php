@@ -12,7 +12,7 @@ use Migration\App\Config\DbNamesEnum;
 class CoversMigrationGroup extends MigrationGroup {
 
   function __construct() {
-    Parent::__construct([
+    parent::__construct([
       new CoversSync(),
       new CoversMigration(),
     ]);
