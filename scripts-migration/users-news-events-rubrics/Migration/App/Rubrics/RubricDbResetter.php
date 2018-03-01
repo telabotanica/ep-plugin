@@ -24,11 +24,10 @@ class RubricDbResetter extends QueryDbResetter {
      * Deletes previously imported rubric related data from WP DB.
      */
     public function resetDb() {
-
         $sql = 'DELETE FROM term_taxonomy WHERE term_id IN (' . AnnuaireTelaBpProfileDataMap::getWordpressCategoriesId() . ')';
         array_push($this->queries, $sql);
-        parent::resetDb();
 
+        parent::resetDb();
     }
 
 }

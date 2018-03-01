@@ -98,24 +98,28 @@ class AnnuaireTelaBpProfileDataMap {
   // Détails des différentes rubriques à migrer
   // on associe le titre et le slug d'une catégorie wordpress avec des rubriques spip
   // les articles des rubriques seront migrés vers la catégorie donnée
-  private static $correspondanceCategorieRubriques = array(
+  private static $correspondanceCategorieRubriques = [
     // Actualités
-    array('titre' => 'Brèves', 'slug' => 'breves', 'rubrique-a-migrer' => [22, 31, 35]),
-    array('titre' => 'Contribuez', 'slug' => 'contribuez', 'rubrique-a-migrer' => [70, 71]),
-    array('titre' => 'En kiosque', 'slug' => 'en-kiosque', 'rubrique-a-migrer' => [30, 34]),
-    array('titre' => 'Nouvelles du réseau', 'slug' => 'nouvelles-du-reseau', 'rubrique-a-migrer' => [54, 55]),
-    array('titre' => 'Points de vue', 'slug' => 'points-de-vue', 'rubrique-a-migrer' => [38, 39]),
-    // Évènements
-    // array('titre' => 'Congrès et conférences', 'slug' => 'congres-conferences'),
-    // array('titre' => 'Expositions', 'slug' => 'expositions'),
-    // array('titre' => 'Sorties de terrain', 'slug' => 'sorties-de-terrain'),
-    // array('titre' => 'Stages et ateliers', 'slug' => 'stages-ateliers'),
+    ['titre' => 'Brèves', 'slug' => 'breves', 'rubrique-a-migrer' => [22, 31, 35]],
+    ['titre' => 'Contribuez', 'slug' => 'contribuez', 'rubrique-a-migrer' => [70, 71]],
+    ['titre' => 'En kiosque', 'slug' => 'en-kiosque', 'rubrique-a-migrer' => [30, 34]],
+    ['titre' => 'Nouvelles du réseau', 'slug' => 'nouvelles-du-reseau', 'rubrique-a-migrer' => [54, 55]],
+    ['titre' => 'Points de vue', 'slug' => 'points-de-vue', 'rubrique-a-migrer' => [38, 39]],
     // Offres d'emploi
-    array('titre' => 'CDD / CDI', 'slug' => 'cdd-cdi', 'rubrique-a-migrer' => [19]),
-    array('titre' => 'Stages', 'slug' => 'stages', 'rubrique-a-migrer' => [51])
+    ['titre' => 'CDD / CDI', 'slug' => 'cdd-cdi', 'rubrique-a-migrer' => [19]],
+    ['titre' => 'Stages', 'slug' => 'stages', 'rubrique-a-migrer' => [51]]
     // Autres
     // array('titre' => 'Revue de presse', 'slug' => 'revue-de-presse', 'rubrique-a-migrer' => 69) // Poubelle
-  );
+  ];
+
+  // comme au dessus, on associe le slug d'un catégorie WP avec l'id de la nature bazar
+  private static $correspondanceCategorieNatures = [
+    // Évènements
+    ['titre' => 'Congrès et conférences', 'slug' => 'congres-conferences', 'rubrique-a-migrer' => [1]],
+    ['titre' => 'Expositions', 'slug' => 'expositions', 'rubrique-a-migrer' => [2]],
+    ['titre' => 'Sorties de terrain', 'slug' => 'sorties-de-terrain', 'rubrique-a-migrer' => [3]],
+    ['titre' => 'Stages et ateliers', 'slug' => 'stages-ateliers', 'rubrique-a-migrer' => [4]],
+  ];
 
   private static $codes_langues = [
     '30842'=>'Anglais',
@@ -250,12 +254,8 @@ class AnnuaireTelaBpProfileDataMap {
     return self::$correspondance_categories[$annuaireTelaValue];
   }
 
-  public static function getRubriqueCategory($annuaireTelaValue) {
-    return self::$correspondanceCategorieRubriques[$annuaireTelaValue];
-  }
-
-  public static function getRubriqueCategoryArray() {
-    return self::$correspondanceCategorieRubriques;
+  public static function getCorrespondencesCategory() {
+    return array_merge(self::$correspondanceCategorieRubriques, self::$correspondanceCategorieNatures);
   }
 
   public static function getDepartment($annuaireTelaValue) {
@@ -278,7 +278,7 @@ class AnnuaireTelaBpProfileDataMap {
 
   public static function getWordpressCategoriesId() {
     $slugsCategories = [];
-    foreach (self::getRubriqueCategoryArray() as $categorie) {
+    foreach (self::getCorrespondencesCategory() as $categorie) {
       $slugsCategories[] = $categorie['slug'];
     }
 
