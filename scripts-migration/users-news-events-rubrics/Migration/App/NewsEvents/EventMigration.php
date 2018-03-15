@@ -50,7 +50,7 @@ class EventMigration extends BaseMigration {
       }
 
       // collecte les infos pour l'enregistrement des redirections 301 des articles
-      $ancienne_url = 'http://www.tela-botanica.org/page:evenements?action=8&id_fiche=' . $evenement['ID'] - 10000;
+      $ancienne_url = 'http://www.tela-botanica.org/page:evenements?action=8&id_fiche=' . ($evenement['ID'] - 10000);
       // BUG IN THE SCIPT!!!!!!!!!!!!!!!!!
       //$insert_redirection[] = '(' . $article['ID'] . ', ' . $wpDbConnection->quote($ancienne_url) . ')';
       $insert_redirection[] = '(' . $evenement['ID'] . ', ' . $this->wpDbConnection->quote($ancienne_url) . ')';
