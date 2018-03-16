@@ -26,8 +26,9 @@ class NewsCommentMigration extends BaseMigration {
   */
   public function migrate() {
 
-    $requeteActualitesCommentaires = 'SELECT `id_forum` , `id_article` , `auteur` , `email_auteur` , "" AS url, `ip` , `date_heure` , `date_heure` AS gmt, `texte` , "0" AS karma, replace(`statut`, "publie", "1") , "" AS agent, "" AS TYPE , `id_parent` , `id_auteur`
+    $requeteActualitesCommentaires = 'SELECT `id_forum` , `id_article` , `auteur` , `email_auteur` , "" AS url, `ip` , `date_heure` , `date_heure` AS gmt, `texte` , "0" AS karma, replace(`statut`, "publie", "1") , "" AS agent, "" AS TYPE , `id_parent` , COALESCE(a.U_ID, 0) as `id_auteur`
     FROM `spip_forum`
+    LEFT JOIN tela_prod_v4.annuaire_tela a ON email_auteur = a.U_MAIL
     WHERE id_article IN (SELECT `id_article` FROM `spip_articles` WHERE id_rubrique IN (' . AnnuaireTelaBpProfileDataMap::getSpipRubricsToBeMigrated() . ')) AND statut = "publie"';
 
     $actualitesCommentaires = $this->spipDbConnection->query($requeteActualitesCommentaires)->fetchAll(PDO::FETCH_ASSOC);

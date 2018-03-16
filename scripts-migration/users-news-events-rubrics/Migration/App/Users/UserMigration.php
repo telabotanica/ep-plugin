@@ -8,7 +8,7 @@ use Migration\Api\MigrationException;
 use \Exception;
 use \PDO;
 
-/* @implementaionNotes
+/* @implementationNotes
 Dans la table (wp_)users :
   -user_nicename : unique, éditable, suffixé si déjà utilisé, de
                    préférence l'intitulé, voir suffixé avec un rand ou
@@ -19,13 +19,14 @@ Dans la table (wp_)users :
                   prénom, nom, prénom + nom, ou le nickname)
   -nickname : éditable (équivalent du pseudo, mais coté WP) : intitulé,
               affiché sur le site
+              (affiché, mais où ? je ne vois que le pseudo bp en fait)
 
   // recopier ces metas dans celles de wordpress
 
 
 Dans la table bp_xprofile_data :
-  -xprofileData[champ 1] (c'est le pseudo BP) unique, éditable, suffixé
-                         si déjà utilisé
+  -xprofileData[champ 1] (c'est le pseudo BP) non-unique, éditable. Il est
+      utilisé notamment pour afficher le nom de l'auteur d'un commentaire
 
 (lorsque le profil BP est modifié, sa valeur est copiée dans user_nicename
 dans sa version suffixée, et en version originale [saisie par
@@ -100,7 +101,6 @@ class UserMigration extends BaseMigration {
       unset($utilisateur['U_NAME']);
 
       $this->insertUserIntoWpUserTable($utilisateur);
-      $this->insertUserIntoBpXprofileDataTable($utilisateur);
 
     }
     echo('-- ' . $this->userCount . '/' . count($utilisateurs) .
@@ -170,26 +170,6 @@ class UserMigration extends BaseMigration {
     }
 
   }// end method insertUserIntoWpUserTable($utilisateur)
-
-  /**
-   * Inserts a new record into bp_xprofile_data with the given user informations.
-   *
-   * @parameter $utilisateur a map containing user informations.
-   */
-  private function insertUserIntoBpXprofileDataTable($utilisateur) {
-
-    $requete_pseudo_bp = "INSERT INTO " . $this->wpTablePrefix . "bp_xprofile_data (`field_id`, `user_id`, `value`, `last_updated`) VALUES
-    ('1', {$utilisateur['ID']}, {$this->wpDbConnection->quote($utilisateur['user_nicename'])}, '2017-05-19 15:06:16')
-    ON DUPLICATE KEY UPDATE `field_id`=VALUES(`field_id`), `user_id`=VALUES(`user_id`), `value`=VALUES(`value`), `last_updated`=VALUES(`last_updated`);";
-
-    try {
-      $this->wpDbConnection->exec($requete_pseudo_bp);
-    } catch(Exception $e) {
-      echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requete_pseudo_bp]" . PHP_EOL;
-      throw new MigrationException($e, $requete_pseudo_bp, __FUNCTION__);
-    }
-
-  }// end method insertUserIntoBpXprofileDataTable($utilisateur)
 
 
   /**
