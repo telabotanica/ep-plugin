@@ -61,10 +61,36 @@ class UserMetaMigration extends BaseMigration {
         echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$query]" . PHP_EOL;
         throw new MigrationException($e, $query, __FUNCTION__);
       }
+
+      $this->insertUserIntoBpXprofileDataTable($utilisateurMeta['U_ID'], $nickname);
     }
 
     echo '-- ' . $compteur . '/' . count($utilisateursMeta) . ' metas d\'utilisateur migrées. ' . PHP_EOL;
 
   }
+
+
+  /**
+   *  Inserts a new record into bp_xprofile_data with the given user informations.
+   *
+   * @param      integer                            $utilisateurId  The utilisateur identifier
+   * @param      string                             $nickname       The utilisateur nickname
+   *
+   * @throws     \Migration\Api\MigrationException  (description)
+   */
+  private function insertUserIntoBpXprofileDataTable($utilisateurId, $nickname) {
+
+    $requete_pseudo_bp = "INSERT INTO " . $this->wpTablePrefix . "bp_xprofile_data (`field_id`, `user_id`, `value`, `last_updated`) VALUES
+    ('1', {$utilisateurId}, {$this->wpDbConnection->quote($nickname)}, '2017-05-19 15:06:16')
+    ON DUPLICATE KEY UPDATE `field_id`=VALUES(`field_id`), `user_id`=VALUES(`user_id`), `value`=VALUES(`value`), `last_updated`=VALUES(`last_updated`);";
+
+    try {
+      $this->wpDbConnection->exec($requete_pseudo_bp);
+    } catch(Exception $e) {
+      echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requete_pseudo_bp]" . PHP_EOL;
+      throw new MigrationException($e, $requete_pseudo_bp, __FUNCTION__);
+    }
+
+  }// end method insertUserIntoBpXprofileDataTable($utilisateur)
 
 }
