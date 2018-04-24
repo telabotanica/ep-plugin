@@ -53,6 +53,14 @@ class TB_Outil extends BP_Group_Extension {
 			add_action('wp_enqueue_scripts', array($this, 'scriptsEtStylesAvant'), 1);
 			add_action('wp_enqueue_scripts', array($this, 'scriptsEtStylesApres'), 100);
 		}
+
+		if ($this->desactive_globalement) {
+			parent::init([
+				'enable_nav_item' => false,
+				'access' => 'noone',
+				'show_tab' => 'noone',
+			]);
+		}
 	}
 
 	/**
