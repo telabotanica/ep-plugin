@@ -16,7 +16,10 @@ class EventMetaMigration  extends BaseMigration {
    * Migrates event metas.
    */
   /*
-  * @todo vérifier que les metas sont bien synchros avec l'actuel
+   * Donc concernant l'adresse, faut prendre les champs bf_lieu_evenement bf_cp_lieu_evenement et bf_adresse pi faire un string potable avec.
+   * Pour le prix faut déduire is_free à partir du contenu des colonnes bf_tarif_individuel bf_tarif_entreprise bf_tarif_opca
+   * Pour le contact c'est bf_nom_contact bf_mail bf_telephone (voir si c'est pas plus compliqué en fait, genre faut un tableau)
+   * Pour les dates, date_end doit être null si bf_date_fin_evenement === bf_date_debut_evenement
   */
   public function migrate() {
 
@@ -46,9 +49,9 @@ class EventMetaMigration  extends BaseMigration {
     SELECT `bf_id_fiche`+10000 AS post_id,  'description' AS meta_key, CONVERT(bf_description  USING utf8) $fin UNION
 
     SELECT `bf_id_fiche`+10000 AS post_id,  '_date' AS meta_key, CONVERT('field_580364c892ee1'  USING utf8) $fin UNION
-    SELECT `bf_id_fiche`+10000 AS post_id,  'date' AS meta_key, CONVERT(date_format(bf_date_fin_evenement, '%Y%m%d') USING utf8) $fin UNION
+    SELECT `bf_id_fiche`+10000 AS post_id,  'date' AS meta_key, CONVERT(date_format(bf_date_debut_evenement, '%Y%m%d') USING utf8) $fin UNION
     SELECT `bf_id_fiche`+10000 AS post_id,  '_date_end' AS meta_key, CONVERT('field_5803659792ee5'  USING utf8) $fin UNION
-    SELECT `bf_id_fiche`+10000 AS post_id,  'date_end' AS meta_key, CONVERT(date_format(bf_date_debut_evenement, '%Y%m%d') USING utf8) $fin;";
+    SELECT `bf_id_fiche`+10000 AS post_id,  'date_end' AS meta_key, IF(CONVERT(date_format(bf_date_fin_evenement, '%Y%m%d') USING utf8) = CONVERT(date_format(bf_date_debut_evenement, '%Y%m%d') USING utf8), null, CONVERT(date_format(bf_date_fin_evenement, '%Y%m%d') USING utf8)) $fin;";
 
     $evenementsChampsACF = $this->telaDbConnection->query($requeteEvenementsChampsACF)->fetchAll(PDO::FETCH_ASSOC);
 
