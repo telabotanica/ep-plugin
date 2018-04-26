@@ -86,7 +86,7 @@ class NewsMigration extends BaseMigration {
       } catch(Exception $e) {
         echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requeteInsert]" . PHP_EOL;
 
-        throw new MigrationException($e->getMessage(), $e->getCode(), $requeteInsert, __FUNCTION__);
+        throw new MigrationException($e, $requeteInsert, __FUNCTION__);
 
       }
       $insert = array();

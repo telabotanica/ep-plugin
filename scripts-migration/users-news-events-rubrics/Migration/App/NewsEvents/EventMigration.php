@@ -46,7 +46,7 @@ class EventMigration extends BaseMigration {
       } catch(Exception $e) {
         echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requete]" . PHP_EOL;
         $tb2beRestored = [$e->getMessage(), $e->getCode(), $this->wpTablePrefix . 'posts'];
-        throw new MigrationException($wthis->pDbConnection, $tb2beRestored);
+        throw new MigrationException($e, $requete, __FUNCTION__);
       }
 
       // collecte les infos pour l'enregistrement des redirections 301 des articles

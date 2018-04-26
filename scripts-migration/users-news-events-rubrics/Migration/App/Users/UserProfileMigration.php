@@ -111,7 +111,7 @@ class UserProfileMigration extends BaseMigration {
         $compteur++;
       } catch(Exception $e) {
         echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requeteInsert]" . PHP_EOL;
-        throw new MigrationException($e->getMessage(), $e->getCode(), $requeteInsert, __FUNCTION__);
+        throw new MigrationException($e, $requeteInsert, __FUNCTION__);
       }
     }
 

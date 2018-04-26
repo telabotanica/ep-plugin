@@ -4,6 +4,7 @@ namespace Migration\App\Utilz;
 
 use \Migration\Api\DatasourceManager;
 use \Migration\App\Config\DbNamesEnum;
+use \Migration\Api\MigrationException;
 use \Exception;
 
 /**
@@ -29,8 +30,8 @@ class WpmlIclTranslationDAO {
     try {
       $this->wpDbConnection->exec($wpMlInsertLanguageQuery);
     } catch(Exception $e) {
-      echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requeteInsert]" . PHP_EOL;
-      throw new MigrationException($e->getMessage(), $e->getCode(), $wpMlInsertLanguageQuery, __FUNCTION__);
+      echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$wpMlInsertLanguageQuery]" . PHP_EOL;
+      throw new MigrationException($e, $wpMlInsertLanguageQuery, __FUNCTION__);
     }
   }
 

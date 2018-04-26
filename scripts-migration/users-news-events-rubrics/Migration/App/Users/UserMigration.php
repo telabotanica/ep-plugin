@@ -121,7 +121,7 @@ class UserMigration extends BaseMigration {
         // die(var_dump($utilisateur_existant));
       } catch(Exception $e) {
         echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requete_pseudo]" . PHP_EOL;
-        throw new MigrationException($e->getMessage(), $e->getCode(), $requete_pseudon, __FUNCTION__);
+        throw new MigrationException($e, $requete_pseudo, __FUNCTION__);
       }
 
       if (!empty($utilisateur_existant)) {
@@ -186,7 +186,7 @@ class UserMigration extends BaseMigration {
       $usedPseudo = $this->telaDbConnection->query($usedPseudoQuery)->fetch(PDO::FETCH_ASSOC);
     } catch(Exception $e) {
       echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requete_pseudo_bp]" . PHP_EOL;
-      throw new MigrationException($e, $usedPseudoQuery, __FUNCTION__);
+      throw new MigrationException($e, $requete_pseudo_bp, __FUNCTION__);
     }
 
     return $usedPseudo["pseudo_utilise"];
