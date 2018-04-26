@@ -51,6 +51,7 @@ class CoversMigration extends BaseMigration {
     // chdir($old_path); // commenté car inutile de rechanger de répertoire avant la fin du script
 
 
+    echo '-- import des images (attention c\'est long)' . PHP_EOL;
     $requete = sprintf('SELECT spip_articles.`id_article` AS ID, `date`, titre FROM `spip_articles` WHERE id_rubrique in ( %s ) ORDER BY id_article', AnnuaireTelaBpProfileDataMap::getSpipRubricsToBeMigrated());
     $articles = $this->spipDbConnection->query($requete)->fetchAll(PDO::FETCH_ASSOC);
 
@@ -59,6 +60,7 @@ class CoversMigration extends BaseMigration {
     $compteurEchecs = 0;
     $compteurAbusay = 0;
     $length = count($articles);
+    echo '-- nombre d\'images à importer : '. $length . PHP_EOL;
     foreach ($articles as $article) {
 
 

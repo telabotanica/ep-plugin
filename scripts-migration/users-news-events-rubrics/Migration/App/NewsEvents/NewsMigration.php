@@ -31,11 +31,11 @@ class NewsMigration extends BaseMigration {
 
     $wpmlIclTranslationDao = new WpmlIclTranslationDAO();
     $trGrId = $wpmlIclTranslationDao->getMaxTranslationGroupId();
-    $requete_doc = "SELECT d.`id_document`, `fichier`, `id_article` FROM `spip_documents` d LEFT JOIN spip_documents_articles da ON da.`id_document` = d.`id_document`";
+    $requete_doc = "SELECT d.`id_document`, `fichier`, titre, `id_article` FROM `spip_documents` d LEFT JOIN spip_documents_articles da ON da.`id_document` = d.`id_document` WHERE distant = 'non'";
     $documents = $this->spipDbConnection->query($requete_doc)->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($documents as $doc) {
-      $doc_loc[$doc['id_document']] = $doc['fichier'];
+      $doc_loc[$doc['id_document']] = $doc;
     }
 
     /*INSERT INTO `wp4_posts`
@@ -55,9 +55,27 @@ class NewsMigration extends BaseMigration {
     $length = count($articles);
     foreach ($articles as $article) {
 
-      $article['post_content'] = preg_replace("/\[([^\[]*)\-\>([^\[]*)\]/", '<a href="\2">\1</a>', $article['post_content']);
+      $article['post_content'] = preg_replace("@\[([^\[]*)\-\>([^\[]*)\]@", '<a href="$2">$1</a>', $article['post_content']);
       //$images = preg_grep("\<img([0-9]*)\|[a-z]*\>", $article['post_content']);
-      $article['post_content'] = preg_replace_callback("/\<img([0-9]*)\|[a-z]*\>/", [$this, 'transformerNumEnUrl'], $article['post_content']);
+      $article['post_content'] = preg_replace_callback(
+        "@\<(?:img|doc|emb)([0-9]*)\|[a-z]*\>@",
+        function($matches) use ($doc_loc) {
+          if (isset($matches[1]) && isset($doc_loc[$matches[1]])) {
+            $url = $doc_loc[$matches[1]]['fichier'];
+            switch (substr($url, -3, 3)) {
+              case 'jpg':
+              case 'png':
+              case 'gif':
+                return '<img src="http://www.tela-botanica.org/actu/'.$url.'" />';
+              default:
+                return '<a href="http://www.tela-botanica.org/actu/'.$url.'">'.(isset($fichier['titre']) ?? $url).'</a>';
+            }
+          } else {
+            return '';
+          }
+        },
+        $article['post_content']
+      );
 
       // gestion des dates normales et dates en GMT
       $date = new DateTime($article['post_date'], new DateTimeZone('Europe/Paris'));
