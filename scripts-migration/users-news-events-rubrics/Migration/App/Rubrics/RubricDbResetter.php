@@ -16,18 +16,9 @@ class RubricDbResetter extends QueryDbResetter {
     public function __construct($dbName) {
         parent::__construct($dbName);
         parent::setQueries([
-          'DELETE FROM term_relationships JOIN posts ON (posts.ID = term_relationships.object_id AND posts.post_type = "post")',
+          'DELETE term_relationships FROM term_relationships JOIN posts ON (posts.ID = term_relationships.object_id AND posts.post_type = "post")',
+          'DELETE FROM term_taxonomy WHERE term_id IN (' . AnnuaireTelaBpProfileDataMap::getWordpressCategoriesId() . ')'
         ]);
-    }
-
-    /**
-     * Deletes previously imported rubric related data from WP DB.
-     */
-    public function resetDb() {
-        $sql = 'DELETE FROM term_taxonomy WHERE term_id IN (' . AnnuaireTelaBpProfileDataMap::getWordpressCategoriesId() . ')';
-        array_push($this->queries, $sql);
-
-        parent::resetDb();
     }
 
 }

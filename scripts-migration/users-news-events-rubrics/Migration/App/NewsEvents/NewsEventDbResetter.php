@@ -15,10 +15,10 @@ class NewsEventDbResetter extends QueryDbResetter {
     public function __construct($dbName) {
         parent::__construct($dbName);
         parent::setQueries([
-          'DELETE FROM posts p1 JOIN posts p2 ON (p1.post_parent = p2.ID AND p2.post_type = "post")',
-          'DELETE FROM slug_history JOIN post ON (post.ID = slug_history.post_id AND post.post_type = "post")',
-          'DELETE FROM icl_translations JOIN post ON (post.ID = icl_translations.element_id AND post.post_type = "post")',
-          'DELETE FROM postmeta JOIN posts ON (posts.ID = postmeta.post_id AND posts.post_type = "post")'
+          'DELETE postmeta FROM postmeta JOIN posts ON (posts.ID = postmeta.post_id AND posts.post_type = "post")',
+          'DELETE slug_history FROM slug_history JOIN posts ON (posts.ID = slug_history.post_id AND posts.post_type = "post")',
+          'DELETE icl_translations FROM icl_translations JOIN posts ON (posts.ID = icl_translations.element_id AND posts.post_type = "post")',
+          'DELETE posts FROM posts p1 JOIN posts p2 ON (p1.post_parent = p2.ID AND p2.post_type = "post")',
         ]);
     }
 
