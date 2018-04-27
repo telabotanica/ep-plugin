@@ -59,9 +59,14 @@ class CoversMigration extends BaseMigration {
     $compteurSucces = 0;
     $compteurEchecs = 0;
     $compteurAbusay = 0;
+    $compteurBoucle = 0;
     $length = count($articles);
     echo '-- nombre d\'images à importer : '. $length . PHP_EOL;
     foreach ($articles as $article) {
+      $compteurBoucle++;
+      if (0 === $compteurBoucle % 1000) {
+        echo 'progression : ' . $compteurBoucle . '/' . $length . PHP_EOL;
+      }
 
       $wpcli_meta_thumbnail = 'wp post meta get ' . $article['ID'] . ' _thumbnail_id --skip-plugins --skip-themes --skip-packages';
 
@@ -76,6 +81,9 @@ class CoversMigration extends BaseMigration {
         // echo 'han!! le post ' . $article['ID'] . ' bah il a déjà une image, trop abusééééééé' . PHP_EOL;
         // echo 'id du post de l\'image ' . $meta['meta_value'] . PHP_EOL;
         $compteurAbusay++;
+
+        $id_image = $wpcli_meta_command_output[0];
+        $this->ajouter_categorie($id_image);
 
         continue; // y'a déjà une couverture, on passe au prochain article
 
@@ -140,17 +148,8 @@ class CoversMigration extends BaseMigration {
         preg_match('@(\d+).$@', $command_output[0], $matches);
         $id_image = $matches[1];
 
-        $wpcli_image_categorie = 'wp post term add ' . $id_image
-          . ' media_category actu-import --by=slug'
-          . ' --skip-themes --skip-packages'
-        ;
+        $this->ajouter_categorie($id_image);
 
-        unset($output_image_categorie_command);
-        exec($wpcli_image_categorie, $output_image_categorie_command, $exit_code);
-
-        if (0 !== $exit_code) {
-          echo 'erreur lors de l\'ajout de categorie à l\'image importée' . PHP_EOL;
-        }
       } else {
         echo 'commande en échec : "' . $wpcli_commande . '"' . PHP_EOL;
         echo PHP_EOL;
@@ -165,6 +164,19 @@ class CoversMigration extends BaseMigration {
     echo '-- ' . $compteurEchecs . ' erreurs rencontrées pendant la migration (mais rien de grave). ' . PHP_EOL;
     echo '-- ' . $compteurAbusay . ' images déjà migrées ' . PHP_EOL;
     echo '-- ' . $length . ' articles au total ' . PHP_EOL;
+  }
+
+  public function ajouter_categorie($id_image) {
+    $wpcli_image_categorie = 'wp post term add ' . $id_image
+      . ' media_category actu-import --by=slug'
+      . ' --skip-themes --skip-packages'
+    ;
+
+    exec($wpcli_image_categorie, $output_image_categorie_command, $exit_code);
+
+    if (0 !== $exit_code) {
+      echo 'erreur lors de l\'ajout de categorie à l\'image importée' . PHP_EOL;
+    }
   }
 
 }
