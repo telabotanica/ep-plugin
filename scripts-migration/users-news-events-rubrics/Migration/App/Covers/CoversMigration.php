@@ -124,6 +124,7 @@ class CoversMigration extends BaseMigration {
         . ' --skip-plugins --skip-packages' // post_except field
       ;
 
+      unset($command_output);
       exec($wpcli_commande, $command_output, $exit_code);
 
       if (0 === $exit_code) {
@@ -135,7 +136,21 @@ class CoversMigration extends BaseMigration {
 
         $compteurSucces++;
 
-        unset($command_output);
+        // on ajoute une catégorie à l'image importée
+        preg_match('@(\d+).$@', $command_output[0], $matches);
+        $id_image = $matches[1];
+
+        $wpcli_image_categorie = 'wp post term add ' . $id_image
+          . ' media_category actu-import --by=slug'
+          . ' --skip-themes --skip-packages'
+        ;
+
+        unset($output_image_categorie_command);
+        exec($wpcli_image_categorie, $output_image_categorie_command, $exit_code);
+
+        if (0 !== $exit_code) {
+          echo 'erreur lors de l\'ajout de categorie à l\'image importée' . PHP_EOL;
+        }
       } else {
         echo 'commande en échec : "' . $wpcli_commande . '"' . PHP_EOL;
         echo PHP_EOL;
