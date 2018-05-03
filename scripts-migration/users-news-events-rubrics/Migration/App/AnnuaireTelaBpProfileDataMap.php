@@ -71,6 +71,14 @@ class AnnuaireTelaBpProfileDataMap {
   // metier                   ; pas d'équivalent ; 26
   // zone geo d'interet       ; 120       ; 61          ; [30806] ex: 30805;;30806;;30807
   // espece d'interet         ; pas forcément ça 8 ; 63 ; [30829]
+  //
+  // Doublons entre la table des metas et la table annuaire
+  // code postal = utiliser annuaire
+  // site web = utiliser annuaire
+  // ville = utiliser annuaire
+  // pays = utiliser annuaire
+  // nom = utiliser annuaire
+  // prenom = utiliser annuaire
 
   // l'index c'est l'identifiant actuel (amv_ce_colonne), et la valeur c'est celle coté bp
 

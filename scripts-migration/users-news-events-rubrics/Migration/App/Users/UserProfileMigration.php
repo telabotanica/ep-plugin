@@ -18,12 +18,12 @@ class UserProfileMigration extends BaseMigration {
   */
   public function migrate() {
 
-    $requete_supp = "SELECT *  FROM `annu_meta_valeurs` WHERE `amv_ce_colonne` in (99, 2, 137, 12, 103, 1, 7, 4, 8, 120, 133, 132, 134, 125, 14, 15) AND (amv_valeur != ''  AND amv_valeur != 0)";
+     $requete_supp = "SELECT *  FROM `annu_meta_valeurs` WHERE `amv_ce_colonne` in (99, 2, 137, 4, 8, 120, 133, 132, 125, 14, 15) AND (amv_valeur != ''  AND amv_valeur != 0)";
     $infos_supp = $this->telaDbConnection->query($requete_supp)->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($infos_supp as $infos) {
       switch ($infos['amv_ce_colonne']) {
-        case 2: // langues
+        case 2: // Langues pratiquées
           //exemple a:3:{i:0;s:7:"Anglais";i:1;s:8:"Espagnol";i:2;s:7:"Italien";}
           $langues = explode(';;', $infos['amv_valeur']);
           if (count($langues)) {
@@ -31,20 +31,20 @@ class UserProfileMigration extends BaseMigration {
           }
 
           break;
-        case 4: // niveau bota
+        case 4: // Expérience botanique
           $supp[$infos['amv_cle_ligne']][$infos['amv_ce_colonne']] = AnnuaireTelaBpProfileDataMap::getBotanicLevel($infos['amv_valeur']);
           break;
-        case 133: // asso naturalistes
+        case 133: // Vous êtes membre d'une association botanique ou en lien avec la botanique
           $supp[$infos['amv_cle_ligne']][$infos['amv_ce_colonne']] = AnnuaireTelaBpProfileDataMap::getNaturalistAssociationMembership($infos['amv_valeur']);
 
           break;
-        case 15: // conditions d'utilisation
+        case 15: // Conditions d'utilisation
           if (1 == $infos['amv_valeur']) {
             $supp[$infos['amv_cle_ligne']][$infos['amv_ce_colonne']] = serialize("J\'accepte les conditions d\'utilisation");
           }
 
           break;
-        case 120: // zones géo
+        case 120: // Spécialités (zone géographique)
           // exemple: a:3:{i:0;s:16:"Zones tropicales";i:1;s:24:"Zones méditerranéennes";i:2;s:8:"Montagne";}
           $zones_geo = explode(';;', $infos['amv_valeur']);
           if (count($zones_geo)) {
@@ -52,6 +52,12 @@ class UserProfileMigration extends BaseMigration {
           }
 
           break;
+        case 8: // Spécialités (groupe(s) de plantes étudié(s))
+        case 14: // Inscription à la lettre d'actualité
+        case 99: // Pseudo
+        case 125: // Présentation
+        case 132: // Adresse
+        case 137: // Date de naissance
         default:
           $supp[$infos['amv_cle_ligne']][$infos['amv_ce_colonne']] = $infos['amv_valeur'];
 
