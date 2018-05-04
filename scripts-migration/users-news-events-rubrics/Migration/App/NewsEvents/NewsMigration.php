@@ -62,13 +62,23 @@ class NewsMigration extends BaseMigration {
         function($matches) use ($doc_loc) {
           if (isset($matches[1]) && isset($doc_loc[$matches[1]])) {
             $url = $doc_loc[$matches[1]]['fichier'];
+            $titre = $doc_loc[$matches[1]]['titre'];
             switch (substr($url, -3, 3)) {
               case 'jpg':
               case 'png':
               case 'gif':
-                return '<img src="http://www.tela-botanica.org/actu/'.$url.'" />';
+                if ('' !== $titre) {
+                  return
+                    '<figure>
+                      <img src="http://www.tela-botanica.org/actu/'.$url.'" alt="'.$titre.'"/>
+                      <figcaption>'.$titre.'</figcaption>
+                    </figure>'
+                  ;
+                } else {
+                  return '<img src="http://www.tela-botanica.org/actu/'.$url.'" alt="pas de alt pour cette image, soz"/>';
+                }
               default:
-                return '<a href="http://www.tela-botanica.org/actu/'.$url.'">'.(isset($fichier['titre']) ?? $url).'</a>';
+                return '<a href="http://www.tela-botanica.org/actu/'.$url.'">'.($titre ?? $url).'</a>';
             }
           } else {
             return '';
