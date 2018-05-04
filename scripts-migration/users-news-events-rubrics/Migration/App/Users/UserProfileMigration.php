@@ -72,7 +72,7 @@ class UserProfileMigration extends BaseMigration {
     $compteur = 0;
     foreach ($utilisateurs as $utilisateur) {
       // on va essayer de trouver le département à partir du code postal
-      if (preg_match('@(?:^(\d{2})(\d)\d{2}.*$)|(?:^(\d{2})\s.*$)@', $utilisateur['U_ZIP_CODE'], $matches)) {
+      if ($utilisateur['pays'] === 'France' && preg_match('@(?:^(\d{2})(\d)\d{2}.*$)|(?:^(\d{2})\s.*$)@', $utilisateur['U_ZIP_CODE'], $matches)) {
         $numero_departement = $matches[1];
         $numero_complementaire = $matches[2]; // pour la corse (201/202) ou les  // DOM (97X) et TOM (98X)
 
