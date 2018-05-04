@@ -167,15 +167,19 @@ class CoversMigration extends BaseMigration {
   }
 
   public function ajouter_categorie($id_image) {
-    $wpcli_image_categorie = 'wp post term add ' . $id_image
-      . ' media_category actu-import --by=slug'
-      . ' --skip-themes --skip-packages'
-    ;
+    if ($id_image) {
+      $wpcli_image_categorie = 'wp post term add ' . $id_image
+        . ' media_category actu-import --by=slug'
+        . ' --skip-themes --skip-packages'
+      ;
 
-    exec($wpcli_image_categorie, $output_image_categorie_command, $exit_code);
+      exec($wpcli_image_categorie, $output_image_categorie_command, $exit_code);
 
-    if (0 !== $exit_code) {
-      echo 'erreur lors de l\'ajout de categorie à l\'image importée' . PHP_EOL;
+      if (0 !== $exit_code) {
+        echo 'erreur lors de l\'ajout de categorie à l\'image importée' . PHP_EOL;
+        echo $wpcli_image_categorie . PHP_EOL;
+        die();
+      }
     }
   }
 
