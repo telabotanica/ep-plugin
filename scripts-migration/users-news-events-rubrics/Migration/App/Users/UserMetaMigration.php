@@ -27,7 +27,7 @@ class UserMetaMigration extends BaseMigration {
       $pseudo_utilise = $this->telaDbConnection->query('SELECT amv_valeur AS pseudo_utilise FROM annu_meta_valeurs WHERE amv_ce_colonne = 136 AND amv_cle_ligne = ' . $utilisateurMeta['U_ID'])->fetch(PDO::FETCH_ASSOC);
 
 
-      $nickname = $utilisateurMeta['U_SURNAME'] . ' ' . $utilisateurMeta['U_NAME'];
+      $nickname = $utilisateurMeta['U_SURNAME'] . ' ' . ucwords(strtolower($utilisateurMeta['U_NAME']));
       if ($pseudo_utilise['pseudo_utilise'] && $pseudo['pseudo']) {
         $nickname = $pseudo['pseudo'];
       }

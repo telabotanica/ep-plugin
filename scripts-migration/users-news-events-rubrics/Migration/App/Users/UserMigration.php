@@ -57,7 +57,7 @@ class UserMigration extends BaseMigration {
     $utilisateurs = $this->fetchTelaDbUsers();
 
     foreach ($utilisateurs as $utilisateur) {
-      $intitule = $utilisateur['U_SURNAME'] . ' ' . $utilisateur['U_NAME'];
+      $intitule = $utilisateur['U_SURNAME'] . ' ' . ucwords(strtolower($utilisateur['U_NAME']));
 
       $usedPseudo = $this->hasUserChosenPseudo($utilisateur['ID']);
 
