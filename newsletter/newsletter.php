@@ -272,6 +272,9 @@ function get_newsletter($multipart_boundary = null) {
 					$subcategories[$category->term_id][$subcategory->term_id] = $subcategory->name;
 
 					$posts[$category->term_id][$subcategory->term_id][] = get_post_details($post);
+
+					// Shortcodes are being incorrectly interpreted
+					$posts[$category->term_id][$subcategory->term_id][0]['post']->post_content = strip_shortcodes($posts[$category->term_id][$subcategory->term_id][0]['post']->post_content);
 				}
 			}
 		}
