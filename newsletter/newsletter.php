@@ -128,7 +128,7 @@ function get_event_date($post_id) {
 }
 
 /**
- * Gets the event place.
+ * Gets the event or job offer place.
  *
  * Address should be formatted like "D12, 81630 Saint-Urcisse, France"
  *
@@ -138,9 +138,9 @@ function get_event_date($post_id) {
  *
  * @param      int  $post_id  The post identifier
  *
- * @return     string  The event place.
+ * @return     string  The event or job offer place.
  */
-function get_event_place($post_id) {
+function get_place($post_id) {
 	$details = get_field('place', $post_id);
 
 	if (is_array($details)) {
@@ -193,7 +193,6 @@ function get_event_place($post_id) {
 
 function get_event_details($post_id) {
 	return get_event_date($post_id) + [
-		'place'		=> get_event_place($post_id),
 		'details'	=> get_field('description', $post_id)
 	];
 }
@@ -210,6 +209,7 @@ function get_post_details($post, $featured = false) {
 		'link' 		=> get_permalink($post->ID),
 		'thumbnail'	=> get_the_post_thumbnail_url($post->ID, $featured ? 'home-latest-post' : 'thumbnail'),
 		'date'		=> format_post_date($post->post_date),
+		'place'		=> get_place($post->ID),
 		'event'		=> get_event_details($post->ID)
 	];
 }
