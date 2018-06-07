@@ -48,8 +48,8 @@ class NewsCommentMigration extends BaseMigration {
         // echo $compteur . PHP_EOL;
         $compteur++;
       } catch(Exception $e) {
-        echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requete]" . PHP_EOL;
-          throw new MigrationException($e, $requete, __FUNCTION__);
+        echo "-- ECHEC " . basename(__FILE__) . ':' . __FUNCTION__ . " REQUÊTE: [$requete]" . PHP_EOL;
+          throw new MigrationException($e, $requete, basename(__FILE__) . ':' . __FUNCTION__);
       }
     }
 

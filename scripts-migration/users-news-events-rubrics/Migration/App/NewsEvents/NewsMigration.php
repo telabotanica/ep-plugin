@@ -47,16 +47,17 @@ class NewsMigration extends BaseMigration {
     $requete = "SELECT spip_articles.`id_article` AS ID, `id_auteur` AS post_author, `date` AS post_date, `date` AS post_date_gmt,
     replace(replace(replace(replace(replace(replace(replace(replace(replace(convert( convert( texte USING latin1 ) USING utf8 ),'{{{{',''), '}}}}', '<!--more-->'), '{{{','<h2>'), '}}}', '</h2>'), '{{', '<strong>'), '}}', '</strong>'), '{', '<em>'), '}', '</em>'), '_ ', '') AS post_content,
     `titre` AS post_title,  \"\" AS post_excerpt, replace(replace(replace(replace(replace(`statut`,'poubelle', 'trash'),'publie', 'publish'), 'prepa', 'private'), 'prop', 'pending'), 'refuse', 'trash') AS post_status,  \"open\" AS comment_status, \"open\" AS ping_status, \"\" AS post_password, concat(\"article\",spip_articles.`id_article`) AS post_name, \"\" AS to_ping, \"\" AS pinged, `date_modif` AS post_modified,`date_modif` AS post_modified_gmt, \"\" AS post_content_filtered, \"\" AS post_parent,
-    concat(\"http://tela-botanica.org/?p=\",spip_articles.`id_article`) AS guid, \"0\" AS menu_order, \"post\" AS post_type, \"\" AS post_mime_type, \"\" AS comment_count FROM `spip_articles` LEFT JOIN spip_auteurs_articles ON spip_auteurs_articles.`id_article` =  spip_articles.`id_article` WHERE id_rubrique in ( " . AnnuaireTelaBpProfileDataMap::getSpipRubricsToBeMigrated() . " )";
+    concat(\"http://tela-botanica.org/?p=\",spip_articles.`id_article`) AS guid, \"0\" AS menu_order, \"post\" AS post_type, \"\" AS post_mime_type, \"\" AS comment_count FROM `spip_articles` LEFT JOIN spip_auteurs_articles ON spip_auteurs_articles.`id_article` =  spip_articles.`id_article` WHERE id_rubrique in ( " . AnnuaireTelaBpProfileDataMap::getSpipRubricsToBeMigrated() . " ) GROUP BY ID";
     $articles = $this->spipDbConnection->query($requete)->fetchAll(PDO::FETCH_ASSOC);
 
-    $i = 0;
     $compteurSucces = 0;
-    $length = count($articles);
     foreach ($articles as $article) {
 
+      // remove chapo (we add it later in postmeta)
+      $article['post_content'] = preg_replace("@{{{{.*}}}}@", '', $article['post_content']);
+      // transform links
       $article['post_content'] = preg_replace("@\[([^\[]*)\-\>([^\[]*)\]@", '<a href="$2">$1</a>', $article['post_content']);
-      //$images = preg_grep("\<img([0-9]*)\|[a-z]*\>", $article['post_content']);
+
       $article['post_content'] = preg_replace_callback(
         "@\<(?:img|doc|emb)([0-9]*)\|[a-z]*\>@",
         function($matches) use ($doc_loc) {
@@ -99,22 +100,20 @@ class NewsMigration extends BaseMigration {
       $ancienne_url = 'http://www.tela-botanica.org/actu/article' . $article['ID'] . '.html';
       $insert_redirection[] = '(' . $article['ID'] . ', ' . $this->wpDbConnection->quote($ancienne_url) . ')';
 
-      $i++;
-      $requeteInsert = 'INSERT INTO ' . $this->wpTablePrefix . 'posts (`ID`, `post_author`, `post_date`, `post_date_gmt`, `post_content`, `post_title`, `post_excerpt`, `post_status`, `comment_status`, `ping_status`, `post_password`, `post_name`, `to_ping`, `pinged`, `post_modified`, `post_modified_gmt`, `post_content_filtered`, `post_parent`, `guid`, `menu_order`, `post_type`, `post_mime_type`, `comment_count`) VALUES ' . implode(', ', $insert) . '
-      ON DUPLICATE KEY UPDATE `ID`=VALUES(`ID`), `post_author`=VALUES(`post_author`), `post_date`=VALUES(`post_date`), `post_date_gmt`=VALUES(`post_date_gmt`), `post_content`=VALUES(`post_content`), `post_title`=VALUES(`post_title`), `post_excerpt`=VALUES(`post_excerpt`), `post_status`=VALUES(`post_status`), `comment_status`=VALUES(`comment_status`), `ping_status`=VALUES(`ping_status`), `post_password`=VALUES(`post_password`), `post_name`=VALUES(`post_name`), `to_ping`=VALUES(`to_ping`), `pinged`=VALUES(`pinged`), `post_modified`=VALUES(`post_modified`), `post_modified_gmt`=VALUES(`post_modified_gmt`), `post_content_filtered`=VALUES(`post_content_filtered`), `post_parent`=VALUES(`post_parent`), `guid`=VALUES(`guid`), `menu_order`=VALUES(`menu_order`), `post_type`=VALUES(`post_type`), `post_mime_type`=VALUES(`post_mime_type`), `comment_count`=VALUES(`comment_count`);';
+      $requeteInsert = 'INSERT INTO ' . $this->wpTablePrefix . 'posts (`ID`, `post_author`, `post_date`, `post_date_gmt`, `post_content`, `post_title`, `post_excerpt`, `post_status`, `comment_status`, `ping_status`, `post_password`, `post_name`, `to_ping`, `pinged`, `post_modified`, `post_modified_gmt`, `post_content_filtered`, `post_parent`, `guid`, `menu_order`, `post_type`, `post_mime_type`, `comment_count`) VALUES ' . implode(', ', $insert)
+      ;
 
       try {
         $this->wpDbConnection->exec($requeteInsert);
         // // Verbose
         // echo $compteurSucces . PHP_EOL;
         $compteurSucces += count($insert);
-        $lastInsertId =  $this->wpDbConnection->lastInsertId();
-        $wpmlIclTranslationDao->create("'post_post'", $lastInsertId, $trGrId, "'fr'", 'NULL');
-        $trGrId++;
+        $lastInsertId = $this->wpDbConnection->lastInsertId();
+        $wpmlIclTranslationDao->create("'post_post'", $lastInsertId, ++$trGrId, "'fr'", 'NULL');
       } catch(Exception $e) {
-        echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requeteInsert]" . PHP_EOL;
+        echo "-- ECHEC " . basename(__FILE__) . ':' . __FUNCTION__ . " REQUÊTE: [$requeteInsert]" . PHP_EOL;
 
-        throw new MigrationException($e, $requeteInsert, __FUNCTION__);
+        throw new MigrationException($e, $requeteInsert, basename(__FILE__) . ':' . __FUNCTION__);
 
       }
       $insert = array();
@@ -125,8 +124,8 @@ class NewsMigration extends BaseMigration {
       try {
         $this->wpDbConnection->exec($query);
       } catch(Exception $e) {
-        echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$query]" . PHP_EOL;
-        throw new MigrationException($e, $query, __FUNCTION__);
+        echo "-- ECHEC " . basename(__FILE__) . ':' . __FUNCTION__ . " REQUÊTE: [$query]" . PHP_EOL;
+        throw new MigrationException($e, $query, basename(__FILE__) . ':' . __FUNCTION__);
       }
       $insert_redirection = array();
 
