@@ -69,17 +69,20 @@ class RubricMigration extends BaseMigration {
   private function createTermLink($elements) {
     foreach ($elements as $element) {
       $requete = 'INSERT INTO ' . $this->wpTablePrefix . 'term_relationships (`object_id`, `term_taxonomy_id`)
-      VALUES(' . $element['id'] . ', ' . $this->rubriqueCategorie[$element['id_rubrique']] . ')
+      VALUES(:eventId, :rubriqueId)
       ON DUPLICATE KEY UPDATE `object_id`=VALUES(`object_id`), `term_taxonomy_id`=VALUES(`term_taxonomy_id`);';
 
       $updateCompteur = 'INSERT INTO ' . $this->wpTablePrefix . 'term_taxonomy (`term_id`, `taxonomy`, `count`) '
-      . 'VALUES(' . $this->rubriqueCategorie[$element['id_rubrique']] . ', "category", 1)'
+      . 'VALUES(:rubriqueId, "category", 1)'
       . 'ON DUPLICATE KEY UPDATE `term_id`=VALUES(`term_id`), `taxonomy`=VALUES(`taxonomy`), `count`=`count`+1'
       ;
 
       try {
-        $this->wpDbConnection->exec($requete);
-        $this->wpDbConnection->exec($updateCompteur);
+        $this->wpDbConnection->exec($requete, [
+          ':eventId' => $element['id'],
+          ':rubriqueId' => $this->rubriqueCategorie[$element['id_rubrique']]
+        ]);
+        $this->wpDbConnection->exec($updateCompteur, [':rubriqueId' => $this->rubriqueCategorie[$element['id_rubrique']]]);
 
         $this->compteur++;
       } catch(Exception $e) {
