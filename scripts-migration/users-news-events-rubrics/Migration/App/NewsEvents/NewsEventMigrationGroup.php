@@ -16,6 +16,7 @@ class NewsEventMigrationGroup extends MigrationGroup {
     $newsEventDbResetter = new NewsEventDbResetter(DbNamesEnum::Wp);
     parent::__construct([
       new NewsMigration(),
+      new NewsMetaMigration(),
       new NewsCommentMigration(),
       new EventMigration(),
       new EventMetaMigration()
