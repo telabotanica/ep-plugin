@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname(__FILE__) . '/TB_ListeEzmlmBase.php';
+
 /**
  * Gère une liste de discussion ezmlm, en utilisant cURL pour envoyer des ordres
  * au service ezmlm-php, avec le jeton admin donnant tous les pouvoirs; lit ce
@@ -7,33 +9,15 @@
  * lui fournir, dans la configuration "tb_general_config" qui se règle dans
  * "Tela Botanica" > "Sécurité" @TODO renommer cette section
  */
-class TB_ListeEzmlm {
+class TB_ListeEzmlm extends TB_ListeEzmlmBase {
 
 	protected $nomListe;
-	protected $jetonAdmin;
-	protected $urlRacineEzmlmPhp;
-	protected $nomEnteteAuth;
 
 	public function __construct($nomListe) {
 
 		$this->nomListe = $nomListe;
 
-		$securiteConfig = json_decode(get_option('tb_general_config'), true);
-		if (is_array($securiteConfig)) {
-			// jeton SSO admin
-			if (array_key_exists('adminToken', $securiteConfig)) {
-				$this->jetonAdmin = $securiteConfig['adminToken'];
-			}
-			// URL racine du service ezmlm-php
-			if (array_key_exists('ezmlmRootUri', $securiteConfig)) {
-				$this->urlRacineEzmlmPhp = $securiteConfig['ezmlmRootUri'];
-			}
-			// entête d'autorisation, valeur standard par défaut
-			$this->nomEnteteAuth = 'Authorization';
-			if (array_key_exists('ezmlmAuthHeaderName', $securiteConfig)) {
-				$this->nomEnteteAuth = $securiteConfig['ezmlmAuthHeaderName'];
-			}
-		}
+		parent::__construct();
 	}
 
 	/**

@@ -1,6 +1,7 @@
 <?php
 
 require_once dirname(__FILE__) . '/../lib/liste.php';
+require_once dirname(__FILE__) . '/../lib/TB_SubscriberEzmlm.php';
 
 /**
  * Définit ce qui se produit lorsqu'un utilisateur met à jour son profil étandu
