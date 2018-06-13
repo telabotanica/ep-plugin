@@ -32,7 +32,7 @@ class UserMetaMigration extends BaseMigration {
         $nickname = $pseudo['pseudo'];
       }
 
-      $access = 'a:4:{i:0;s:1:\"2\";i:1;s:1:\"5\";i:2;s:1:\"6\";i:3;s:1:\"7\";}';
+      $access = 'a:12:{i:0;s:2:\"20\";i:1;s:2:\"21\";i:2;s:2:\"22\";i:3;s:2:\"23\";i:4;s:2:\"24\";i:5;s:2:\"26\";i:6;s:2:\"27\";i:7;s:2:\"28\";i:8;s:2:\"29\";i:9;s:2:\"31\";i:10;s:2:\"32\";i:11;s:2:\"39\";}';
       $bp_xprofile_visibility_levels = 'a:12:{i:1;s:6:\"public\";i:60;s:6:\'public\';i:61;s:6:\'public\';i:49;s:6:\'public\';i:55;s:6:\'public\';i:48;s:6:\'public\';i:62;s:6:\'public\';i:63;s:6:\'public\';i:68;s:6:\'public\';i:76;s:6:\'public\';i:120;s:6:\'public\';i:81;s:6:\'public\';}';
       $capabilities = 'a:1:{s:11:\"contributor\";b:1;}';
       $user_level = '1';
