@@ -98,4 +98,6 @@ class PDObis extends PDO {
       throw new Exception($sth->errorInfo()[2]);
     }
   }
+
+  return $sth;
 }
