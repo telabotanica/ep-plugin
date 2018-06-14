@@ -97,7 +97,7 @@ class PDObis extends PDO {
     if (false === $sth->execute($params)) {
       throw new Exception($sth->errorInfo()[2]);
     }
-  }
 
-  return $sth;
+    return $sth;
+  }
 }
