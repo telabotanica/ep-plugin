@@ -24,16 +24,17 @@ class NewsMetaMigration extends BaseMigration {
     $compteurSucces = 0;
     foreach ($articles as $article) {
       // search for chapo (intro) in post content
-      if (preg_match("@{{{{(.*)}}}}@", $article['post_content'], $matches)) {
+      if (preg_match("@<chapo>(.*)</chapo>@", $article['post_content'], $matches)) {
 
-        $req = 'INSERT INTO ' . $this->wpTablePrefix . 'postmeta (`post_id`, `meta_key`, `meta_value`) VALUES'
-          . '(`:postId`, `intro`, `:chapo`),'
-          . '(`:postId`, `_intro`, `field_582b32add4527`)'
+        $req = 'INSERT INTO ' . $this->wpTablePrefix . 'postmeta (`post_id`, `meta_key`, `meta_value`) VALUES '
+          . '(:postId, "intro", :chapo), '
+          . '(:postId2, "_intro", "field_582b32add4527")'
         ;
 
         try {
           $this->wpDbConnection->exec($req, [
             ':postId' => $article['ID'],
+            ':postId2' => $article['ID'],
             ':chapo' => $matches[1],
           ]);
           // // Verbose
