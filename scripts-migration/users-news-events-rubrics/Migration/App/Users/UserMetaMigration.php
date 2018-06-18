@@ -32,20 +32,20 @@ class UserMetaMigration extends BaseMigration {
         $nickname = $pseudo['pseudo'];
       }
 
-      $access = 'a:12:{i:0;s:2:\"20\";i:1;s:2:\"21\";i:2;s:2:\"22\";i:3;s:2:\"23\";i:4;s:2:\"24\";i:5;s:2:\"26\";i:6;s:2:\"27\";i:7;s:2:\"28\";i:8;s:2:\"29\";i:9;s:2:\"31\";i:10;s:2:\"32\";i:11;s:2:\"39\";}';
-      $bp_xprofile_visibility_levels = 'a:12:{i:1;s:6:\"public\";i:60;s:6:\'public\';i:61;s:6:\'public\';i:49;s:6:\'public\';i:55;s:6:\'public\';i:48;s:6:\'public\';i:62;s:6:\'public\';i:63;s:6:\'public\';i:68;s:6:\'public\';i:76;s:6:\'public\';i:120;s:6:\'public\';i:81;s:6:\'public\';}';
-      $capabilities = 'a:1:{s:11:\"contributor\";b:1;}';
+      $access = 'a:12:{i:0;s:2:"20";i:1;s:2:"21";i:2;s:2:"22";i:3;s:2:"23";i:4;s:2:"24";i:5;s:2:"26";i:6;s:2:"27";i:7;s:2:"28";i:8;s:2:"29";i:9;s:2:"31";i:10;s:2:"32";i:11;s:2:"39";}';
+      $bp_xprofile_visibility_levels = 'a:12:{i:1;s:6:"public";i:60;s:6:"public";i:61;s:6:"public";i:49;s:6:"public";i:55;s:6:"public";i:48;s:6:"public";i:62;s:6:"public";i:63;s:6:"public";i:68;s:6:"public";i:76;s:6:"public";i:120;s:6:"public";i:81;s:6:"public";}';
+      $capabilities = 'a:1:{s:11:"contributor";b:1;}';
       $user_level = '1';
 
       switch ($utilisateurMeta['U_ID']) {
         case '2': //Ex-telabotaniste
           $access = 'a:0:{}';
-          $bp_xprofile_visibility_levels = 'a:18:{i:46;s:10:\"adminsonly\";i:10;s:10:\"adminsonly\";i:9;s:10:\"adminsonly\";i:3;s:10:\"adminsonly\";i:592;s:10:\"adminsonly\";i:4;s:10:\"adminsonly\";i:59;s:6:"public";i:1;s:6:"public";i:51;s:6:"public";i:54;s:6:"public";i:53;s:10:\"adminsonly\";i:2;s:10:\"adminsonly\";i:52;s:10:\"adminsonly\";i:26;s:10:\"adminsonly\";i:12;s:10:\"adminsonly\";i:69;s:10:\"adminsonly\";i:63;s:10:\"adminsonly\";i:61;s:10:\"adminsonly\";}';
-          $capabilities = 'a:1:{s:15:\"deleted_tb_user\";b:1;}';
+          $bp_xprofile_visibility_levels = 'a:18:{i:46;s:10:"adminsonly";i:10;s:10:"adminsonly";i:9;s:10:"adminsonly";i:3;s:10:"adminsonly";i:592;s:10:"adminsonly";i:4;s:10:"adminsonly";i:59;s:6:"public";i:1;s:6:"public";i:51;s:6:"public";i:54;s:6:"public";i:53;s:10:"adminsonly";i:2;s:10:"adminsonly";i:52;s:10:"adminsonly";i:26;s:10:"adminsonly";i:12;s:10:"adminsonly";i:69;s:10:"adminsonly";i:63;s:10:"adminsonly";i:61;s:10:"adminsonly";}';
+          $capabilities = 'a:1:{s:15:"deleted_tb_user";b:1;}';
           $user_level = '0';
           break;
         case '5': //tb_president
-          $capabilities = 'a:1:{s:12:\"tb_president\";b:1;}';
+          $capabilities = 'a:1:{s:12:"tb_president";b:1;}';
           break;
         default:
           break;
@@ -62,13 +62,13 @@ class UserMetaMigration extends BaseMigration {
       . "({$utilisateurMeta['U_ID']}, 'admin_color', 'fresh'), "
       . "({$utilisateurMeta['U_ID']}, 'use_ssl', '0'), "
       . "({$utilisateurMeta['U_ID']}, 'show_admin_bar_front', 'true'), "
-      . "({$utilisateurMeta['U_ID']}, '" . $this->wpTablePrefix . "capabilities', $capabilities), "
-      . "({$utilisateurMeta['U_ID']}, '" . $this->wpTablePrefix . "user_level', $user_level), "
+      . "({$utilisateurMeta['U_ID']}, '" . $this->wpTablePrefix . "capabilities', $this->wpDbConnection->quote($capabilities)), "
+      . "({$utilisateurMeta['U_ID']}, '" . $this->wpTablePrefix . "user_level', $this->wpDbConnection->quote($user_level)), "
       . "({$utilisateurMeta['U_ID']}, 'dismissed_wp_pointers', ''), "
       . "({$utilisateurMeta['U_ID']}, 'wp_dashboard_quick_press_last_post_id', '63'), " // c koi ?
       . "({$utilisateurMeta['U_ID']}, '_restrict_media', '1'), " // lié au plugin restrict author media
-      . "({$utilisateurMeta['U_ID']}, '_access', $access), "
-      . "({$utilisateurMeta['U_ID']}, 'bp_xprofile_visibility_levels', $bp_xprofile_visibility_levels) "
+      . "({$utilisateurMeta['U_ID']}, '_access', $this->wpDbConnection->quote($access)), "
+      . "({$utilisateurMeta['U_ID']}, 'bp_xprofile_visibility_levels', $this->wpDbConnection->quote($bp_xprofile_visibility_levels)) "
       . ";";
 
       try {
