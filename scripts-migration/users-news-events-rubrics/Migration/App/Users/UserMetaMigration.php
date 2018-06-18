@@ -62,13 +62,13 @@ class UserMetaMigration extends BaseMigration {
       . "({$utilisateurMeta['U_ID']}, 'admin_color', 'fresh'), "
       . "({$utilisateurMeta['U_ID']}, 'use_ssl', '0'), "
       . "({$utilisateurMeta['U_ID']}, 'show_admin_bar_front', 'true'), "
-      . "({$utilisateurMeta['U_ID']}, '" . $this->wpTablePrefix . "capabilities', {$capabilities}), "
-      . "({$utilisateurMeta['U_ID']}, '" . $this->wpTablePrefix . "user_level', {$user_level}), "
+      . "({$utilisateurMeta['U_ID']}, '" . $this->wpTablePrefix . "capabilities', $capabilities), "
+      . "({$utilisateurMeta['U_ID']}, '" . $this->wpTablePrefix . "user_level', $user_level), "
       . "({$utilisateurMeta['U_ID']}, 'dismissed_wp_pointers', ''), "
       . "({$utilisateurMeta['U_ID']}, 'wp_dashboard_quick_press_last_post_id', '63'), " // c koi ?
       . "({$utilisateurMeta['U_ID']}, '_restrict_media', '1'), " // lié au plugin restrict author media
-      . "({$utilisateurMeta['U_ID']}, '_access', '{$access}'), "
-      . "({$utilisateurMeta['U_ID']}, 'bp_xprofile_visibility_levels', '{$bp_xprofile_visibility_levels}') "
+      . "({$utilisateurMeta['U_ID']}, '_access', $access), "
+      . "({$utilisateurMeta['U_ID']}, 'bp_xprofile_visibility_levels', $bp_xprofile_visibility_levels) "
       . ";";
 
       try {
