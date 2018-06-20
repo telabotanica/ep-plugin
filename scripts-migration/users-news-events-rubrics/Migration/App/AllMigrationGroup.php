@@ -16,7 +16,8 @@ class AllMigrationGroup extends MigrationGroup {
     parent::__construct([
         new UserMigrationGroup(),
         new NewsEventMigrationGroup(),
-        new RubricMigrationGroup()
+        new RubricMigrationGroup(),
+        new CoversMigrationGroup(),
       ]);
   }
 

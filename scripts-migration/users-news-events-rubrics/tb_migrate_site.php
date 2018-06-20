@@ -34,6 +34,7 @@ use \Migration\Api\MigrationFactory;
 use \Migration\App\Config\ConfEntryValuesEnum;
 use \Migration\App\Config\DbNamesEnum;
 use \Migration\Api\FailureNotifier;
+use \Migration\Api\MigrationException;
 
 $context = $argv[1];
 
