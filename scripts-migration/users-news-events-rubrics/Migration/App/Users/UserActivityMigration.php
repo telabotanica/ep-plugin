@@ -24,7 +24,7 @@ class UserActivityMigration extends BaseMigration {
     foreach ($utilisateurs as $utilisateur) {
       $query = 'INSERT INTO ' . $this->wpTablePrefix . "bp_activity
       (`id`, `user_id`, `component`, `type`, `action`, `content`, `primary_link`, `item_id`, `secondary_item_id`, `date_recorded`, `hide_sitewide`, `mptt_left`, `mptt_right`, `is_spam`)
-      VALUES (NULL, {:userId}, 'members', 'last_activity', '', '', '', '0', NULL, '2017-05-19 15:06:16', '0', '0', '0', '0');"; // @todo voir si ON DUPLICATE KEY UPDATE est pertinent ici mais on dirait bien
+      VALUES (NULL, :userId, 'members', 'last_activity', '', '', '', '0', NULL, '2017-05-19 15:06:16', '0', '0', '0', '0');"; // @todo voir si ON DUPLICATE KEY UPDATE est pertinent ici mais on dirait bien
 
       try {
         $this->wpDbConnection->exec($query, [':userId' => $utilisateur['U_ID']]);

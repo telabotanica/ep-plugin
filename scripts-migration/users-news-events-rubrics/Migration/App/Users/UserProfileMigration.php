@@ -96,12 +96,12 @@ class UserProfileMigration extends BaseMigration {
       }
 
       $requeteInsert = "INSERT INTO " . $this->wpTablePrefix . "bp_xprofile_data (`field_id`, `user_id`, `value`, `last_updated`) VALUES
-        ('3', {$utilisateur['U_ID']}, {:pays}, '2017-05-19 15:06:16'),
-        ('4', {$utilisateur['U_ID']}, {:city}, '2017-05-19 15:06:16'),
-        ('9', {$utilisateur['U_ID']}, {:name}, '2017-05-19 15:06:16'),
-        ('10', {$utilisateur['U_ID']}, {:surname}, '2017-05-19 15:06:16'),
-        ('592', {$utilisateur['U_ID']}, {:zipcode}, '2017-05-19 15:06:16'),
-        ('21', {$utilisateur['U_ID']}, {:siteperso}, '2017-05-19 15:06:16')";
+        ('3', {$utilisateur['U_ID']}, :pays, '2017-05-19 15:06:16'),
+        ('4', {$utilisateur['U_ID']}, :city, '2017-05-19 15:06:16'),
+        ('9', {$utilisateur['U_ID']}, :name, '2017-05-19 15:06:16'),
+        ('10', {$utilisateur['U_ID']}, :surname, '2017-05-19 15:06:16'),
+        ('592', {$utilisateur['U_ID']}, :zipcode, '2017-05-19 15:06:16'),
+        ('21', {$utilisateur['U_ID']}, :siteperso, '2017-05-19 15:06:16')";
       if (isset($supp[$utilisateur['U_ID']])) {
         foreach ($supp[$utilisateur['U_ID']] as $num => $val){
           $requeteInsert .= ",(" . AnnuaireTelaBpProfileDataMap::getCategory($num) . ", {$utilisateur['U_ID']}, {$this->wpDbConnection->quote($val)}, '2017-05-19 15:06:16')";

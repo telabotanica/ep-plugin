@@ -32,12 +32,14 @@ class UserMetaMigration extends BaseMigration {
         $nickname = $pseudo['pseudo'];
       }
 
-      // _access est pour définir les catégories d'articles que l'utilisateur pourra écrire
+      // meta provenant du plugin Restrict Author Media :
+      //  _access est pour définir les catégories d'articles que l'utilisateur pourra écrire
+      //  _restrict_media permet de n'afficher que les medias de l'utilisateur courant dans la galerie
       $query = 'INSERT INTO ' . $this->wpTablePrefix . "usermeta (`user_id`, `meta_key`, `meta_value`) VALUES "
       . "({$utilisateurMeta['U_ID']}, 'last_activity', '2017-05-19 15:06:16'), "
-      . "({$utilisateurMeta['U_ID']}, 'first_name', {:surname}), "
-      . "({$utilisateurMeta['U_ID']}, 'last_name', {:name}), "
-      . "({$utilisateurMeta['U_ID']}, 'nickname', {:nickname}), "
+      . "({$utilisateurMeta['U_ID']}, 'first_name', :surname), "
+      . "({$utilisateurMeta['U_ID']}, 'last_name', :name), "
+      . "({$utilisateurMeta['U_ID']}, 'nickname', :nickname), "
       . "({$utilisateurMeta['U_ID']}, 'description', ''), "
       . "({$utilisateurMeta['U_ID']}, 'rich_editing', 'true'), "
       . "({$utilisateurMeta['U_ID']}, 'comment_shortcuts', 'false'), "
@@ -48,7 +50,7 @@ class UserMetaMigration extends BaseMigration {
       . "({$utilisateurMeta['U_ID']}, '" . $this->wpTablePrefix . "user_level', '1'), "
       . "({$utilisateurMeta['U_ID']}, 'dismissed_wp_pointers', ''), "
       . "({$utilisateurMeta['U_ID']}, 'wp_dashboard_quick_press_last_post_id', '63'), " // c koi ?
-      . "({$utilisateurMeta['U_ID']}, '_restrict_media', '1'), " // lié au plugin restrict author media
+      . "({$utilisateurMeta['U_ID']}, '_restrict_media', '1'), "
       . "({$utilisateurMeta['U_ID']}, '_access', 'a:4:{i:0;s:1:\"2\";i:1;s:1:\"5\";i:2;s:1:\"6\";i:3;s:1:\"7\";}'), "
       . "({$utilisateurMeta['U_ID']}, 'bp_xprofile_visibility_levels', 'a:12:{i:1;s:6:\"public\";i:60;s:6:\'public\';i:61;s:6:\'public\';i:49;s:6:\'public\';i:55;s:6:\'public\';i:48;s:6:\'public\';i:62;s:6:\'public\';i:63;s:6:\'public\';i:68;s:6:\'public\';i:76;s:6:\'public\';i:120;s:6:\'public\';i:81;s:6:\'public\';}') "
       . ";";
@@ -85,7 +87,7 @@ class UserMetaMigration extends BaseMigration {
   private function insertUserIntoBpXprofileDataTable($utilisateurId, $nickname) {
 
     $requete_pseudo_bp = "INSERT INTO " . $this->wpTablePrefix . "bp_xprofile_data (`field_id`, `user_id`, `value`, `last_updated`) VALUES
-    ('1', {:userId}, {:nickname}, '2017-05-19 15:06:16')
+    ('1', :userId, :nickname, '2017-05-19 15:06:16')
     ON DUPLICATE KEY UPDATE `field_id`=VALUES(`field_id`), `user_id`=VALUES(`user_id`), `value`=VALUES(`value`), `last_updated`=VALUES(`last_updated`);";
 
     try {
