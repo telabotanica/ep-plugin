@@ -9,6 +9,7 @@ use Migration\App\NewsEvents\NewsEventMigrationGroup;
 
 /**
  * Migrates users/news-events/rubrics related data.
+ * But quickly, for test purposes (user migration is really slow)
  */
 class QuickTestMigrationGroup extends MigrationGroup {
 

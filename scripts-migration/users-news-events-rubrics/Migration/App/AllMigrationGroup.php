@@ -9,7 +9,7 @@ use Migration\App\NewsEvents\NewsEventMigrationGroup;
 use Migration\App\Covers\CoversMigrationGroup;
 
 /**
- * Migrates users/news-events/rubrics related data.
+ * Migrates users/news-events/rubric/covers related data.
  */
 class AllMigrationGroup extends MigrationGroup {
 
