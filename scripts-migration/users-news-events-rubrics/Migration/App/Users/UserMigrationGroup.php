@@ -12,14 +12,14 @@ use Migration\App\Config\DbNamesEnum;
  */
 class UserMigrationGroup extends MigrationGroup {
 
-  function __construct() {
+  function __construct($test = false) {
     $userDbResetter = new UserDbResetter(DbNamesEnum::Wp);
     parent::__construct([
       new UserMigration(),
       new UserMetaMigration(),
       new UserProfileMigration(),
       new UserActivityMigration()
-    ], $userDbResetter);
+    ], $userDbResetter, $test);
 
   }
 

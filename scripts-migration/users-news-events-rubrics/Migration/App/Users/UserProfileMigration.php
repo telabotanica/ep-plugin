@@ -16,9 +16,12 @@ class UserProfileMigration extends BaseMigration {
   /**
   * Migrates user profiles from Tela DB to WP/BP DB..
   */
-  public function migrate() {
+  public function migrate($test = false) {
 
-     $requete_supp = "SELECT *  FROM `annu_meta_valeurs` WHERE `amv_ce_colonne` in (99, 2, 137, 4, 8, 120, 133, 132, 125, 14, 15) AND (amv_valeur != ''  AND amv_valeur != 0)";
+    $requete_supp = "SELECT *  FROM `annu_meta_valeurs` WHERE `amv_ce_colonne` in (99, 2, 137, 4, 8, 120, 133, 132, 125, 14, 15) AND (amv_valeur != ''  AND amv_valeur != 0)";
+    if ($test) {
+        $requete_supp .= ' AND `amv_cle_ligne` < 300';
+    }
     $infos_supp = $this->telaDbConnection->query($requete_supp)->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($infos_supp as $infos) {

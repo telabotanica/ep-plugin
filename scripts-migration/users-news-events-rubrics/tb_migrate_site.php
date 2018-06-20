@@ -43,7 +43,8 @@ $contextMigrationClassMap = array(
   'news-events'  => '\Migration\App\NewsEvents\NewsEventMigrationGroup',
   'covers'       => '\Migration\App\Covers\CoversMigrationGroup',
   'rubrics'      => '\Migration\App\Rubrics\RubricMigrationGroup',
-  'all'          => '\Migration\App\AllMigrationGroup'
+  'all'          => '\Migration\App\AllMigrationGroup',
+  'quick-test'   => '\Migration\App\QuickTestMigrationGroup',
 );
 
 $migrationFactory = new MigrationFactory($contextMigrationClassMap);

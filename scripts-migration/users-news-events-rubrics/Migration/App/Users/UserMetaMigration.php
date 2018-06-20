@@ -15,9 +15,12 @@ class UserMetaMigration extends BaseMigration {
   /**
    * Migrates user metas from Tela DB to WP/BP DB..
    */
-  public function migrate() {
+  public function migrate($test = false) {
 
     $requeteUtilisateursMeta = "SELECT `U_ID`, `U_NAME`, `U_SURNAME` FROM `annuaire_tela`;";
+    if ($test) {
+      $requeteUtilisateursMeta .= ' WHERE `U_ID` < 300';
+    }
     $utilisateursMeta = $this->telaDbConnection->query($requeteUtilisateursMeta)->fetchAll(PDO::FETCH_ASSOC);
 
     $compteur = 0;

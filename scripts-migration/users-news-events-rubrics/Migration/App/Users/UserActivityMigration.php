@@ -15,9 +15,12 @@ class UserActivityMigration extends BaseMigration {
   /**
    * Migrates user activities from Tela DB to WP/BP DB..
    */
-  public function migrate() {
+  public function migrate($test = false) {
 
     $requete = 'SELECT `U_ID` FROM `annuaire_tela`;';
+    if ($test) {
+      $requete .= ' WHERE `U_ID` < 300';
+    }
     $utilisateurs = $this->telaDbConnection->query($requete)->fetchAll(PDO::FETCH_ASSOC);
 
     $compteur = 0;

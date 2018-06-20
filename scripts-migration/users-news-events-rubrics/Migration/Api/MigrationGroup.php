@@ -15,10 +15,13 @@ class MigrationGroup implements Migration {
   protected $migrations;
   // The DbResetter to reset target DB:
   private $dbResetter;
+  // Testing session ?
+  protected $test;
 
-  public function __construct($migrations, $dbResetter = null) {
+  public function __construct($migrations, $dbResetter = null, $test = false) {
     $this->migrations = $migrations;
     $this->dbResetter = $dbResetter;
+    $this->test = $test;
   }
 
   /**
@@ -29,7 +32,7 @@ class MigrationGroup implements Migration {
       $this->dbResetter->resetDb();
     }
     foreach($this->migrations as $migration) {
-      $migration->migrate();
+      $migration->migrate($this->test);
     }
   }
 

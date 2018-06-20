@@ -52,9 +52,9 @@ class UserMigration extends BaseMigration {
   * Si ça a déjà été fait, ça écrase les valeurs éxistantes coté WordPress
   * Peut donc être relancé plusieurs fois avant la mise en prod
   */
-  public function migrate() {
+  public function migrate($test = false) {
 
-    $utilisateurs = $this->fetchTelaDbUsers();
+    $utilisateurs = $this->fetchTelaDbUsers($test);
 
     foreach ($utilisateurs as $utilisateur) {
       $intitule = $utilisateur['U_SURNAME'] . ' ' . ucwords(strtolower($utilisateur['U_NAME']));
@@ -218,7 +218,7 @@ class UserMigration extends BaseMigration {
   /**
    * Returns records for all users in Tela DB
    **/
-  private function fetchTelaDbUsers() {
+  private function fetchTelaDbUsers($test = false) {
     $resuls = null;
     $requeteUtilisateurs = "SELECT `U_ID` AS `ID`,
     `U_MAIL` AS `user_login`,
@@ -230,6 +230,10 @@ class UserMigration extends BaseMigration {
     `U_NAME`,
     concat(`U_SURNAME`,' ',`U_NAME`) AS display_name
     FROM `annuaire_tela`";
+
+    if ($test) {
+      $requeteUtilisateurs .= ' WHERE `U_ID` < 300';
+    }
 
     try {
       $resuls = $this->telaDbConnection->query($requeteUtilisateurs)->fetchAll(PDO::FETCH_ASSOC);
