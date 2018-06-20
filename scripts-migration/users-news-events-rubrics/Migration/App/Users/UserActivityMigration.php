@@ -19,7 +19,7 @@ class UserActivityMigration extends BaseMigration {
 
     $requete = 'SELECT `U_ID` FROM `annuaire_tela`;';
     if ($test) {
-      $requete .= ' WHERE `U_ID` < 300';
+      $requete .= ' WHERE `U_ID` < 100';
     }
     $utilisateurs = $this->telaDbConnection->query($requete)->fetchAll(PDO::FETCH_ASSOC);
 

@@ -232,7 +232,7 @@ class UserMigration extends BaseMigration {
     FROM `annuaire_tela`";
 
     if ($test) {
-      $requeteUtilisateurs .= ' WHERE `U_ID` < 300';
+      $requeteUtilisateurs .= ' WHERE `U_ID` < 100';
     }
 
     try {

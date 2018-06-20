@@ -19,7 +19,7 @@ class UserMetaMigration extends BaseMigration {
 
     $requeteUtilisateursMeta = "SELECT `U_ID`, `U_NAME`, `U_SURNAME` FROM `annuaire_tela`;";
     if ($test) {
-      $requeteUtilisateursMeta .= ' WHERE `U_ID` < 300';
+      $requeteUtilisateursMeta .= ' WHERE `U_ID` < 100';
     }
     $utilisateursMeta = $this->telaDbConnection->query($requeteUtilisateursMeta)->fetchAll(PDO::FETCH_ASSOC);
 

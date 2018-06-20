@@ -20,7 +20,7 @@ class UserProfileMigration extends BaseMigration {
 
     $requete_supp = "SELECT *  FROM `annu_meta_valeurs` WHERE `amv_ce_colonne` in (99, 2, 137, 4, 8, 120, 133, 132, 125, 14, 15) AND (amv_valeur != ''  AND amv_valeur != 0)";
     if ($test) {
-        $requete_supp .= ' AND `amv_cle_ligne` < 300';
+        $requete_supp .= ' AND `amv_cle_ligne` < 100';
     }
     $infos_supp = $this->telaDbConnection->query($requete_supp)->fetchAll(PDO::FETCH_ASSOC);
 
