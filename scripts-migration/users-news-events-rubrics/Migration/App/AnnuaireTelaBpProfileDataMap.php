@@ -34,6 +34,15 @@ class AnnuaireTelaBpProfileDataMap {
     '30807' => 'Zones tropicales' // Zones géographiques : subtropicales à tropicales
   ];
 
+  private static $correspondances_espece_d_interet = [
+    '58499' => '', // y'a deux valeurs comme ça en base, correspondant à "Ajouté" (WTF?) donc j'ai vidé le champ
+    '60334' => 'Algues',
+    '226845' => 'Lichens',
+    '58479' => 'Champignons',
+    '189792' => 'Mousses',
+    '71308' => 'Plantes vasculaires',
+  ];
+
 
   // Export des meta de buddypress :
   // INSERT INTO `bp_xprofile_fields` (`id`, `group_id`, `parent_id`, `type`, `name`, `description`, `is_required`, `is_default_option`, `field_order`, `option_order`, `order_by`, `can_delete`)
@@ -256,6 +265,10 @@ class AnnuaireTelaBpProfileDataMap {
 
   public static function getGeoZone($annuaireTelaValue) {
     return self::$correspondances_zones_geo[$annuaireTelaValue];
+  }
+
+  public static function getSpeciesInterest($annuaireTelaValue) {
+    return self::$correspondances_espece_d_interet[$annuaireTelaValue];
   }
 
   public static function getCategory($annuaireTelaValue) {

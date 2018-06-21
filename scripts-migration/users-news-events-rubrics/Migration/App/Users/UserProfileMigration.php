@@ -49,13 +49,25 @@ class UserProfileMigration extends BaseMigration {
           break;
         case 120: // Spécialités (zone géographique)
           // exemple: a:3:{i:0;s:16:"Zones tropicales";i:1;s:24:"Zones méditerranéennes";i:2;s:8:"Montagne";}
+          $zones_geo_pouet = [];
           $zones_geo = explode(';;', $infos['amv_valeur']);
-          if (count($zones_geo)) {
-            $supp[$infos['amv_cle_ligne']][$infos['amv_ce_colonne']] = serialize($zones_geo);
+          foreach ($zones_geo as $zone_geo) {
+            $zones_geo_pouet[] = AnnuaireTelaBpProfileDataMap::getGeoZone($zone_geo);
+          }
+          if (count($zones_geo_pouet)) {
+            $supp[$infos['amv_cle_ligne']][$infos['amv_ce_colonne']] = serialize($zones_geo_pouet);
           }
 
           break;
-        case 8: // Spécialités (groupe(s) de plantes étudié(s))
+        case 8: // Spécialités (groupe(s) de plantes étudié(s)) espèces d'intérêt
+          $especes = [];
+          $especes_d_interet = explode(';;', $infos['amv_valeur']);
+          foreach ($especes_d_interet as $espece_d_interet) {
+            if (0 != $espece_d_interet && '' != AnnuaireTelaBpProfileDataMap::getSpeciesInterest($espece_d_interet)) {
+              $especes[] = AnnuaireTelaBpProfileDataMap::getSpeciesInterest($espece_d_interet);
+            }
+          }
+          $supp[$infos['amv_cle_ligne']][$infos['amv_ce_colonne']] = implode(', ', $especes);
         case 14: // Inscription à la lettre d'actualité
         case 99: // Pseudo
         case 125: // Présentation
