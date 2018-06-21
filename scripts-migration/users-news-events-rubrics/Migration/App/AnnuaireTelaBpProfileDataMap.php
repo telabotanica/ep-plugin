@@ -35,12 +35,12 @@ class AnnuaireTelaBpProfileDataMap {
   ];
 
   private static $correspondances_espece_d_interet = [
-    '58499' => '', // y'a deux valeurs comme ça en base, correspondant à "Ajouté" (WTF?) donc j'ai vidé le champ
-    '60334' => 'Algues',
-    '226845' => 'Lichens',
-    '58479' => 'Champignons',
-    '189792' => 'Mousses',
-    '71308' => 'Plantes vasculaires',
+    '1' => '', // y'a deux valeurs comme ça en base, correspondant à "Ajouté" (WTF?) donc j'ai vidé le champ
+    '30829' => 'Algues',
+    '30835' => 'Lichens',
+    '30836' => 'Champignons',
+    '30837' => 'Mousses',
+    '30838' => 'Plantes vasculaires',
   ];
 
 
