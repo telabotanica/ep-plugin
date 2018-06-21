@@ -17,7 +17,7 @@ class UserActivityMigration extends BaseMigration {
    */
   public function migrate($test = false) {
 
-    $requete = 'SELECT `U_ID` FROM `annuaire_tela`;';
+    $requete = 'SELECT `U_ID` FROM `annuaire_tela`';
     if ($test) {
       $requete .= ' WHERE `U_ID` < 100';
     }

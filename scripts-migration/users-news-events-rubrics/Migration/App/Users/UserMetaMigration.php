@@ -17,7 +17,7 @@ class UserMetaMigration extends BaseMigration {
    */
   public function migrate($test = false) {
 
-    $requeteUtilisateursMeta = "SELECT `U_ID`, `U_NAME`, `U_SURNAME` FROM `annuaire_tela`;";
+    $requeteUtilisateursMeta = "SELECT `U_ID`, `U_NAME`, `U_SURNAME` FROM `annuaire_tela`";
     if ($test) {
       $requeteUtilisateursMeta .= ' WHERE `U_ID` < 100';
     }
