@@ -68,6 +68,7 @@ class UserProfileMigration extends BaseMigration {
             }
           }
           $supp[$infos['amv_cle_ligne']][$infos['amv_ce_colonne']] = implode(', ', $especes);
+          break;
         case 14: // Inscription à la lettre d'actualité
         case 99: // Pseudo
         case 125: // Présentation
