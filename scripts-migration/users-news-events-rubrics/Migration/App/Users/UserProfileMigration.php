@@ -81,7 +81,10 @@ class UserProfileMigration extends BaseMigration {
     }
 
     $requete = "SELECT `U_ID`, `U_NAME`, `U_SURNAME`, U_WEB, `U_CITY`, `U_COUNTRY`, pays, `U_ZIP_CODE` FROM `annuaire_tela`
-      LEFT JOIN (SELECT  `amo_nom` AS pays,  `amo_abreviation` FROM `annu_meta_ontologie` WHERE  `amo_ce_parent` = 1074) liste_pays  ON `amo_abreviation` = `U_COUNTRY`";
+      LEFT JOIN (SELECT  `amo_nom` AS pays,  `amo_abreviation` FROM `annu_meta_ontologie` WHERE  `amo_ce_parent` = 1074) liste_pays  ON (`amo_abreviation` = `U_COUNTRY`)";
+    if ($test) {
+      $requete .= ' WHERE `U_ID` < 100';
+    }
     $utilisateurs = $this->telaDbConnection->query($requete)->fetchAll(PDO::FETCH_ASSOC);
 
     $compteur = 0;
