@@ -17,7 +17,7 @@ class UserMetaMigration extends BaseMigration {
    */
   public function migrate($test = false) {
 
-    $requeteUtilisateursMeta = "SELECT `U_ID`, `U_NAME`, `U_SURNAME` FROM `annuaire_tela`";
+    $requeteUtilisateursMeta = "SELECT `U_ID`, `U_NAME`, `U_SURNAME`, `U_LETTRE` FROM `annuaire_tela`";
     if ($test) {
       $requeteUtilisateursMeta .= ' WHERE `U_ID` < 100';
     }
@@ -94,7 +94,7 @@ class UserMetaMigration extends BaseMigration {
         throw new MigrationException($e, $query, basename(__FILE__) . ':' . __FUNCTION__);
       }
 
-      $this->insertUserIntoBpXprofileDataTable($utilisateurMeta['U_ID'], $nickname);
+      $this->insertUserIntoBpXprofileDataTable($utilisateurMeta['U_ID'], $nickname, (bool) $utilisateurMeta['U_LETTRE']);
     }
 
     echo '-- ' . $compteur . '/' . count($utilisateursMeta) . ' metas d\'utilisateur migrées. ' . PHP_EOL;
@@ -107,23 +107,33 @@ class UserMetaMigration extends BaseMigration {
    *
    * @param      integer                            $utilisateurId  The utilisateur identifier
    * @param      string                             $nickname       The utilisateur nickname
+   * @param      bool                               $newsletter     The utilisateur newsletter subscribe state
    *
    * @throws     \Migration\Api\MigrationException  (description)
    */
-  private function insertUserIntoBpXprofileDataTable($utilisateurId, $nickname) {
+  private function insertUserIntoBpXprofileDataTable($utilisateurId, $nickname, $newsletter) {
 
-    $requete_pseudo_bp = "INSERT INTO " . $this->wpTablePrefix . "bp_xprofile_data (`field_id`, `user_id`, `value`, `last_updated`) VALUES
-    ('1', :userId, :nickname, '2017-05-19 15:06:16')
-    ON DUPLICATE KEY UPDATE `field_id`=VALUES(`field_id`), `user_id`=VALUES(`user_id`), `value`=VALUES(`value`), `last_updated`=VALUES(`last_updated`);";
+    $params = [
+      ':userId' => $utilisateurId,
+      ':nickname' => $nickname,
+    ];
+
+    $requete = "INSERT INTO " . $this->wpTablePrefix . "bp_xprofile_data (`field_id`, `user_id`, `value`, `last_updated`) VALUES
+      ('1', :userId, :nickname, '2017-05-19 15:06:16')";
+
+    if ($newsletter) {
+      $requete .= ",('54', :userId2, :newsletter, '2017-05-19 15:06:16')";
+      $params = $params + [
+        ':userId2' => $utilisateurId,
+        ':newsletter' => serialize(['Je souhaite recevoir la lettre d’actualité hebdomadaire']),
+      ];
+    }
 
     try {
-      $this->wpDbConnection->exec($requete_pseudo_bp, [
-        ':userId' => $utilisateurId,
-        ':nickname' => $nickname,
-      ]);
+      $this->wpDbConnection->exec($requete, $params);
     } catch(Exception $e) {
-      echo "-- ECHEC " . basename(__FILE__) . ':' . __FUNCTION__ . " REQUÊTE: [$requete_pseudo_bp]" . PHP_EOL;
-      throw new MigrationException($e, $requete_pseudo_bp, basename(__FILE__) . ':' . __FUNCTION__);
+      echo "-- ECHEC " . basename(__FILE__) . ':' . __FUNCTION__ . " REQUÊTE: [$requete]" . PHP_EOL;
+      throw new MigrationException($e, $requete, basename(__FILE__) . ':' . __FUNCTION__);
     }
 
   }// end method insertUserIntoBpXprofileDataTable($utilisateur)
