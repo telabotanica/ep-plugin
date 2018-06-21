@@ -17,7 +17,7 @@ class RubricDbResetter extends QueryDbResetter {
         parent::__construct($dbName);
         parent::setQueries([
           'DELETE term_relationships FROM term_relationships JOIN posts ON (posts.ID = term_relationships.object_id AND posts.post_type = "post")',
-          'DELETE FROM term_taxonomy WHERE term_id IN (' . AnnuaireTelaBpProfileDataMap::getWordpressCategoriesId() . ')'
+          'DELETE FROM term_taxonomy WHERE term_id IN ("' . implode('","', AnnuaireTelaBpProfileDataMap::getWordpressCategoriesId()) . '")'
         ]);
     }
 

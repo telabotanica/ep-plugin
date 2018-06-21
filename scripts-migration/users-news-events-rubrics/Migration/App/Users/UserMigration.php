@@ -52,9 +52,9 @@ class UserMigration extends BaseMigration {
   * Si ça a déjà été fait, ça écrase les valeurs éxistantes coté WordPress
   * Peut donc être relancé plusieurs fois avant la mise en prod
   */
-  public function migrate() {
+  public function migrate($test = false) {
 
-    $utilisateurs = $this->fetchTelaDbUsers();
+    $utilisateurs = $this->fetchTelaDbUsers($test);
 
     foreach ($utilisateurs as $utilisateur) {
       $intitule = $utilisateur['U_SURNAME'] . ' ' . ucwords(strtolower($utilisateur['U_NAME']));
@@ -120,8 +120,8 @@ class UserMigration extends BaseMigration {
         $utilisateur_existant = $this->wpDbConnection->query($requete_pseudo)->fetchAll(PDO::FETCH_ASSOC);
         // die(var_dump($utilisateur_existant));
       } catch(Exception $e) {
-        echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requete_pseudo]" . PHP_EOL;
-        throw new MigrationException($e, $requete_pseudo, __FUNCTION__);
+        echo "-- ECHEC " . basename(__FILE__) . ':' . __FUNCTION__ . " REQUÊTE: [$requete_pseudo]" . PHP_EOL;
+        throw new MigrationException($e, $requete_pseudo, basename(__FILE__) . ':' . __FUNCTION__);
       }
 
       if (!empty($utilisateur_existant)) {
@@ -165,8 +165,8 @@ class UserMigration extends BaseMigration {
       $this->wpDbConnection->exec($req);
       $this->userCount++;
     } catch(Exception $e) {
-      echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$req]" . PHP_EOL;
-      throw new MigrationException($e, $req, __FUNCTION__);
+      echo "-- ECHEC " . basename(__FILE__) . ':' . __FUNCTION__ . " REQUÊTE: [$req]" . PHP_EOL;
+      throw new MigrationException($e, $req, basename(__FILE__) . ':' . __FUNCTION__);
     }
 
   }// end method insertUserIntoWpUserTable($utilisateur)
@@ -185,8 +185,8 @@ class UserMigration extends BaseMigration {
     try {
       $usedPseudo = $this->telaDbConnection->query($usedPseudoQuery)->fetch(PDO::FETCH_ASSOC);
     } catch(Exception $e) {
-      echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requete_pseudo_bp]" . PHP_EOL;
-      throw new MigrationException($e, $requete_pseudo_bp, __FUNCTION__);
+      echo "-- ECHEC " . basename(__FILE__) . ':' . __FUNCTION__ . " REQUÊTE: [$requete_pseudo_bp]" . PHP_EOL;
+      throw new MigrationException($e, $requete_pseudo_bp, basename(__FILE__) . ':' . __FUNCTION__);
     }
 
     return $usedPseudo["pseudo_utilise"];
@@ -206,8 +206,8 @@ class UserMigration extends BaseMigration {
     try {
       $resuls = $this->telaDbConnection->query($pseudoQuery)->fetch(PDO::FETCH_ASSOC);
     } catch(Exception $e) {
-      echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$pseudoQuery]" . PHP_EOL;
-      throw new MigrationException($e, $pseudoQuery, __FUNCTION__);
+      echo "-- ECHEC " . basename(__FILE__) . ':' . __FUNCTION__ . " REQUÊTE: [$pseudoQuery]" . PHP_EOL;
+      throw new MigrationException($e, $pseudoQuery, basename(__FILE__) . ':' . __FUNCTION__);
     }
 
     return $resuls['pseudo'];
@@ -218,7 +218,7 @@ class UserMigration extends BaseMigration {
   /**
    * Returns records for all users in Tela DB
    **/
-  private function fetchTelaDbUsers() {
+  private function fetchTelaDbUsers($test = false) {
     $resuls = null;
     $requeteUtilisateurs = "SELECT `U_ID` AS `ID`,
     `U_MAIL` AS `user_login`,
@@ -231,11 +231,15 @@ class UserMigration extends BaseMigration {
     concat(`U_SURNAME`,' ',`U_NAME`) AS display_name
     FROM `annuaire_tela`";
 
+    if ($test) {
+      $requeteUtilisateurs .= ' WHERE `U_ID` < 100';
+    }
+
     try {
       $resuls = $this->telaDbConnection->query($requeteUtilisateurs)->fetchAll(PDO::FETCH_ASSOC);
     } catch(Exception $e) {
-      echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$pseudoQuery]" . PHP_EOL;
-      throw new MigrationException($e, $pseudoQuery, __FUNCTION__);
+      echo "-- ECHEC " . basename(__FILE__) . ':' . __FUNCTION__ . " REQUÊTE: [$pseudoQuery]" . PHP_EOL;
+      throw new MigrationException($e, $pseudoQuery, basename(__FILE__) . ':' . __FUNCTION__);
     }
 
     return $resuls;

@@ -34,6 +34,7 @@ use \Migration\Api\MigrationFactory;
 use \Migration\App\Config\ConfEntryValuesEnum;
 use \Migration\App\Config\DbNamesEnum;
 use \Migration\Api\FailureNotifier;
+use \Migration\Api\MigrationException;
 
 $context = $argv[1];
 
@@ -42,7 +43,8 @@ $contextMigrationClassMap = array(
   'news-events'  => '\Migration\App\NewsEvents\NewsEventMigrationGroup',
   'covers'       => '\Migration\App\Covers\CoversMigrationGroup',
   'rubrics'      => '\Migration\App\Rubrics\RubricMigrationGroup',
-  'all'          => '\Migration\App\AllMigrationGroup'
+  'all'          => '\Migration\App\AllMigrationGroup',
+  'quick-test'   => '\Migration\App\QuickTestMigrationGroup',
 );
 
 $migrationFactory = new MigrationFactory($contextMigrationClassMap);

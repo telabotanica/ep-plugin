@@ -27,8 +27,8 @@ class QueryDbResetter extends AbstractDbResetter {
       try {
         $this->dbConnection->exec($query);
       } catch (Exception $ex) {
-        echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$query]" . PHP_EOL;
-        throw new MigrationException($ex, $query, __FUNCTION__);
+        echo "-- ECHEC " . basename(__FILE__) . ':' . __FUNCTION__ . " REQUÊTE: [$query]" . PHP_EOL;
+        throw new MigrationException($ex, $query, basename(__FILE__) . ':' . __FUNCTION__);
       }
 
     }

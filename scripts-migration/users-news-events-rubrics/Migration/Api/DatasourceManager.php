@@ -5,7 +5,8 @@ namespace Migration\Api;
 require_once(dirname(__FILE__) . "/../App/Config/datasources.php");
 use const \Migration\App\Config\DATASOURCES;
 
-use  \PDO;
+use \PDO;
+use \Exception;
 
 /**
  * Singleton managing data sources (PDO objects).
@@ -73,14 +74,30 @@ class DatasourceManager {
 
   private function buildPdo($datasource) {
     $dsn = $this->buildDsn($datasource['host'], $datasource['port'], $datasource['dbname']);
-    $conn =  new PDO(
+    $conn = new PDObis(
       $dsn,
       $datasource['user'],
       $datasource['password'],
-      array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
+      array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8')
+    );
     //$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     return $conn;
   }
 
+}
+
+class PDObis extends PDO {
+  public function __construct($dsn, $username, $password, $options) {
+    parent::__construct($dsn, $username, $password, $options);
+  }
+
+  public function exec($query, $params = array()) {
+    $sth = $this->prepare($query);
+    if (false === $sth->execute($params)) {
+      throw new Exception($sth->errorInfo()[2]);
+    }
+
+    return $sth;
+  }
 }

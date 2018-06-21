@@ -39,14 +39,12 @@ class EventMigration extends BaseMigration {
 
       try {
         $this->wpDbConnection->exec($requete);
-        $lastInsertId =  $this->wpDbConnection->lastInsertId();
-        $wpmlIclTranslationDao->create("'post_post'", $lastInsertId, $trGrId, "'fr'", 'NULL');
-        $trGrId++;
+        $lastInsertId = $this->wpDbConnection->lastInsertId();
+        $wpmlIclTranslationDao->create("'post_post'", $lastInsertId, ++$trGrId, "'fr'", 'NULL');
         $compteur++;
       } catch(Exception $e) {
-        echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$requete]" . PHP_EOL;
-        $tb2beRestored = [$e->getMessage(), $e->getCode(), $this->wpTablePrefix . 'posts'];
-        throw new MigrationException($e, $requete, __FUNCTION__);
+        echo "-- ECHEC " . basename(__FILE__) . ':' . __FUNCTION__ . " REQUÊTE: [$requete]" . PHP_EOL;
+        throw new MigrationException($e, $requete, basename(__FILE__) . ':' . __FUNCTION__);
       }
 
       // collecte les infos pour l'enregistrement des redirections 301 des articles
@@ -62,10 +60,10 @@ class EventMigration extends BaseMigration {
       try {
         $this->wpDbConnection->exec($query);
       } catch(Exception $e) {
-        echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$query]" . PHP_EOL;
+        echo "-- ECHEC " . basename(__FILE__) . ':' . __FUNCTION__ . " REQUÊTE: [$query]" . PHP_EOL;
 
         if (true !== $modeBourrin) {
-          throw new MigrationException($e, $query, __FUNCTION__);
+          throw new MigrationException($e, $query, basename(__FILE__) . ':' . __FUNCTION__);
         }
       }
     }

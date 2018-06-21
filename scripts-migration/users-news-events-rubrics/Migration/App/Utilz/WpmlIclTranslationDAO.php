@@ -30,8 +30,8 @@ class WpmlIclTranslationDAO {
     try {
       $this->wpDbConnection->exec($wpMlInsertLanguageQuery);
     } catch(Exception $e) {
-      echo "-- ECHEC " . __FUNCTION__ . " REQUÊTE: [$wpMlInsertLanguageQuery]" . PHP_EOL;
-      throw new MigrationException($e, $wpMlInsertLanguageQuery, __FUNCTION__);
+      echo "-- ECHEC " . basename(__FILE__) . ':' . __FUNCTION__ . " REQUÊTE: [$wpMlInsertLanguageQuery]" . PHP_EOL;
+      throw new MigrationException($e, $wpMlInsertLanguageQuery, basename(__FILE__) . ':' . __FUNCTION__);
     }
   }
 
