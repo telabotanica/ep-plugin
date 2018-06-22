@@ -72,10 +72,11 @@ class RubricMigration extends BaseMigration {
       VALUES(:eventId, :rubriqueId)
       ON DUPLICATE KEY UPDATE `object_id`=VALUES(`object_id`), `term_taxonomy_id`=VALUES(`term_taxonomy_id`);';
 
-      $updateCompteur = 'INSERT INTO ' . $this->wpTablePrefix . 'term_taxonomy (`term_id`, `taxonomy`, `count`) '
-      . 'VALUES(:rubriqueId, "category", 1)'
-      . 'ON DUPLICATE KEY UPDATE `term_id`=VALUES(`term_id`), `taxonomy`=VALUES(`taxonomy`), `count`=`count`+1'
-      ;
+      $updateCompteur = "
+        UPDATE {$this->wpTablePrefix}term_taxonomy
+        SET count=count+1
+        WHERE taxonomy = :rubriqueId
+      ";
 
       try {
         $this->wpDbConnection->exec($requete, [
