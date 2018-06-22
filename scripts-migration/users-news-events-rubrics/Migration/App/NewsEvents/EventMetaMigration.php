@@ -62,10 +62,10 @@ class EventMetaMigration  extends BaseMigration {
     SELECT `bf_id_fiche`+10000 AS post_id,  '_edit_last' AS meta_key, CONVERT('1'  USING utf8) $fin UNION
     SELECT `bf_id_fiche`+10000 AS post_id,  '_alp_processed' AS meta_key, CONVERT('1476891070'  USING utf8) $fin UNION
 
-    SELECT `bf_id_fiche`+10000 AS post_id,  '_place' AS meta_key, CONVERT('field_580366d5a9e01'  USING utf8) $fin UNION
+    SELECT `bf_id_fiche`+10000 AS post_id,  '_place' AS meta_key, CONVERT('field_58337bc15ecd7'  USING utf8) $fin UNION
     SELECT `bf_id_fiche`+10000 AS post_id,  'place' AS meta_key, CONCAT('{\"type\":\"address\",\"name\":\"', CONVERT(bf_adresse USING utf8),'\",\"city\":\"\",\"country\":\"\",\"countryCode\":\"\",\"administrative\":\"\",\"latlng\":{\"lat\":', CONVERT(bf_latitude USING utf8),',\"lng\":', CONVERT(bf_longitude USING utf8),'},\"postcode\":\"', CONVERT(bf_cp_lieu_evenement USING utf8),'\",\"value\":\"', CONVERT(bf_adresse USING utf8), ' ', CONVERT(bf_cp_lieu_evenement USING utf8),'\"}') $fin UNION
 
-    SELECT `bf_id_fiche`+10000 AS post_id,  '_contact_0_description' AS meta_key, CONVERT('field_580e45789024f'  USING utf8) $fin UNION
+    SELECT `bf_id_fiche`+10000 AS post_id,  '_contact_0_description' AS meta_key, CONVERT('field_582c88326af66'  USING utf8) $fin UNION
     SELECT `bf_id_fiche`+10000 AS post_id,  'contact_0_description' AS meta_key, CONVERT(bf_nom_contact  USING utf8) $fin UNION
 
     SELECT `bf_id_fiche`+10000 AS post_id,  '_prices' AS meta_key, CONVERT('field_5803a6059a5d1'  USING utf8) $fin UNION
@@ -75,7 +75,7 @@ class EventMetaMigration  extends BaseMigration {
 
     SELECT `bf_id_fiche`+10000 AS post_id,  '_image' AS meta_key, CONVERT('field_5803a65a08014'  USING utf8) $fin UNION
     SELECT `bf_id_fiche`+10000 AS post_id,  'image' AS meta_key, CONVERT(''  USING utf8) $fin UNION
-    SELECT `bf_id_fiche`+10000 AS post_id,  '_contact' AS meta_key, CONVERT('field_580e45279024d'  USING utf8) $fin UNION
+    SELECT `bf_id_fiche`+10000 AS post_id,  '_contact' AS meta_key, CONVERT('field_582c87e96af64'  USING utf8) $fin UNION
     SELECT `bf_id_fiche`+10000 AS post_id,  'contact' AS meta_key, CONVERT('1'  USING utf8) $fin UNION
 
     SELECT `bf_id_fiche`+10000 AS post_id,  '_description' AS meta_key, CONVERT('field_580366bfa9e00'  USING utf8) $fin UNION
