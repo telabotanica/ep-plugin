@@ -36,6 +36,8 @@ class EventMetaMigration  extends BaseMigration {
   */
   public function migrate() {
 
+    $codespostaux = file_get_contents(dirname(__FILE__) . '/../../Api/laposte_hexasmal.csv');
+
     $fin = 'AS meta_value FROM `bazar_fiche` WHERE year(`bf_date_debut_validite_fiche`) >= 2017 AND bf_statut_fiche = 1';
 
     // brouillon d'exemple
@@ -93,6 +95,32 @@ class EventMetaMigration  extends BaseMigration {
 
     $compteur = 0;
     foreach ($evenementsChampsACF as $champACF) {
+      // on va passer chaque evenement à la moulinette pour trouver sa ville
+      if ('place' === $champACF['meta_key']) {
+        $place = json_decode(str_replace(array("\r\n", "\n", "\r"), ', ', $champACF['meta_value']), true);
+        $pattern = '@^' . $place['postcode'] . ',([\w ]*)$@m';
+        // on cherche les différentes villes correspondant au code postal
+        if (preg_match_all($pattern, $codespostaux, $matches)) {
+          // on cherche si une des villes trouvées est présente dans le texte
+          foreach ($matches[1] as $ville) {
+            $pattern = '@'.$ville.'@';
+            // faut normaliser la ville, remplacer tout ce qui n'est pas une lettre par un espace
+            $subject = preg_replace('@\W*@', ' ', $place['name']);
+            // si on trouve pas ou qu'on a pas le choix on fait un choix par défaut
+            if (preg_match($pattern, $subject) || 1 === count($matches[1]) || $ville === end($matches[1])) {
+              $place['city'] = ucwords(strtolower($ville));
+              $place['country'] = 'France';
+              $place['countryCode'] = 'fr';
+              $place['value'] .= ' ' . $place['city'] . ' ' . $place['country'];
+
+              break;
+            }
+          }
+          // on applique les changements
+          $champACF['meta_value'] = json_encode($place);
+        } // code postal inconnu, koikonfait ? OSEF ? On met city=inconnue ?
+      }
+
       $requete = 'INSERT INTO ' . $this->wpTablePrefix . 'postmeta (`post_id`, `meta_key`, `meta_value`) VALUES'
       . '(' . implode(', ', array_map(array($this->wpDbConnection, 'quote'), $champACF)) . ')'
       . 'ON DUPLICATE KEY UPDATE `post_id`=VALUES(`post_id`), `meta_key`=VALUES(`meta_key`), `meta_value`=VALUES(`meta_value`);'
