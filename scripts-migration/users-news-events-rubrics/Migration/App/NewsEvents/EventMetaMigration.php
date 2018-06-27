@@ -94,6 +94,7 @@ class EventMetaMigration  extends BaseMigration {
     ;
 
     $compteur = 0;
+    $compteurCodesPostauxInconnus = 0;
     foreach ($evenementsChampsACF as $champACF) {
       // on va passer chaque evenement à la moulinette pour trouver sa ville
       if ('place' === $champACF['meta_key']) {
@@ -118,7 +119,11 @@ class EventMetaMigration  extends BaseMigration {
           }
           // on applique les changements
           $champACF['meta_value'] = json_encode($place);
-        } // code postal inconnu, koikonfait ? OSEF ? On met city=inconnue ?
+        } else {
+          // code postal non reconnu, on ignore la meta (sinon ça fait moche en front)
+          $compteurCodesPostauxInconnus++;
+          continue;
+        }
       }
 
       $requete = 'INSERT INTO ' . $this->wpTablePrefix . 'postmeta (`post_id`, `meta_key`, `meta_value`) VALUES'
@@ -137,6 +142,7 @@ class EventMetaMigration  extends BaseMigration {
     }
 
     echo '-- ' . $compteur . '/' . count($evenementsChampsACF) . ' meta d\'évènements migrées. ' . PHP_EOL;
+    echo '---- ' . $compteurCodesPostauxInconnus . ' codes postaux non reconnus. ' . PHP_EOL;
   }
 
 }
