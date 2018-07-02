@@ -180,7 +180,7 @@ function migration_documents($argc, $argv) {
 	$dossiers = array();
 	while ($ligne = $resDos->fetch()) {
 		$dossiers[$ligne['pd_id']] = array(
-			"pd_nom" => $ligne['pd_nom'],
+			"pd_nom" => nettoyer_nom_ressource($ligne['pd_nom']),
 			"pd_pere" => $ligne['pd_pere']
 		);
 	}
@@ -410,6 +410,36 @@ function reconstruire_chemin_cumulus(&$dossiers, $f) {
 		}
 	}
 	return $chemin;
+}
+
+/**
+ * Supprime les '/' (sauf le '/' final sinon ça casse tout)
+ * Les noms de fichiers peuvent contenir des '/' et ça casse tout, donc on les vire
+ * Idem pour les noms de dossiers, même si il faut garder le '/' final
+ */
+function nettoyer_nom_ressource($nom) {
+	$propre = preg_replace_callback(
+		"@/.+@", // y-a-t'il un slash non-final dans le nom ?
+		function ($input) {
+			$name = $input[0];
+			$isFolder = false;
+			if ('/' === mb_substr($name, -1)) { // slash final ?
+				$isFolder = true;
+				$name = mb_substr($name, 0, strlen($name)-1); // on enlève le slash pour le remettre + tard
+			}
+
+			$name = str_replace('/', '-', $name);
+
+			return $name . ($isFolder ? '/' : '');
+		},
+		$nom
+	);
+
+	if (!$propre) {
+		throw new Exception("Propre isn't propre.", 1);
+	}
+
+	return $propre;
 }
 
 /**
