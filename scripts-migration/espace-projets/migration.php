@@ -724,7 +724,7 @@ function migration_listes($argc, $argv) {
 		}
 		$jsonConfig = '{"ezmlm-php": {"list": "' . $nomListe . '"}}';
 		$req = "INSERT INTO $tableReglages (id_projet, id_outil, name, prive, create_step_position, nav_item_position, enable_nav_item, config) "
-			. "VALUES($idProjet, 'forum', 'Forum', $prive, 70, 70, 1, '$jsonConfig');";
+			. "VALUES($idProjet, 'forum', 'Forum', $prive, 70, 70, 1, {$bdWordpress->quote($jsonConfig)});";
 		//echo $req . "\n";
 		try {
 			$bdWordpress->exec($req);
