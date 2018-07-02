@@ -114,7 +114,7 @@ function nettoyage($argc, $argv) {
 	} catch(Exception $e) {
 		echo "-- ECHEC REQUÊTE: [$req]" . PHP_EOL;
 	}
-	$req = "DELETE FROM $tableMetadonneesUtilisateurs WHERE user_id > 1;";
+	$req = "DELETE FROM $tableMetadonneesUtilisateurs WHERE user_id > 1 AND meta_key = 'total_group_count';";
 	try {
 		$bdWordpress->exec($req);
 		echo "Métadonnées des utilisateurs supprimées" . PHP_EOL;
