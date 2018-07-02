@@ -70,8 +70,8 @@ switch($action) {
 		break;
 	case "tout_sauf_docs": // et sauf "liste-permissions", aussi
 		migration_projets($argc, $argv);
-		migration_utilisateurs($argc, $argv);
-		//migration_inscrits($argc, $argv);
+		//migration_utilisateurs($argc, $argv);
+		migration_inscrits($argc, $argv);
 		migration_listes($argc, $argv);
 		configuration_porte_documents($argc, $argv);
 		migration_wikis($argc, $argv);
