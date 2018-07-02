@@ -450,8 +450,9 @@ function migration_projets($argc, $argv) {
 	global $bdProjet;
 	global $bdWordpress;
 	global $prefixe_tables_wp;
+	global $projets_a_migrer;
 
-	$reqProjets = "SELECT p_id, p_titre, p_resume, p_description, p_espace_internet, p_wikini, p_date_creation, p_type, p_modere, GROUP_CONCAT(pt_label_theme) as themes FROM projet LEFT JOIN projet_avoir_theme ON pat_id_projet = p_id LEFT JOIN projet_theme ON pat_id_theme = pt_id_theme WHERE p_id IN (1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 15, 18, 21, 26, 28, 37, 40, 42, 48, 50, 55, 57, 59, 62, 65, 66, 70, 71, 72, 74, 77, 78, 79, 80, 81, 84, 85, 86, 87, 90, 92, 93, 95, 97, 99, 100, 101, 102, 104, 105, 106, 108, 109, 112, 113, 119, 121, 124, 126, 127, 128, 129, 132, 133, 134, 135, 136, 138, 140, 141, 142, 143, 144, 145, 146, 147, 148, 150, 152, 153, 154, 156, 157, 158, 159, 160, 161, 162, 163) GROUP BY p_id";
+	$reqProjets = "SELECT p_id, p_titre, p_resume, p_description, p_espace_internet, p_wikini, p_date_creation, p_type, p_modere, GROUP_CONCAT(pt_label_theme) as themes FROM projet LEFT JOIN projet_avoir_theme ON pat_id_projet = p_id LEFT JOIN projet_theme ON pat_id_theme = pt_id_theme WHERE p_id IN ($projets_a_migrer) GROUP BY p_id";
 	$resProjets = $bdProjet->query($reqProjets);
 	$projets = array();
 	while ($ligne = $resProjets->fetch()) {
@@ -699,8 +700,9 @@ function migration_listes($argc, $argv) {
 	global $bdProjet;
 	global $bdWordpress;
 	global $prefixe_tables_wp;
+	global $projets_a_migrer;
 
-	$reqListes = "SELECT pl.pl_nom_liste, pl.pl_visibilite, pll.pl_id_projet FROM projet_liste pl LEFT JOIN projet_lien_liste pll ON pll.pl_id_liste = pl.pl_id_liste";
+	$reqListes = "SELECT pl.pl_nom_liste, pl.pl_visibilite, pll.pl_id_projet FROM projet_liste pl LEFT JOIN projet_lien_liste pll ON pll.pl_id_liste = pl.pl_id_liste WHERE pll.pl_id_projet IN ($projets_a_migrer)";
 	$resListes = $bdProjet->query($reqListes);
 	$listes = array();
 	while ($ligne = $resListes->fetch()) {
