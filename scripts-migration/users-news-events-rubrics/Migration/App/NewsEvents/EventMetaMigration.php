@@ -69,6 +69,8 @@ class EventMetaMigration  extends BaseMigration {
 
     SELECT `bf_id_fiche`+10000 AS post_id,  '_contact_0_description' AS meta_key, CONVERT('field_582c88326af66'  USING utf8) $fin UNION
     SELECT `bf_id_fiche`+10000 AS post_id,  'contact_0_description' AS meta_key, CONVERT(bf_nom_contact  USING utf8) $fin UNION
+    SELECT `bf_id_fiche`+10000 AS post_id,  '_contact_0_name' AS meta_key, CONVERT('field_582c881b6af65'  USING utf8) $fin UNION
+    SELECT `bf_id_fiche`+10000 AS post_id,  'contact_0_name' AS meta_key, CONVERT(bf_organisateur  USING utf8) $fin UNION
 
     SELECT `bf_id_fiche`+10000 AS post_id,  '_prices' AS meta_key, CONVERT('field_5803a6059a5d1'  USING utf8) $fin UNION
     SELECT `bf_id_fiche`+10000 AS post_id,  'prices' AS meta_key, CONVERT(bf_tarif_individuel  USING utf8) $fin UNION
