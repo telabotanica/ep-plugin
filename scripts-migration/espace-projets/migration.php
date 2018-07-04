@@ -525,6 +525,9 @@ function migration_projets($argc, $argv) {
 		//		dans la liste des groupes !
 		$reqMeta = "INSERT INTO $tableGroupesMeta (group_id, meta_key, meta_value) VALUES "
 			. "($id, 'description-complete', '$description'), "
+			. "($id, 'published', '1'), "
+			. "($id, 'total_member_count', '0'), "
+			. "($id, 'invite_status', 'members'), "
 			. "($id, 'last_activity', NOW()), "
 			. "($id, 'wiki-externe', '$wikiExterne'), "
 			. "($id, 'url-site', '$espaceInternet')";
@@ -651,8 +654,10 @@ function migration_inscrits($argc, $argv) {
 		$reqMajP = "UPDATE $tableGroupes SET creator_id = $createur WHERE id = $idProjet";
 		//echo $reqMajP . "\n";
 		// Stockage de "total_member_count" en métadonnées
-		$reqMeta = "INSERT INTO $tableGroupesMeta (group_id, meta_key, meta_value) VALUES "
-			. "($idProjet, 'total_member_count', $nbInscrits)";
+		// $reqMeta = "INSERT INTO $tableGroupesMeta (group_id, meta_key, meta_value) VALUES "
+		// 	. "($idProjet, 'total_member_count', $nbInscrits)";
+		$reqMeta = "UPDATE $tableGroupesMeta SET meta_value = $nbInscrits "
+			. "WHERE group_id = $idProjet AND meta_key = 'total_member_count'";
 		//echo $reqMeta . "\n";
 		try {
 			$bdWordpress->exec($reqMajP);
