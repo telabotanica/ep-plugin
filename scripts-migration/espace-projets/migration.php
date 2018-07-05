@@ -70,8 +70,8 @@ switch($action) {
 		break;
 	case "tout_sauf_docs": // et sauf "liste-permissions", aussi
 		migration_projets($argc, $argv);
-		migration_utilisateurs($argc, $argv);
-		//migration_inscrits($argc, $argv);
+		//migration_utilisateurs($argc, $argv);
+		migration_inscrits($argc, $argv);
 		migration_listes($argc, $argv);
 		configuration_porte_documents($argc, $argv);
 		migration_wikis($argc, $argv);
@@ -114,7 +114,7 @@ function nettoyage($argc, $argv) {
 	} catch(Exception $e) {
 		echo "-- ECHEC REQUÊTE: [$req]" . PHP_EOL;
 	}
-	$req = "DELETE FROM $tableMetadonneesUtilisateurs WHERE user_id > 1;";
+	$req = "DELETE FROM $tableMetadonneesUtilisateurs WHERE user_id > 1 AND meta_key = 'total_group_count';";
 	try {
 		$bdWordpress->exec($req);
 		echo "Métadonnées des utilisateurs supprimées" . PHP_EOL;
@@ -180,7 +180,7 @@ function migration_documents($argc, $argv) {
 	$dossiers = array();
 	while ($ligne = $resDos->fetch()) {
 		$dossiers[$ligne['pd_id']] = array(
-			"pd_nom" => $ligne['pd_nom'],
+			"pd_nom" => nettoyer_nom_ressource($ligne['pd_nom']),
 			"pd_pere" => $ligne['pd_pere']
 		);
 	}
@@ -413,6 +413,36 @@ function reconstruire_chemin_cumulus(&$dossiers, $f) {
 }
 
 /**
+ * Supprime les '/' (sauf le '/' final sinon ça casse tout)
+ * Les noms de fichiers peuvent contenir des '/' et ça casse tout, donc on les vire
+ * Idem pour les noms de dossiers, même si il faut garder le '/' final
+ */
+function nettoyer_nom_ressource($nom) {
+	$propre = preg_replace_callback(
+		"@/.+@", // y-a-t'il un slash non-final dans le nom ?
+		function ($input) {
+			$name = $input[0];
+			$isFolder = false;
+			if ('/' === mb_substr($name, -1)) { // slash final ?
+				$isFolder = true;
+				$name = mb_substr($name, 0, strlen($name)-1); // on enlève le slash pour le remettre + tard
+			}
+
+			$name = str_replace('/', '-', $name);
+
+			return $name . ($isFolder ? '/' : '');
+		},
+		$nom
+	);
+
+	if (!$propre) {
+		throw new Exception("Propre isn't propre.", 1);
+	}
+
+	return $propre;
+}
+
+/**
  * Copie les caractéristiques des projets existants dans les
  * nouveaux projets (Wordpress / Buddypress)
  */
@@ -420,8 +450,9 @@ function migration_projets($argc, $argv) {
 	global $bdProjet;
 	global $bdWordpress;
 	global $prefixe_tables_wp;
+	global $projets_a_migrer;
 
-	$reqProjets = "SELECT p_id, p_titre, p_resume, p_description, p_espace_internet, p_wikini, p_date_creation, p_type, p_modere, GROUP_CONCAT(pt_label_theme) as themes FROM projet LEFT JOIN projet_avoir_theme ON pat_id_projet = p_id LEFT JOIN projet_theme ON pat_id_theme = pt_id_theme GROUP BY p_id";
+	$reqProjets = "SELECT p_id, p_titre, p_resume, p_description, p_espace_internet, p_wikini, p_date_creation, p_type, p_modere, GROUP_CONCAT(pt_label_theme) as themes FROM projet LEFT JOIN projet_avoir_theme ON pat_id_projet = p_id LEFT JOIN projet_theme ON pat_id_theme = pt_id_theme WHERE p_id IN ($projets_a_migrer) GROUP BY p_id";
 	$resProjets = $bdProjet->query($reqProjets);
 	$projets = array();
 	while ($ligne = $resProjets->fetch()) {
@@ -494,6 +525,9 @@ function migration_projets($argc, $argv) {
 		//		dans la liste des groupes !
 		$reqMeta = "INSERT INTO $tableGroupesMeta (group_id, meta_key, meta_value) VALUES "
 			. "($id, 'description-complete', '$description'), "
+			. "($id, 'published', '1'), "
+			. "($id, 'total_member_count', '0'), "
+			. "($id, 'invite_status', 'members'), "
 			. "($id, 'last_activity', NOW()), "
 			. "($id, 'wiki-externe', '$wikiExterne'), "
 			. "($id, 'url-site', '$espaceInternet')";
@@ -620,8 +654,10 @@ function migration_inscrits($argc, $argv) {
 		$reqMajP = "UPDATE $tableGroupes SET creator_id = $createur WHERE id = $idProjet";
 		//echo $reqMajP . "\n";
 		// Stockage de "total_member_count" en métadonnées
-		$reqMeta = "INSERT INTO $tableGroupesMeta (group_id, meta_key, meta_value) VALUES "
-			. "($idProjet, 'total_member_count', $nbInscrits)";
+		// $reqMeta = "INSERT INTO $tableGroupesMeta (group_id, meta_key, meta_value) VALUES "
+		// 	. "($idProjet, 'total_member_count', $nbInscrits)";
+		$reqMeta = "UPDATE $tableGroupesMeta SET meta_value = $nbInscrits "
+			. "WHERE group_id = $idProjet AND meta_key = 'total_member_count'";
 		//echo $reqMeta . "\n";
 		try {
 			$bdWordpress->exec($reqMajP);
@@ -669,8 +705,9 @@ function migration_listes($argc, $argv) {
 	global $bdProjet;
 	global $bdWordpress;
 	global $prefixe_tables_wp;
+	global $projets_a_migrer;
 
-	$reqListes = "SELECT pl.pl_nom_liste, pl.pl_visibilite, pll.pl_id_projet FROM projet_liste pl LEFT JOIN projet_lien_liste pll ON pll.pl_id_liste = pl.pl_id_liste";
+	$reqListes = "SELECT pl.pl_nom_liste, pl.pl_visibilite, pll.pl_id_projet FROM projet_liste pl LEFT JOIN projet_lien_liste pll ON pll.pl_id_liste = pl.pl_id_liste WHERE pll.pl_id_projet IN ($projets_a_migrer)";
 	$resListes = $bdProjet->query($reqListes);
 	$listes = array();
 	while ($ligne = $resListes->fetch()) {
@@ -694,7 +731,7 @@ function migration_listes($argc, $argv) {
 		}
 		$jsonConfig = '{"ezmlm-php": {"list": "' . $nomListe . '"}}';
 		$req = "INSERT INTO $tableReglages (id_projet, id_outil, name, prive, create_step_position, nav_item_position, enable_nav_item, config) "
-			. "VALUES($idProjet, 'forum', 'Forum', $prive, 70, 70, 1, '$jsonConfig');";
+			. "VALUES($idProjet, 'forum', 'Forum', $prive, 70, 70, 1, {$bdWordpress->quote($jsonConfig)});";
 		//echo $req . "\n";
 		try {
 			$bdWordpress->exec($req);

@@ -41,12 +41,6 @@ class UserProfileMigration extends BaseMigration {
           $supp[$infos['amv_cle_ligne']][$infos['amv_ce_colonne']] = AnnuaireTelaBpProfileDataMap::getNaturalistAssociationMembership($infos['amv_valeur']);
 
           break;
-        case 15: // Conditions d'utilisation
-          if (1 == $infos['amv_valeur']) {
-            $supp[$infos['amv_cle_ligne']][$infos['amv_ce_colonne']] = serialize("J\'accepte les conditions d\'utilisation");
-          }
-
-          break;
         case 120: // Spécialités (zone géographique)
           // exemple: a:3:{i:0;s:16:"Zones tropicales";i:1;s:24:"Zones méditerranéennes";i:2;s:8:"Montagne";}
           $zones_geo_pouet = [];
@@ -120,6 +114,7 @@ class UserProfileMigration extends BaseMigration {
         ('9', {$utilisateur['U_ID']}, :name, '2017-05-19 15:06:16'),
         ('10', {$utilisateur['U_ID']}, :surname, '2017-05-19 15:06:16'),
         ('592', {$utilisateur['U_ID']}, :zipcode, '2017-05-19 15:06:16'),
+        ('59', {$utilisateur['U_ID']}, :eula, '2017-05-19 15:06:16'),
         ('21', {$utilisateur['U_ID']}, :siteperso, '2017-05-19 15:06:16')";
       if (isset($supp[$utilisateur['U_ID']])) {
         foreach ($supp[$utilisateur['U_ID']] as $num => $val){
@@ -136,6 +131,7 @@ class UserProfileMigration extends BaseMigration {
           ':name' => ucwords(strtolower($utilisateur['U_NAME'])),
           ':surname' => $utilisateur['U_SURNAME'],
           ':zipcode' => $utilisateur['U_ZIP_CODE'],
+          ':eula' => serialize(['J’accepte les conditions d’utilisation']),
           ':siteperso' => $utilisateur['U_WEB'],
         ]);
         // // Verbose
