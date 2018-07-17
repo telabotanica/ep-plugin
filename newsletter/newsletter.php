@@ -312,8 +312,9 @@ function send_newsletter($test_recipient = false) {
 
 	$headers[] = 'Content-Type: multipart/alternative;boundary=' . $boundary . '; charset=UTF-8';
 	$headers[] = 'Content-Transfer-Encoding: 8bit';
+	$headers[] = 'List-Unsubscribe: <https://www.tela-botanica.org/newsletter/desinscription/>, <mailto:accueil@tela-botanica.org?subject=desinscription>';
 	$headers[] = 'From: Tela Botanica <accueil@tela-botanica.org>';
-	$headers[] = 'Reply-To: accueil@tela-botanica.org';
+	$headers[] = 'Reply-To: Tela Botanica <accueil@tela-botanica.org>';
 	$headers[] = 'MIME-Version: 1.0';
 	$headers[] = 'X-Mailer: PHP/' . phpversion();
 
