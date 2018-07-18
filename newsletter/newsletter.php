@@ -231,7 +231,7 @@ function get_subject() {
 	return $subject;
 }
 
-function get_newsletter($multipart_boundary = null) {
+function get_newsletter() {
 	require_once __DIR__ . '/../vendor/autoload.php';
 	require_once __DIR__ . '/tela_twig_extension.php'; // loads Twig_Extensions_Extension_Tela
 	$loader = new Twig_Loader_Filesystem(get_template_directory() . '/inc/newsletter');
@@ -290,14 +290,10 @@ function get_newsletter($multipart_boundary = null) {
 		'outro' 	=> get_field('tb_newsletter_footer', 'option')
 	];
 
-	if ($multipart_boundary) {
-		$params['boundary'] = $multipart_boundary;
-
-		return $twig->render('newsletter-multipart.html', $params);
-	} else {
-		return $twig->render('newsletter-html.html', $params);
-	}
-
+	return [
+		'text' => $twig->render('newsletter-text.html', $params),
+		'html' => $twig->render('newsletter-html.html', $params),
+	];
 }
 
 /**
@@ -308,10 +304,6 @@ function get_newsletter($multipart_boundary = null) {
  * @param      boolean|string  $test_recipient  The test recipient
  */
 function send_newsletter($test_recipient = false) {
-	$boundary = uniqid('tela');
-
-	$headers[] = 'Content-Type: multipart/alternative;boundary=' . $boundary . '; charset=UTF-8';
-	$headers[] = 'Content-Transfer-Encoding: 8bit';
 	$headers[] = 'List-Unsubscribe: <https://www.tela-botanica.org/newsletter/desinscription/>, <mailto:accueil@tela-botanica.org?subject=desinscription>';
 	$headers[] = 'From: Tela Botanica <accueil@tela-botanica.org>';
 	$headers[] = 'Reply-To: Tela Botanica <accueil@tela-botanica.org>';
@@ -325,10 +317,34 @@ function send_newsletter($test_recipient = false) {
 		$mailer->CharSet  = "utf-8";
 	}
 
+	/*
+	 * Faut savoir que WP ne gère pas correctement le multipart (depuis 8 ans) :
+	 * https://core.trac.wordpress.org/ticket/15448
+	 * Du coup j'ai trouvé ça pour contourner le problème :
+	 * https://wordpress.stackexchange.com/a/253956
+	 */
+	$newsletter = get_newsletter();
+	$newsletter = maybe_serialize($newsletter);
+
+	// setting alt body distinctly
+	add_action('phpmailer_init', 'set_alt_mail_body', 10, 1);
+
+	function set_alt_mail_body($phpmailer) {
+		$body_parts = maybe_unserialize($phpmailer->Body);
+
+		if (!empty($body_parts['html'])) {
+			$phpmailer->MsgHTML($body_parts['html']);
+		}
+
+		if (!empty($body_parts['text'])) {
+			$phpmailer->AltBody = $body_parts['text'];
+		}
+	}
+
 	wp_mail(
 		$test_recipient ?: get_config()['newsletter_recipient'],
 		get_subject(),
-		get_newsletter($boundary),
+		$newsletter,
 		$headers
 	);
 }
@@ -462,7 +478,7 @@ function tb_newsletter_send() {
 					<div id="post-body-content" style="position: relative;">
 						<div class="card">
 
-							<?php echo get_newsletter() ?>
+							<?php echo get_newsletter()['html'] ?>
 
 						</div>
 					</div>
