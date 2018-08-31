@@ -6,6 +6,9 @@
 	"user-creation-urls": [
 		"http://example.org/createuser/{user_id}/{new_email}"
 	],
+	"user-deletion-urls": [
+		"http://example.org/deleteteuser/{user_id}/{user_email}"
+	],
 	"error-recipients-emails": [
 		"dev-log@tela-botanica.org"
 	],
