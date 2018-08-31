@@ -109,11 +109,13 @@ function tb_menu_hooks() {
 			if (isset($_POST[$hidden_field_name]) && $_POST[$hidden_field_name] == 'Y') {
 				$hooks_config['email-modification-urls'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['email-modification-urls']));
 				$hooks_config['user-creation-urls'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['user-creation-urls']));
+				$hooks_config['user-deletion-urls'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['user-deletion-urls']));
 				$hooks_config['error-recipients-emails'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['error-recipients-emails']));
 				$hooks_config['header-name'] = $_POST['header-name'];
 				// suppression des lignes vides
 				$hooks_config['email-modification-urls'] = array_filter($hooks_config['email-modification-urls']);
 				$hooks_config['user-creation-urls'] = array_filter($hooks_config['user-creation-urls']);
+				$hooks_config['user-deletion-urls'] = array_filter($hooks_config['user-deletion-urls']);
 				$hooks_config['error-recipients-emails'] = array_filter($hooks_config['error-recipients-emails']);
 
 				update_option(Hooks::STORAGE_OPTION_NAME, json_encode($hooks_config));
@@ -158,6 +160,20 @@ function tb_menu_hooks() {
 								Une URL par ligne.<br>
 								Ex : http://example.org/createuser/{user_id}/{new_email}<br>
 								Les paramètres {user_id} et {new_email} sont remplacés par les valeurs utilisateur lors de l'appel<br>
+								Les lignes commençant par # seront ignorées
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="user-deletion-urls">URLs à appeler en cas de suppression d'un utilisateur</label>
+						</th>
+						<td>
+							<textarea id="user-deletion-urls" name="user-deletion-urls" rows="3" cols="80"><?php echo implode(PHP_EOL, $hooks_config['user-deletion-urls']); ?></textarea>
+							<p class="description">
+								Une URL par ligne.<br>
+								Ex : http://example.org/deleteuser/{user_id}/{user_email}<br>
+								Les paramètres {user_id} et {user_email} sont remplacés par les valeurs utilisateur lors de l'appel<br>
 								Les lignes commençant par # seront ignorées
 							</p>
 						</td>

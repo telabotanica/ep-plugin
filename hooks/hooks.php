@@ -7,6 +7,7 @@ class Hooks {
 	function __construct() {
 		add_action('profile_update', array($this, 'callProfileUpdateHooks'), 10, 2);
 		add_action('user_register', array($this, 'callUserRegisterHooks'), 10, 1);
+		add_action('deleted_user', array($this, 'callUserDeletedHooks'), 10, 1);
 	}
 
 	/**
@@ -84,7 +85,7 @@ class Hooks {
 		}
 	}
 
-	private function callCaptainHooks($hooks_name, $user_id, $new_email, $old_email = '') {
+	private function callCaptainHooks($hooks_name, $user_id, $user_email, $old_email = '') {
 		// jeton SSO admin
 		$url_pattern_for_token_domain = '`^https?://(.+\.)?' . $this->getConfigSecurite()['adminTokenDomain'] . '.*$`i';
 		$admin_token = $this->getConfigSecurite()['adminToken'];
@@ -95,8 +96,8 @@ class Hooks {
 				$count = 0;
 
 				$hook_service_url = preg_replace(
-					array('/{old_email}/i', '/{new_email}/i', '/{user_id}/i'),
-					array($old_email, $new_email, $user_id),
+					array('/{old_email}/i', '/{new_email}/i', '/{user_id}/i', '/{user_email}/i'),
+					array($old_email, $user_email, $user_id, $user_email),
 					$hook_service_pattern, -1, $count
 				);
 
@@ -140,6 +141,12 @@ class Hooks {
 		$user = get_userdata( $user_id );
 
 		$this->callCaptainHooks('user-creation-urls', $user_id, $user->user_email);
+	}
+
+	function callUserDeletedHooks($user_id) {
+		$user = get_userdata( $user_id );
+
+		$this->callCaptainHooks('user-deletion-urls', $user_id, $user->user_email);
 	}
 }
 
