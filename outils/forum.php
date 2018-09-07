@@ -282,7 +282,18 @@ class Forum extends TB_Outil {
 		<div id="tb-forum-commande-inscription" class="tab-project-meta">
 			<!-- état de l'inscription -->
 			<div id="tb-forum-etat-inscription" class="tab-meta-info">
-				<?php echo $this->statutAbonnement ? __("Vous êtes abonné", 'telabotanica') : __("Vous n'êtes pas abonné", 'telabotanica') ?>
+				<?php echo $this->statutAbonnement ? __("Vous êtes abonné⋅e", 'telabotanica') : __("Vous n'êtes pas abonné⋅e", 'telabotanica') ?>
+
+				<!-- je ne sais pas où mettre ça alors ça va finir là, c'est sale mais bon... -->
+				<script>
+					document.addEventListener("forum-rendered", function() {
+						var nolistmessage = document.getElementById('no-list-message');
+						if (<?php echo $this->statutAbonnement ? 'false' : 'true' ?> && nolistmessage) {
+							nolistmessage.innerHTML = "Pour commencer, abonnez-vous ->";
+						}
+					});
+				</script>
+
 			</div>
 			<!-- mini-formulaire d'inscription / désinscription -->
 			<div class="tab-meta-info">
@@ -290,7 +301,7 @@ class Forum extends TB_Outil {
 					<input type="hidden" name="tb-forum-action-inscription" value="<?php echo $this->statutAbonnement ? '0' : '1' ?>">
 					<input class="button <?php echo $this->statutAbonnement ? 'abonne' : 'non-abonne' ?>" type="submit"
 						value="<?php echo $this->statutAbonnement ? __("Se désabonner", 'telabotanica') : __("S'abonner", 'telabotanica') ?>"
-						title="<?php _e("Confirmer " . ($this->statutAbonnement ? "le dés" : "l'") . "abonnement ?", 'telabotanica') ?>">
+						title="<?php _e(($this->statutAbonnement ? "Se désabonner" : "S'abonner") . " pour " . ($this->statutAbonnement ? "ne plus" : "") . " recevoir les discussions par mail", 'telabotanica') ?>">
 				</form>
 			</div>
 		</div>
