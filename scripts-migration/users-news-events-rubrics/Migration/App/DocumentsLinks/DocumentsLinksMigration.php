@@ -143,7 +143,7 @@ class DocumentsLinksMigration extends BaseMigration {
       // Sure there's no imported post having documents metas whith title "Documents", as tested the request :
       // SELECT post_id FROM postmeta where meta_value = 'Documents' and post_id <= 8800 order by post_id
       // ( All posts having documents to add : post_id <= 8800 )
-      $values = "
+      $values .= "
         ($id_article, 'components_{$component_id}_title', 'Documents'),
         ($id_article, '_components_{$component_id}_title', 'field_5817910c37e01_field_5817810a01e2a'),
       ";
