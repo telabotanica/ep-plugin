@@ -39,12 +39,13 @@ use \Migration\Api\MigrationException;
 $context = $argv[1];
 
 $contextMigrationClassMap = array(
-  'users'        => '\Migration\App\Users\UserMigrationGroup',
-  'news-events'  => '\Migration\App\NewsEvents\NewsEventMigrationGroup',
-  'covers'       => '\Migration\App\Covers\CoversMigrationGroup',
-  'rubrics'      => '\Migration\App\Rubrics\RubricMigrationGroup',
-  'all'          => '\Migration\App\AllMigrationGroup',
-  'quick-test'   => '\Migration\App\QuickTestMigrationGroup',
+  'users'          => '\Migration\App\Users\UserMigrationGroup',
+  'news-events'    => '\Migration\App\NewsEvents\NewsEventMigrationGroup',
+  'covers'         => '\Migration\App\Covers\CoversMigrationGroup',
+  'DocumentsLinks' => '\Migration\App\DocumentsLinks\DocumentsLinksMigrationGroup',
+  'rubrics'        => '\Migration\App\Rubrics\RubricMigrationGroup',
+  'all'            => '\Migration\App\AllMigrationGroup',
+  'quick-test'     => '\Migration\App\QuickTestMigrationGroup',
 );
 
 $migrationFactory = new MigrationFactory($contextMigrationClassMap);
