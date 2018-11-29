@@ -180,7 +180,7 @@ function migration_documents($argc, $argv) {
 	$dossiers = array();
 	while ($ligne = $resDos->fetch()) {
 		$dossiers[$ligne['pd_id']] = array(
-			"pd_nom" => nettoyer_nom_ressource($ligne['pd_nom']),
+			"pd_nom" => trim(nettoyer_nom_ressource($ligne['pd_nom'])),
 			"pd_pere" => $ligne['pd_pere']
 		);
 	}
@@ -220,7 +220,7 @@ function migration_documents($argc, $argv) {
 		$prefixe_disque = $prefixe_stockage_cumulus . $prefixe_stockage_projets_cumulus . '/' . $f['p_id'];
 
 		// merdier de partout avec les encodages pas cohérents etc.
-		$titre = trim($f['pd_nom']);
+		$titre = trim(nettoyer_nom_ressource($f['pd_nom']));
 		$description = $f['pd_description'];
 		$nomFichier = $f['pd_lien'];
 		$nomFichierUtf = $nomFichier;
@@ -401,9 +401,10 @@ function reconstruire_chemin_cumulus(&$dossiers, $f) {
 		if (isset($dossiers[$entite['pd_pere']])) {
 			// on marque qu'on est déjà passé par là
 			$parentsParcourus[] = $entite['pd_pere'];
+			// on va traiter le père au prochain tour
 			$entite = $dossiers[$entite['pd_pere']];
 			// on remonte le chemin depuis la fin
-			$chemin .= $entite['pd_nom'] . '/';
+			$chemin = '/' . $entite['pd_nom'] . $chemin;
 		} else {
 			// chemin cassé
 			return false;
