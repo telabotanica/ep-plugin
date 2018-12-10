@@ -149,11 +149,11 @@ class TB_ListeEzmlm {
 		$headers = array();
 		if ($nouvelEtatAbonnement === true) {
 			curl_setopt($ch, CURLOPT_POST, 1);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array("address" => $emailUtilisateur)));
+			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array("address" => trim($emailUtilisateur))));
 			$headers[] = 'Content-Type:application/json';
 		} else {
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
-			$url .= '/' . $emailUtilisateur;
+			$url .= '/' . trim($emailUtilisateur);
 		}
 
 		// jeton dans l'entête choisi (on ne s'occupe pas du domaine ici)
