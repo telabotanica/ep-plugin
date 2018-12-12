@@ -93,6 +93,9 @@ class Porte_Documents extends TB_Outil {
 		wp_enqueue_script('angular-sanitize', $this->urlOutil . 'bower_components/angular-sanitize/angular-sanitize.js', array(), false, true);
 		wp_enqueue_script('ngtoast', $this->urlOutil . 'bower_components/ngtoast/dist/ngToast.js', array(), false, true);
 		wp_enqueue_script('angular-xeditable-js', $this->urlOutil . 'bower_components/angular-xeditable/dist/js/xeditable.min.js');
+		wp_enqueue_script('clipboard', $this->urlOutil . 'bower_components/clipboard/dist/clipboard.min.js');
+		wp_enqueue_script('ngclipboard', $this->urlOutil . 'bower_components/ngclipboard/dist/ngclipboard.min.js');
+
 		wp_enqueue_style('bootstrap-css', $this->urlOutil . 'bootstrap-iso.css');
 		wp_enqueue_style('ngtoast-css', $this->urlOutil . 'bower_components/ngtoast/dist/ngToast.min.css');
 		wp_enqueue_style('angular-xeditable-css', $this->urlOutil . 'bower_components/angular-xeditable/dist/css/xeditable.min.css');
