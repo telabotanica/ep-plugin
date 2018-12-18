@@ -313,7 +313,7 @@ function migration_documents($argc, $argv) {
 		$req .= "'" . $fc['owner'] . "',";
 		$req .= "'" . implode(',', $fc['groups']) . "',";
 		$req .= "'" . $fc['permissions'] . "',";
-		$req .= "NULL,";
+		$req .= "'" . implode(',', $fc['keywords']) . "',";
 		$req .= "'" . $fc['license'] . "',";
 		$req .= "'" .  dqq($fc['meta']) . "',";
 		$req .= "'" . $fc['creation_date'] . "',";
