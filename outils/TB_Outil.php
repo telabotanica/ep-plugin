@@ -330,8 +330,7 @@ class TB_Outil extends BP_Group_Extension {
 
 	/**
 	 * Si l'outil est privé, vérifie que l'utilisateur en cours est membre du
-	 * projet : si oui, ne fait rien; si non, affiche un message et interrompt
-	 * le chargement
+	 * projet : si oui, ne fait rien; si non, affiche un message
 	 */
 	protected function appliquerCaracterePrive() {
 		if ($this->prive) {
@@ -342,8 +341,11 @@ class TB_Outil extends BP_Group_Extension {
 					<?php echo sprintf(__("L'outil %s est réservé aux membres du projet", 'telabotanica'), $this->name) ?>
 				</p>
 				<?php
-				exit;
+			} else {
+				return false;
 			}
 		}
+
+		return $this->prive;
 	}
 }

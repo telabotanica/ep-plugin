@@ -189,22 +189,22 @@ class Porte_Documents extends TB_Outil {
 
 	/* Vue onglet principal */
 	function display($group_id = null) {
-		$this->appliquerCaracterePrive();
+		if (!$this->appliquerCaracterePrive()) {
+			$id_projet = bp_get_current_group_id();
 
-		$id_projet = bp_get_current_group_id();
+			$this->config['ressourcesPath'] = $this->getServerRoot() . $this->getDataBaseUri() . '/';
+			$this->config['abstractionPath'] .= '/' . $id_projet;
+			$this->config['group'] = 'projet:' . $id_projet;
 
-		$this->config['ressourcesPath'] = $this->getServerRoot() . $this->getDataBaseUri() . '/';
-		$this->config['abstractionPath'] .= '/' . $id_projet;
-		$this->config['group'] = 'projet:' . $id_projet;
+			// amorcer l'outil
+			chdir(dirname(__FILE__) . "/porte-documents");
+			$code = file_get_contents('index_pouet.html');
 
-		// amorcer l'outil
-		chdir(dirname(__FILE__) . "/porte-documents");
-		$code = file_get_contents('index_pouet.html');
-
-		echo '<i id="cumulus-config-holder" data-config=\''. json_encode($this->config, JSON_HEX_APOS) .'\'></i>'; //caca
-		echo '<div class="wp-bootstrap bootstrap-iso" ng-app="cumulus">';
-		echo $code;
-		echo '</div>';
+			echo '<i id="cumulus-config-holder" data-config=\''. json_encode($this->config, JSON_HEX_APOS) .'\'></i>'; //caca
+			echo '<div class="wp-bootstrap bootstrap-iso" ng-app="cumulus">';
+			echo $code;
+			echo '</div>';
+		}
 	}
 }
 

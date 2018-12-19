@@ -261,73 +261,73 @@ class Forum extends TB_Outil {
 	 */
 	function display($group_id = null)
 	{
-		$this->appliquerCaracterePrive();
+		if (!$this->appliquerCaracterePrive()) {
+			// paramètres automatiques :
+			// - domaine racine
+			$this->config['domainRoot'] = $this->getServerRoot();
+			// - URI de base
+			$this->config['baseUri'] = $this->getBaseUri();
+			// - URI de base pour les données (/wp-content/*)
+			$this->config['dataBaseUri'] = $this->getDataBaseUri();
 
-		// paramètres automatiques :
-		// - domaine racine
-		$this->config['domainRoot'] = $this->getServerRoot();
-		// - URI de base
-		$this->config['baseUri'] = $this->getBaseUri();
-		// - URI de base pour les données (/wp-content/*)
-		$this->config['dataBaseUri'] = $this->getDataBaseUri();
+			// lire le statut de l'utilisateur et de la liste
+			$this->lireStatutUtilisateurEtListe();
+			// traitement de la commande d'abonnement ou désabonnement
+			// potentiellement envoyée par le formulaire ci-dessous
+			$this->traiterCommandeAbonnement();
+			?>
 
-		// lire le statut de l'utilisateur et de la liste
-		$this->lireStatutUtilisateurEtListe();
-		// traitement de la commande d'abonnement ou désabonnement
-		// potentiellement envoyée par le formulaire ci-dessous
-		$this->traiterCommandeAbonnement();
-		?>
+			<?php if ($this->userId != 0): ?>
+			<div id="tb-forum-commande-inscription" class="tab-project-meta">
+				<!-- état de l'inscription -->
+				<div id="tb-forum-etat-inscription" class="tab-meta-info">
+					<?php echo $this->statutAbonnement ? __("Vous êtes abonné⋅e", 'telabotanica') : __("Vous n'êtes pas abonné⋅e", 'telabotanica') ?>
 
-		<?php if ($this->userId != 0): ?>
-		<div id="tb-forum-commande-inscription" class="tab-project-meta">
-			<!-- état de l'inscription -->
-			<div id="tb-forum-etat-inscription" class="tab-meta-info">
-				<?php echo $this->statutAbonnement ? __("Vous êtes abonné⋅e", 'telabotanica') : __("Vous n'êtes pas abonné⋅e", 'telabotanica') ?>
+					<!-- je ne sais pas où mettre ça alors ça va finir là, c'est sale mais bon... -->
+					<script>
+						document.addEventListener("forum-rendered", function() {
+							var nolistmessage = document.getElementById('no-list-message');
+							if (<?php echo $this->statutAbonnement ? 'false' : 'true' ?> && nolistmessage) {
+								nolistmessage.innerHTML = "Pour commencer, abonnez-vous ->";
+							}
+						});
+					</script>
 
-				<!-- je ne sais pas où mettre ça alors ça va finir là, c'est sale mais bon... -->
-				<script>
-					document.addEventListener("forum-rendered", function() {
-						var nolistmessage = document.getElementById('no-list-message');
-						if (<?php echo $this->statutAbonnement ? 'false' : 'true' ?> && nolistmessage) {
-							nolistmessage.innerHTML = "Pour commencer, abonnez-vous ->";
-						}
-					});
-				</script>
-
+				</div>
+				<!-- mini-formulaire d'inscription / désinscription -->
+				<div class="tab-meta-info">
+					<form id="tb-forum-inscription" action="" method="GET">
+						<input type="hidden" name="tb-forum-action-inscription" value="<?php echo $this->statutAbonnement ? '0' : '1' ?>">
+						<input class="button <?php echo $this->statutAbonnement ? 'abonne' : 'non-abonne' ?>" type="submit"
+							value="<?php echo $this->statutAbonnement ? __("Se désabonner", 'telabotanica') : __("S'abonner", 'telabotanica') ?>"
+							title="<?php _e(($this->statutAbonnement ? "Se désabonner" : "S'abonner") . " pour " . ($this->statutAbonnement ? "ne plus" : "") . " recevoir les discussions par mail", 'telabotanica') ?>">
+					</form>
+				</div>
 			</div>
-			<!-- mini-formulaire d'inscription / désinscription -->
-			<div class="tab-meta-info">
-				<form id="tb-forum-inscription" action="" method="GET">
-					<input type="hidden" name="tb-forum-action-inscription" value="<?php echo $this->statutAbonnement ? '0' : '1' ?>">
-					<input class="button <?php echo $this->statutAbonnement ? 'abonne' : 'non-abonne' ?>" type="submit"
-						value="<?php echo $this->statutAbonnement ? __("Se désabonner", 'telabotanica') : __("S'abonner", 'telabotanica') ?>"
-						title="<?php _e(($this->statutAbonnement ? "Se désabonner" : "S'abonner") . " pour " . ($this->statutAbonnement ? "ne plus" : "") . " recevoir les discussions par mail", 'telabotanica') ?>">
-				</form>
+			<?php endif; ?>
+
+			<!-- portée des styles -->
+			<div class="wp-bootstrap bootstrap-iso">
+			<div id="ezmlm-forum-main">
+
+			<!-- réutilisation propre du jQuery de Wordpress -->
+			<script type="text/javascript">$jq = jQuery.noConflict();</script>
+
+			<?php
+			// amorcer l'outil
+			chdir(dirname(__FILE__) . "/forum/");
+			require "ezmlm-forum.php";
+			$fc = new EzmlmForum($this->config); // front controller
+
+			// - définir le titre
+
+			// - inclure le corps de page
+			$fc->renderPage();
+			?>
 			</div>
-		</div>
-		<?php endif; ?>
-
-		<!-- portée des styles -->
-		<div class="wp-bootstrap bootstrap-iso">
-		<div id="ezmlm-forum-main">
-
-		<!-- réutilisation propre du jQuery de Wordpress -->
-		<script type="text/javascript">$jq = jQuery.noConflict();</script>
-
-		<?php
-		// amorcer l'outil
-		chdir(dirname(__FILE__) . "/forum/");
-		require "ezmlm-forum.php";
-		$fc = new EzmlmForum($this->config); // front controller
-
-		// - définir le titre
-
-		// - inclure le corps de page
-		$fc->renderPage();
-		?>
-		</div>
-		</div>
-		<?php
+			</div>
+			<?php
+		}
 	}
 
 	/* Vue onglet admin */
