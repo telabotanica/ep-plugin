@@ -161,28 +161,25 @@ function get_place($post_id) {
 			case 'address':
 				if ($details->city) {
 					$place = $details->city;
-					if ($details->countryCode === 'fr') {
-						$place = $place . ' (' . substr($details->postcode, 0, 2) . ')';
-					} else {
-						$place = $place . ' ' . $details->country;
-					}
 				} else {
 					$place = $details->name;
 				}
 
 				break;
 			case 'city':
-				$place = $details->name;
-				if ($details->countryCode !== 'fr') {
-					$place = $place . ' ' . $details->country;
-				}
-
-				break;
 			case 'country':
 			default:
 				$place = $details->name;
 
 				break;
+		}
+
+		if (in_array($details->type, ['address', 'city'])) {
+			if ($details->countryCode === 'fr') {
+				$place = $place . ' (' . substr($details->postcode, 0, 2) . ')';
+			} else {
+				$place = $place . ' ' . $details->country;
+			}
 		}
 
 		return $place;
