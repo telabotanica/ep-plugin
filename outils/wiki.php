@@ -187,9 +187,8 @@ class Wiki extends TB_Outil {
 		// mise à jour de la config
 		$configModifiee = Wiki::getConfigDefautOutil();
 		$configModifiee = $this->preparer_config_locale($configModifiee);
-		if (is_super_admin()) {
-			$configModifiee['wikiName'] = $_POST['wikiName'];
-		}
+		// seul un admin Tela peut modifier le nom du wiki
+		$configModifiee['wikiName'] = is_super_admin() ? $_POST['wikiName'] : $this->config['wikiName'];
 
 		/* Mise à jour de la ligne dans la base de données */
 		$table = "{$wpdb->prefix}tb_outils_reglages";
