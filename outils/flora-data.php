@@ -113,10 +113,10 @@ class Flora_Data extends TB_Outil {
 
 		// @TODO mettre dans une config qqpart
 		$titres = array(
+			"saisie" => __("Saisie de nouvelles observations", 'telabotanica'),
 			"cartoPoint" => __("Carte des observations", 'telabotanica'),
 			"photo" => __("Galerie photo", 'telabotanica'),
 			"observation" => __("Flux des dernières observations", 'telabotanica'),
-			"saisie" => __("Saisie de nouvelles observations", 'telabotanica'),
 			"export" => __("Export des observations", 'telabotanica')
 		);
 
@@ -186,6 +186,10 @@ class Flora_Data extends TB_Outil {
 				<label>
 					<?php _e("Modules", 'telabotanica') ?>
 				</label>
+				<label for="module-saisie">
+					<input id="module-saisie" type="checkbox" name="module-saisie" <?php echo $this->config['modules']['saisie'] ? 'checked' : '' ?> >
+					Saisie d'observations
+				</label>
 				<label for="module-cartoPoint">
 					<input id="module-cartoPoint" type="checkbox" name="module-cartoPoint" <?php echo $this->config['modules']['cartoPoint'] ? 'checked' : '' ?> >
 					Carte des observations
@@ -201,10 +205,6 @@ class Flora_Data extends TB_Outil {
 				<label for="module-export">
 					<input id="module-export" type="checkbox" name="module-export" <?php echo $this->config['modules']['export'] ? 'checked' : '' ?> >
 					Export des observations
-				</label>
-				<label for="module-saisie">
-					<input id="module-saisie" type="checkbox" name="module-saisie" <?php echo $this->config['modules']['saisie'] ? 'checked' : '' ?> >
-					Saisie d'observations
 				</label>
 			</div>
 		</p>

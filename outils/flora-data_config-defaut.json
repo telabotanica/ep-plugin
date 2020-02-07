@@ -4,10 +4,10 @@
 	"rootUrl": "https://www.tela-botanica.org/widget:cel",
 	"projet": "",
 	"modules": {
+		"saisie": true,
 		"cartoPoint": true,
 		"photo": false,
 		"observation": false,
-		"export": false,
-		"saisie": true
+		"export": false
 	}
 }
