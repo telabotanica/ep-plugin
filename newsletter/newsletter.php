@@ -308,7 +308,7 @@ function send_newsletter($test_recipient = false) {
 	$headers[] = 'X-Mailer: PHP/' . phpversion();
 
 	add_action( 'phpmailer_init', 'mailer_config', 10, 1);
-	function mailer_config(PHPMailer $mailer){
+	function mailer_config(PHPMailer\PHPMailer\PHPMailer $mailer){
 		// $mailer->IsSMTP();
 		// $mailer->SMTPDebug = 2; // write 0 if you don't want to see client/server communication in page
 		$mailer->CharSet  = "utf-8";
