@@ -13,7 +13,7 @@ if (! empty($_GET['id']) && is_numeric($_GET['id'])) {
 	$parsedUrl = wp_parse_url("//".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
 	if (! empty($parsedUrl['path'])) {
 		$urlParts = explode('/', $parsedUrl['path']);
-		if (count($urlParts > 0)) {
+		if ($urlParts && count($urlParts) > 0) {
 			$lastPart = array_pop($urlParts);
 			while ($lastPart == "") {
 				$lastPart = array_pop($urlParts);
