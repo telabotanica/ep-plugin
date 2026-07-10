@@ -3,6 +3,8 @@
  * Menu du composant de newsletter
  */
 
+require_once __DIR__ . '/class-brevo-api.php';
+
 // Hook pour le menu Newsletter
 add_action('admin_menu', 'tb_newsletter_menu');
 
@@ -308,120 +310,98 @@ function get_newsletter() {
 }
 
 /**
- * Sends a newsletter.
+ * Sends a test newsletter to a single email via Brevo Transactional API.
  *
- * Sends it to test recipient if provided, else to configured recipient
- *
- * @param      boolean|string  $test_recipient  The test recipient
+ * @param      string  $email  The test recipient email
  */
-function send_newsletter($test_recipient = false) {
-	$headers[] = 'List-Unsubscribe: <https://www.tela-botanica.org/newsletter/desinscription/>, <mailto:accueil@tela-botanica.org?subject=desinscription>';
-	$headers[] = 'From: Tela Botanica <accueil@tela-botanica.org>';
-	$headers[] = 'Reply-To: Tela Botanica <accueil@tela-botanica.org>';
-	$headers[] = 'MIME-Version: 1.0';
-	$headers[] = 'X-Mailer: PHP/' . phpversion();
-
-	add_action( 'phpmailer_init', 'mailer_config', 10, 1);
-	function mailer_config(PHPMailer\PHPMailer\PHPMailer $mailer){
-		// $mailer->IsSMTP();
-		// $mailer->SMTPDebug = 2; // write 0 if you don't want to see client/server communication in page
-		$mailer->CharSet  = "utf-8";
-	}
-
-	/*
-	 * Faut savoir que WP ne gère pas correctement le multipart (depuis 8 ans) :
-	 * https://core.trac.wordpress.org/ticket/15448
-	 * Du coup j'ai trouvé ça pour contourner le problème :
-	 * https://wordpress.stackexchange.com/a/253956
-	 */
+function send_test_newsletter($email) {
+	$config = get_config();
+	$brevo = new Brevo_API($config['brevo_api_key']);
 	$newsletter = get_newsletter();
-	$newsletter = maybe_serialize($newsletter);
+	$subject = get_subject();
 
-	// setting alt body distinctly
-	add_action('phpmailer_init', 'set_alt_mail_body', 10, 1);
+	$sender = [
+		'name' => $config['brevo_sender_name'],
+		'email' => $config['brevo_sender_email'],
+	];
 
-	function set_alt_mail_body($phpmailer) {
-		$body_parts = maybe_unserialize($phpmailer->Body);
+	$brevo->send_transactional($email, $subject, $newsletter['html'], $newsletter['text'], $sender);
+}
 
-		if (!empty($body_parts['html'])) {
-			$phpmailer->MsgHTML($body_parts['html']);
-		}
+/**
+ * Sends the newsletter to a Brevo contact list via Campaign API.
+ *
+ * @param      int  $list_id  The Brevo list ID
+ */
+function send_newsletter_to_list($list_id) {
+	$config = get_config();
+	$brevo = new Brevo_API($config['brevo_api_key']);
+	$newsletter = get_newsletter();
+	$subject = get_subject();
 
-		if (!empty($body_parts['text'])) {
-			$phpmailer->AltBody = $body_parts['text'];
-		}
-	}
+	$sender = [
+		'name' => $config['brevo_sender_name'],
+		'email' => $config['brevo_sender_email'],
+	];
 
-	wp_mail(
-		$test_recipient ?: get_config()['newsletter_recipient'],
-		get_subject(),
-		$newsletter,
-		$headers
-	);
+	$campaign = $brevo->create_campaign($subject, $newsletter['html'], $newsletter['text'], [$list_id], $sender);
+	$brevo->send_campaign($campaign['id']);
 }
 
 function tb_newsletter_send() {
+	$newsletter_config = get_config();
+	$hidden_test_field = 'tb_submit_hidden_test';
+	$hidden_send_field = 'tb_submit_hidden_send';
 
+	if (!current_user_can('manage_options')) {
+		wp_die( __('Vous n\'avez pas les droits suffisants pour accéder à cette page.', 'telabotanica') );
+	}
+
+	if (isset($_POST[$hidden_test_field]) && $_POST[$hidden_test_field] == 'Y'):
+		$email = sanitize_email($_POST['newsletter_test_recipient']);
+		$newsletter_config['newsletter_test_recipient'] = $email;
+		update_option('tb_newsletter_config', json_encode($newsletter_config));
+		try {
+			send_test_newsletter($email);
+			echo '<div class="updated"><p><strong>Newsletter de TEST envoyée à ' . esc_html($email) . '</strong></p></div>';
+		} catch (\RuntimeException $e) {
+			echo '<div class="error"><p><strong>Erreur lors de l\'envoi de test : ' . esc_html($e->getMessage()) . '</strong></p></div>';
+		}
+	elseif (isset($_POST[$hidden_send_field]) && $_POST[$hidden_send_field] == 'Y'):
+		$list_id = intval($_POST['brevo_list_id']);
+		try {
+			send_newsletter_to_list($list_id);
+			echo '<div class="updated"><p><strong>Newsletter envoyée à la liste sélectionnée</strong></p></div>';
+		} catch (\RuntimeException $e) {
+			echo '<div class="error"><p><strong>Erreur lors de l\'envoi : ' . esc_html($e->getMessage()) . '</strong></p></div>';
+		}
+	endif;
+
+	$lists = [];
+	$lists_error = '';
+	if (!empty($newsletter_config['brevo_api_key'])) {
+		try {
+			$brevo = new Brevo_API($newsletter_config['brevo_api_key']);
+			$lists = $brevo->get_lists();
+		} catch (\RuntimeException $e) {
+			$lists_error = $e->getMessage();
+		}
+	}
 ?>
 	<div class="wrap">
 
-		<?php
-		if (!current_user_can('manage_options'))
-		{
-			wp_die( __('Vous n\'avez pas les droits suffisants pour accéder à cette page.', 'telabotanica') );
-		}
-		?>
-
 		<?php screen_icon(); ?>
 
-		<!-- Titre -->
 		<h2>Envoi de la newsletter</h2>
 
-		<!-- Description -->
 		<div class="description">
 			<p>Page de prévisualisation et d'envoi de la newsletter</p>
 		</div>
 
 		<?php settings_errors(); ?>
 
-		<?php
-
-			$newsletter_config = get_config();
-
-			$hidden_update_address_field_name = 'tb_submit_hidden_update_addres';
-			$hidden_send_newsletter_field_name = 'tb_submit_hidden_send_newsletter';
-
-			// enregistre les changements de config en BdD
-			if (isset($_POST[$hidden_update_address_field_name]) && $_POST[$hidden_update_address_field_name] == 'Y'):
-				$newsletter_config['newsletter_test_recipient'] = $_POST['newsletter_test_recipient'];
-
-				update_option('tb_newsletter_config', json_encode($newsletter_config));
-
-				send_newsletter($newsletter_config['newsletter_test_recipient']);
-		?>
-
-				<!-- Confirmation de l'enregistrement -->
-				<div class="updated">
-					<p><strong>Newsletter de TEST envoyée</strong></p>
-				</div>
-
-		<?php
-
-			// enregistre les changements de config en BdD
-			elseif (isset($_POST[$hidden_send_newsletter_field_name]) && $_POST[$hidden_send_newsletter_field_name] == 'Y'):
-
-				send_newsletter();
-		?>
-
-				<!-- Confirmation de l'enregistrement -->
-				<div class="updated">
-					<p><strong>Newsletter envoyée</strong></p>
-				</div>
-
-		<?php endif; ?>
-
 		<form method="post" action="">
-			<input type="hidden" name="<?php echo $hidden_update_address_field_name; ?>" value="Y">
+			<input type="hidden" name="<?php echo $hidden_test_field; ?>" value="Y">
 			<table class="form-table">
 				<tbody>
 					<tr>
@@ -429,9 +409,9 @@ function tb_newsletter_send() {
 							<label for="newsletter_test_recipient">Adresse de test</label>
 						</th>
 						<td>
-							<input type="text" name="newsletter_test_recipient" id="newsletter_test_recipient" value="<?php echo $newsletter_config['newsletter_test_recipient']; ?>" class="regular-text">
+							<input type="text" name="newsletter_test_recipient" id="newsletter_test_recipient" value="<?php echo esc_attr($newsletter_config['newsletter_test_recipient']); ?>" class="regular-text">
 							<p class="description">
-								Un exemplaire de la newsletter sera envoyé à cette adresse.<br>
+								Un exemplaire de la newsletter sera envoyé à cette adresse via Brevo.<br>
 								Pour tester le rendu.
 							</p>
 						</td>
@@ -465,12 +445,32 @@ function tb_newsletter_send() {
 										<span class="spinner"></span>
 
 										<form method="post" action="">
-											<input type="hidden" name="<?php echo $hidden_send_newsletter_field_name; ?>" value="Y">
+											<input type="hidden" name="<?php echo $hidden_send_field; ?>" value="Y">
 
-											<p class="submit">
-												<input type="submit" name="Submit" class="button-primary" value="Envoyer la newsletter" />
-											</p>
-											<p class="howto">Après vérification évidemment</p>
+											<?php if (!empty($newsletter_config['brevo_api_key'])): ?>
+												<p>
+													<label for="brevo_list_id">Liste Brevo :</label>
+													<select name="brevo_list_id" id="brevo_list_id" style="width: 100%;">
+														<?php if (!empty($lists)): ?>
+															<?php foreach ($lists as $list): ?>
+																<option value="<?php echo intval($list['id']); ?>">
+																	<?php echo esc_html($list['name']); ?> (<?php echo intval($list['totalSubscribers']); ?> abonnés)
+																</option>
+															<?php endforeach; ?>
+														<?php elseif ($lists_error): ?>
+															<option value="">Erreur : <?php echo esc_html($lists_error); ?></option>
+														<?php else: ?>
+															<option value="">Aucune liste trouvée</option>
+														<?php endif; ?>
+													</select>
+												</p>
+												<p class="submit">
+													<input type="submit" name="Submit" class="button-primary" value="Envoyer la newsletter" />
+												</p>
+												<p class="howto">Après vérification évidemment</p>
+											<?php else: ?>
+												<p class="howto" style="color: #a00;">Configurez d'abord la clé API Brevo dans les Réglages.</p>
+											<?php endif; ?>
 
 										</form>
 									</div>
@@ -518,33 +518,27 @@ function tb_newsletter_config() {
 
 		<?php screen_icon(); ?>
 
-		<!-- Titre -->
 		<h2>Réglages de la newsletter</h2>
 
-		<!-- Description -->
 		<div class="description">
-			<p>Cette configuration est utilisée notamment par le template <tt>[newsletter-desinscription]</tt> du thème Tela Botanica.</p>
+			<p>Configuration de l'API Brevo (ex Sendinblue) pour l'envoi de la newsletter.</p>
 		</div>
 
 		<?php settings_errors(); ?>
 
 		<?php
-		$hidden_update_address_field_name = 'tb_submit_hidden_update_addres';
-		// Chargement de la config actuelle
+		$hidden_field_name = 'tb_submit_hidden_config';
 		$newsletter_config = get_config();
 
-		// enregistre les changements de config en BdD
-		if (isset($_POST[$hidden_update_address_field_name]) && $_POST[$hidden_update_address_field_name] == 'Y'):
-			// préparation des valeurs envoyées
-			$newsletter_config['newsletter_recipient'] = $_POST['newsletter_recipient'];
-			$newsletter_config['ezmlm_php_url'] = $_POST['ezmlm_php_url'];
-			$newsletter_config['ezmlm_php_header'] = $_POST['ezmlm_php_header'];
+		if (isset($_POST[$hidden_field_name]) && $_POST[$hidden_field_name] == 'Y'):
+			$newsletter_config['brevo_api_key'] = sanitize_text_field($_POST['brevo_api_key']);
+			$newsletter_config['brevo_sender_email'] = sanitize_email($_POST['brevo_sender_email']);
+			$newsletter_config['brevo_sender_name'] = sanitize_text_field($_POST['brevo_sender_name']);
 			$newsletter_config['error_recipients_emails'] = preg_split('/\r\n|[\r\n]/', stripslashes($_POST['error_recipients_emails']));
 			$newsletter_config['error_recipients_emails'] = array_filter($newsletter_config['error_recipients_emails']);
-			// enregistrement
+
 			update_option('tb_newsletter_config', json_encode($newsletter_config));
 		?>
-			<!-- Confirmation de l'enregistrement -->
 			<div class="updated">
 				<p>
 					<strong>Options mises à jour</strong>
@@ -553,49 +547,41 @@ function tb_newsletter_config() {
 		<?php endif; ?>
 
 		<form method="post" action="">
-			<input type="hidden" name="<?php echo $hidden_update_address_field_name; ?>" value="Y">
+			<input type="hidden" name="<?php echo $hidden_field_name; ?>" value="Y">
 			<table class="form-table">
 				<tbody>
 					<tr>
 						<th scope="row">
-							<label for="newsletter_recipient">Adresse de la liste</label>
+							<label for="brevo_api_key">Clé API Brevo</label>
 						</th>
 						<td>
-							<input type="text" name="newsletter_recipient" id="newsletter_recipient" value="<?php echo $newsletter_config['newsletter_recipient']; ?>" class="regular-text">
-							<p class="description">Liste de diffusion pour la newsletter</p>
+							<input type="password" name="brevo_api_key" id="brevo_api_key" value="<?php echo esc_attr($newsletter_config['brevo_api_key']); ?>" class="regular-text" autocomplete="off">
+							<p class="description">Clé API v3 depuis <a href="https://app.brevo.com/settings/keys/api" target="_blank">Brevo → Settings → API Keys</a></p>
 						</td>
 					</tr>
 					<tr>
 						<th scope="row">
-							<label for="ezmlm_php_url">URL racine du service ezmlm-php</label>
+							<label for="brevo_sender_email">Email expéditeur</label>
 						</th>
 						<td>
-							<input type="text" name="ezmlm_php_url" id="ezmlm_php_url" value="<?php echo $newsletter_config['ezmlm_php_url']; ?>" class="regular-text">
-							<p class="description">Ne pas mettre de "/" (slash) à la fin.</p>
+							<input type="email" name="brevo_sender_email" id="brevo_sender_email" value="<?php echo esc_attr($newsletter_config['brevo_sender_email']); ?>" class="regular-text">
+							<p class="description">Doit être validé dans Brevo (Senderes → Email Addresses).</p>
 						</td>
 					</tr>
 					<tr>
 						<th scope="row">
-							<label for="ezmlm_php_header">Entête attendu par le service</label>
+							<label for="brevo_sender_name">Nom expéditeur</label>
 						</th>
 						<td>
-							<input type="text" name="ezmlm_php_header" id="ezmlm_php_header" value="<?php echo $newsletter_config['ezmlm_php_header']; ?>" class="regular-text">
-							<p class="description">
-								Entête attendu par ezmlm-php pour y lire le jeton SSO.
-								<br/>
-								Par défaut "Authorization".
-								<br/>
-								Certains serveurs n'acceptant pas la valeur par défault,
-								elle peut être remplacée, par exemple par "Auth".
-							</p>
+							<input type="text" name="brevo_sender_name" id="brevo_sender_name" value="<?php echo esc_attr($newsletter_config['brevo_sender_name']); ?>" class="regular-text">
 						</td>
 					</tr>
 					<tr>
 						<th scope="row">
-							<label for="error_recipients_emails">Destinataires des emails d'erreurs</label>
+							<label for="error_recipients_emails">Destinataires des notifications d'erreur</label>
 						</th>
 						<td>
-							<textarea id="error_recipients_emails" name="error_recipients_emails" rows="3" cols="80" class="regular-text"><?php echo implode(PHP_EOL, $newsletter_config['error_recipients_emails']); ?></textarea>
+							<textarea id="error_recipients_emails" name="error_recipients_emails" rows="3" cols="80" class="regular-text"><?php echo esc_textarea(implode(PHP_EOL, $newsletter_config['error_recipients_emails'])); ?></textarea>
 							<p class="description">
 								Une adresse par ligne<br>
 								Les lignes commençant par # seront ignorées
@@ -605,7 +591,6 @@ function tb_newsletter_config() {
 				</tbody>
 			</table>
 			<hr/>
-			<!-- Enregistrer les modifications -->
 			<p class="submit">
 				<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
 			</p>
