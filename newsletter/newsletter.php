@@ -64,6 +64,10 @@ function get_config() {
 function get_post_top_category($id) {
 	$categories = wp_get_post_categories($id, array('fields' => 'all'));
 
+	if (empty($categories)) {
+		return null;
+	}
+
 	return get_top_category($categories[0]);
 }
 
@@ -76,6 +80,10 @@ function get_post_top_category($id) {
  */
 function get_top_category($category_id) {
 	$category = get_category($category_id);
+
+	if (is_wp_error($category) || !is_object($category)) {
+		return null;
+	}
 
 	if (0 !== $category->parent) {
 		return get_top_category($category->parent);
@@ -152,7 +160,7 @@ function get_place($post_id) {
 
 			$place = $town . ' (' . $departement_number . ')';
 		} elseif (preg_match('/^.*, (.*)$/i', $details['address'], $matches)) {
-			$place = matches[1];
+			$place = $matches[1];
 		}
 
 		return $place;
@@ -248,8 +256,14 @@ function get_newsletter() {
 		while (have_rows('tb_newsletter_sections', 'option')) {
 			the_row();
 
-			foreach (get_sub_field('tb_newsletter_sections_items') as $post) {
+			foreach ((array) get_sub_field('tb_newsletter_sections_items') as $post) {
 				// Featured posts "à la une" have to be handled separatly
+				if (is_numeric($post)) {
+					$post = get_post($post);
+				}
+				if (!$post) {
+					continue;
+				}
 				if (true === get_field('featured', $post->ID)) {
 					$featured_post = get_featured_post_details($post);
 

@@ -11,6 +11,7 @@ class Twig_Extensions_Extension_Tela extends AbstractExtension
             new TwigFilter('addstyletolinks', 'addstyletolinks'),
             new TwigFilter('linktotext', 'linktotext'),
             new TwigFilter('unescape', 'unescape'),
+            new TwigFilter('truncate', 'twig_truncate'),
         ];
     }
 
@@ -18,6 +19,24 @@ class Twig_Extensions_Extension_Tela extends AbstractExtension
     {
         return 'tela';
     }
+}
+
+function twig_truncate($value, $length = 300, $preserve = false)
+{
+    if (mb_strlen($value) <= $length) {
+        return $value;
+    }
+
+    if ($preserve) {
+        $truncated = mb_substr($value, 0, $length);
+        $lastSpace = mb_strrpos($truncated, ' ');
+        if ($lastSpace !== false) {
+            $truncated = mb_substr($truncated, 0, $lastSpace);
+        }
+        return $truncated . '…';
+    }
+
+    return mb_substr($value, 0, $length) . '…';
 }
 
 function addstyletolinks($text, $style)
