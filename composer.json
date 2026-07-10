@@ -1,6 +1,8 @@
 {
     "require": {
-        "twig/twig": "~1.0",
-        "twig/extensions": "~1.0"
+        "php": ">=8.1",
+        "twig/twig": "^3.0",
+        "twig/intl-extra": "^3.0",
+        "twig/string-extra": "^3.0"
     }
 }

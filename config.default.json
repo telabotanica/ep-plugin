@@ -1,14 +1,3 @@
 {
-	"__doc__": "FICHIER DE CONFIGURATION DU PLUGIN WP/BP TELA BOTANICA",
-
-	"outils": [
-		"porte-documents",
-		"forum",
-		"wiki",
-		"flora-data"
-	],
-	"profil": {
-		"__doc__": "id_case_inscription_lettre_actu doit contenir l'ID du champ de profil (_bp_xprofile_field) correspondant à la case à cocher [voulez-vous recevoir la lettre d'actu ?]. Il s'agit du champ ayant le parent_id 0 et le type 'checkbox'. Pour le trouver: SELECT * FROM {prefix}bp_xprofile_fields WHERE name LIKE '%lettre%';",
-		"id_case_inscription_lettre_actu": 3
-	}
+	"__doc__": "Configuration historique du plugin. Plus utilisée depuis la version 2.0.0. La configuration de la newsletter se fait via l'interface d'administration WordPress."
 }

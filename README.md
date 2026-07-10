@@ -9,12 +9,6 @@ Il fournit :
 
 Il est conçu pour être utilisé avec :
  - le [thème Tela Botanica](https://github.com/telabotanica/wp-theme-telabotanica)
- - le [plugin de synchronisation SSO](https://github.com/telabotanica/wp-plugin-tb-sso)
-
-Pour bénéficier de la modération des projets et des messages collectifs, installer également :
- - [BP Members Directory Actions](https://github.com/telabotanica/bp-members-directory-actions)
- - [BP Moderate Private Messages](https://github.com/telabotanica/bp-moderate-private-messages)
- - [BP Moderate Group Creation](https://github.com/telabotanica/bp-moderate-group-creation)
 
 ## installation
 Copier / cloner ce code dans le répertoire wp-content/plugins de Wordpress

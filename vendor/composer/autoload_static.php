@@ -4,64 +4,94 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitbdeea2dad05475a3e5d8afd26676ac43
+class ComposerStaticInit8d3465daec13fae20cc11565e34475ae
 {
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
+        '8825ede83f2f289127722d4e842cf7e8' => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme/bootstrap.php',
+        'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
+        '89efb1254ef2d1c5d80096acd12c4098' => __DIR__ . '/..' . '/twig/twig/src/Resources/core.php',
+        'ffecb95d45175fd40f75be8a23b34f90' => __DIR__ . '/..' . '/twig/twig/src/Resources/debug.php',
+        'c7baa00073ee9c61edf148c51917cfb4' => __DIR__ . '/..' . '/twig/twig/src/Resources/escaper.php',
+        'f844ccf1d25df8663951193c3fc307c8' => __DIR__ . '/..' . '/twig/twig/src/Resources/string_loader.php',
+        'b6b991a57620e2fb6b2f66f03fe9ddc2' => __DIR__ . '/..' . '/symfony/string/Resources/functions.php',
     );
 
     public static $prefixLengthsPsr4 = array (
-        'T' => 
+        'T' =>
         array (
-            'Twig\\Extensions\\' => 16,
+            'Twig\\Extra\\String\\' => 18,
+            'Twig\\Extra\\Intl\\' => 16,
             'Twig\\' => 5,
         ),
-        'S' => 
+        'S' =>
         array (
+            'Symfony\\Polyfill\\Mbstring\\' => 26,
+            'Symfony\\Polyfill\\Intl\\Normalizer\\' => 33,
+            'Symfony\\Polyfill\\Intl\\Grapheme\\' => 31,
             'Symfony\\Polyfill\\Ctype\\' => 23,
+            'Symfony\\Contracts\\Translation\\' => 30,
+            'Symfony\\Component\\String\\' => 25,
+            'Symfony\\Component\\Intl\\' => 23,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Twig\\Extensions\\' => 
+        'Twig\\Extra\\String\\' =>
         array (
-            0 => __DIR__ . '/..' . '/twig/extensions/src',
+            0 => __DIR__ . '/..' . '/twig/string-extra',
         ),
-        'Twig\\' => 
+        'Twig\\Extra\\Intl\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/twig/intl-extra',
+        ),
+        'Twig\\' =>
         array (
             0 => __DIR__ . '/..' . '/twig/twig/src',
         ),
-        'Symfony\\Polyfill\\Ctype\\' => 
+        'Symfony\\Polyfill\\Mbstring\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
+        ),
+        'Symfony\\Polyfill\\Intl\\Normalizer\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer',
+        ),
+        'Symfony\\Polyfill\\Intl\\Grapheme\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme',
+        ),
+        'Symfony\\Polyfill\\Ctype\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
         ),
-    );
-
-    public static $prefixesPsr0 = array (
-        'T' => 
+        'Symfony\\Contracts\\Translation\\' =>
         array (
-            'Twig_Extensions_' => 
-            array (
-                0 => __DIR__ . '/..' . '/twig/extensions/lib',
-            ),
-            'Twig_' => 
-            array (
-                0 => __DIR__ . '/..' . '/twig/twig/lib',
-            ),
+            0 => __DIR__ . '/..' . '/symfony/translation-contracts',
+        ),
+        'Symfony\\Component\\String\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/symfony/string',
+        ),
+        'Symfony\\Component\\Intl\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/symfony/intl',
         ),
     );
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Normalizer' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/Resources/stubs/Normalizer.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitbdeea2dad05475a3e5d8afd26676ac43::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitbdeea2dad05475a3e5d8afd26676ac43::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitbdeea2dad05475a3e5d8afd26676ac43::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInitbdeea2dad05475a3e5d8afd26676ac43::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit8d3465daec13fae20cc11565e34475ae::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit8d3465daec13fae20cc11565e34475ae::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit8d3465daec13fae20cc11565e34475ae::$classMap;
 
         }, null, ClassLoader::class);
     }

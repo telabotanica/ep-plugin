@@ -1,8 +1,6 @@
 *~
 /nbproject/private/
 /nbproject
-/outils/forum
-/outils/porte-documents
 config.php
 config.json
 datasources.php

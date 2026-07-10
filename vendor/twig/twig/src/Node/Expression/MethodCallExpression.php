@@ -12,37 +12,47 @@
 namespace Twig\Node\Expression;
 
 use Twig\Compiler;
+use Twig\Node\Expression\Variable\ContextVariable;
 
-class MethodCallExpression extends AbstractExpression
+class MethodCallExpression extends AbstractExpression implements SupportDefinedTestInterface
 {
-    public function __construct(AbstractExpression $node, $method, ArrayExpression $arguments, $lineno)
+    use SupportDefinedTestDeprecationTrait;
+    use SupportDefinedTestTrait;
+
+    public function __construct(AbstractExpression $node, string $method, ArrayExpression $arguments, int $lineno)
     {
+        trigger_deprecation('twig/twig', '3.15', 'The "%s" class is deprecated, use "%s" instead.', __CLASS__, MacroReferenceExpression::class);
+
         parent::__construct(['node' => $node, 'arguments' => $arguments], ['method' => $method, 'safe' => false], $lineno);
 
-        if ($node instanceof NameExpression) {
+        if ($node instanceof ContextVariable) {
             $node->setAttribute('always_defined', true);
         }
     }
 
-    public function compile(Compiler $compiler)
+    public function compile(Compiler $compiler): void
     {
-        $compiler
-            ->subcompile($this->getNode('node'))
-            ->raw('->')
-            ->raw($this->getAttribute('method'))
-            ->raw('(')
-        ;
-        $first = true;
-        foreach ($this->getNode('arguments')->getKeyValuePairs() as $pair) {
-            if (!$first) {
-                $compiler->raw(', ');
-            }
-            $first = false;
+        if ($this->definedTest) {
+            $compiler
+                ->raw('method_exists($macros[')
+                ->repr($this->getNode('node')->getAttribute('name'))
+                ->raw('], ')
+                ->repr($this->getAttribute('method'))
+                ->raw(')')
+            ;
 
-            $compiler->subcompile($pair['value']);
+            return;
         }
-        $compiler->raw(')');
+
+        $compiler
+            ->raw('CoreExtension::callMacro($macros[')
+            ->repr($this->getNode('node')->getAttribute('name'))
+            ->raw('], ')
+            ->repr($this->getAttribute('method'))
+            ->raw(', ')
+            ->subcompile($this->getNode('arguments'))
+            ->raw(', ')
+            ->repr($this->getTemplateLine())
+            ->raw(', $context, $this->getSourceContext())');
     }
 }
-
-class_alias('Twig\Node\Expression\MethodCallExpression', 'Twig_Node_Expression_MethodCall');

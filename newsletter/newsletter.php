@@ -230,14 +230,14 @@ function get_subject() {
 
 function get_newsletter() {
 	require_once __DIR__ . '/../vendor/autoload.php';
-	require_once __DIR__ . '/tela_twig_extension.php'; // loads Twig_Extensions_Extension_Tela
-	$loader = new Twig_Loader_Filesystem(get_template_directory() . '/inc/newsletter');
+	require_once __DIR__ . '/tela_twig_extension.php';
+	$loader = new \Twig\Loader\FilesystemLoader(get_template_directory() . '/inc/newsletter');
 
-	$twig = new Twig_Environment($loader, array());
-	$twig->addExtension(new Twig_Extensions_Extension_Intl());
-	$twig->addExtension(new Twig_Extensions_Extension_Text());
+	$twig = new \Twig\Environment($loader, []);
+	$twig->addExtension(new \Twig\Extra\Intl\IntlExtension());
+	$twig->addExtension(new \Twig\Extra\String\StringExtension());
 	$twig->addExtension(new Twig_Extensions_Extension_Tela());
-	$twig->getExtension('Twig_Extension_Core')->setTimezone('Europe/Paris');
+	$twig->getExtension(\Twig\Extension\CoreExtension::class)->setTimezone('Europe/Paris');
 
 	if (have_rows('tb_newsletter_sections', 'option')) {
 		$categories = [];
