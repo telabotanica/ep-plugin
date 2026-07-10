@@ -3,10 +3,10 @@
 /**
  * @link              https://github.com/telabotanica/ep-plugin
  * @since             2.0.0
- * @package           Tela_Botanica_Plugin
+ * @package           Tela_Botanica_Newsletter_Plugin
  *
  * @wordpress-plugin
- * Plugin Name:       Tela Botanica Plugin
+ * Plugin Name:       Tela Botanica Newsletter Plugin
  * Plugin URI:        https://github.com/telabotanica/ep-plugin
  * GitHub Plugin URI: https://github.com/telabotanica/ep-plugin
  * Description:       Newsletter management for Tela Botanica
