@@ -453,8 +453,8 @@ function tb_newsletter_send() {
 													<select name="brevo_list_id" id="brevo_list_id" style="width: 100%;">
 														<?php if (!empty($lists)): ?>
 															<?php foreach ($lists as $list): ?>
-																<option value="<?php echo intval($list['id']); ?>">
-																	<?php echo esc_html($list['name']); ?> (<?php echo intval($list['totalSubscribers']); ?> abonnés)
+																<option value="<?php echo (int)$list['id']; ?>">
+																	<?php echo esc_html($list['name']); ?>(<?php echo (int)($list['uniqueSubscribers'] ?? $list['totalSubscribers'] ?? $list['total_subscribers'] ?? 0); ?>abonnés)
 																</option>
 															<?php endforeach; ?>
 														<?php elseif ($lists_error): ?>

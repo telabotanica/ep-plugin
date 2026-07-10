@@ -44,7 +44,11 @@ class Brevo_API {
 
 	public function get_lists() {
 		$result = $this->request('GET', '/contacts/lists?limit=50');
-		return isset($result['lists']) ? $result['lists'] : [];
+		$lists = isset($result['lists']) ? $result['lists'] : [];
+		if (WP_DEBUG && !empty($lists)) {
+			error_log('Brevo API list keys: ' . implode(', ', array_keys($lists[0])));
+		}
+		return $lists;
 	}
 
 	public function create_campaign($subject, $html_content, $plain_text, $list_ids, $sender) {
